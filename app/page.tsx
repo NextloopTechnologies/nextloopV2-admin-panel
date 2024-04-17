@@ -1,7 +1,7 @@
-export default function Home() {
-  return (
+import { LoginForm } from "../components/login";
+
+export default () => (
     <div>
-      <h2>Hello from NextJS!</h2>
+      <LoginForm />
     </div>
-  );
-}
+);
