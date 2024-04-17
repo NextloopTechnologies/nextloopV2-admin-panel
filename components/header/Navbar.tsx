@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { AuthContextProps } from '@/types/auth';
 import { AuthContext } from '../auth/AuthContext';
 
@@ -17,7 +17,7 @@ const Navbar: React.FC = () => {
 
   if(!authUser) return null
   return (
-    <nav className="bg-white shadow-md px-4 py-2 flex justify-between items-center">
+    <nav className="bg-white shadow-md px-4 py-2.5 flex justify-between items-center">
       <Link href="/ideas" 
         className="text-blue-600 font-bold text-xl">NextLoop 
       </Link>
@@ -51,7 +51,7 @@ const Navbar: React.FC = () => {
       </ul>
       
       <button 
-        className="bg-white border border-blue-600 text-blue-600 px-3 py-2 rounded hover:bg-blue-600 hover:text-white"
+        className="bg-white border border-blue-600 text-blue-600 px-1.5 py-1.5 rounded hover:bg-blue-600 hover:text-white"
         onClick={handleOnClickLogout}
       >
         Logout
