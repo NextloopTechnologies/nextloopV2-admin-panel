@@ -16,14 +16,14 @@ const LoginForm: React.FC = () => {
   const { authUser, login } = useContext<AuthContextProps>(AuthContext);
   
   useLayoutEffect(() => { 
-    if(authUser) router.push('/ideas');
+    if(authUser) router.push('/dashboard');
   },[authUser])
 
   const handleSubmit = (values: ILogin) => {
     setIsLoading(true);
     if(values.username === config.adminUsername && values.password === config.adminPassword) {
       login();
-      return router.push('/ideas') 
+      return router.push('/dashboard') 
     }
     setIsLoading(false);
     message.error("Invalid Credentials!")

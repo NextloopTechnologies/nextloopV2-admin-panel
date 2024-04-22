@@ -18,11 +18,16 @@ const Navbar: React.FC = () => {
   if(!authUser) return null
   return (
     <nav className="bg-white shadow-md px-4 py-2.5 flex justify-between items-center">
-      <Link href="/ideas" 
+      <Link href="/dashboard" 
         className="text-blue-600 font-bold text-xl">NextLoop 
       </Link>
 
       <ul className="hidden md:flex space-x-4 list-none">
+        <li>
+          <Link href="/dashboard"
+            className="text-gray-700 hover:text-blue-600 transition duration-200">Dashboard
+          </Link>
+        </li>
         <li>
           <Link href="/careers"
             className="text-gray-700 hover:text-blue-600 transition duration-200">Careers
