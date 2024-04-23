@@ -26,6 +26,12 @@ body {
     /* rgb(var(--background-start-rgb)); */
 }
 
+.content-container {
+  margin: 20px 0 auto;
+  padding: 0 26px;
+  max-width: 1180px;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
