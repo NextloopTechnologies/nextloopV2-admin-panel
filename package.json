@@ -6,11 +6,22 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:push": "drizzle-kit push:pg",
+    "db:pull": "drizzle-kit introspect:pg ",
+    "db:generate": "drizzle-kit generate:pg",
+    "db:drop": "drizzle-kit drop",
+    "db:check": "drizzle-kit check:pg",
+    "db:up": "drizzle-kit up:pg",
+    "db:migrate": "tsx ./lib/supabase/db.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.42.6",
     "antd": "^5.16.1",
-    "next": "14.1.4",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.30.9",
+    "next": "^14.1.4",
+    "postgres": "^3.4.4",
     "react": "^18",
     "react-dom": "^18"
   },
@@ -19,10 +30,12 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
+    "drizzle-kit": "^0.20.17",
     "eslint": "^8",
     "eslint-config-next": "14.1.4",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
+    "tsx": "^4.7.2",
     "typescript": "^5"
   }
 }
