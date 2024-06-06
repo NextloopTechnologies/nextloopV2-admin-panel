@@ -27,9 +27,13 @@ body {
 }
 
 .content-container {
-  margin: 20px 0 auto;
+  margin: 40px 0 auto 40px;
   padding: 0 26px;
   max-width: 1180px;
+}
+
+.text-blue {
+  color: #007bff; /* Another example */
 }
 
 @layer utilities {
