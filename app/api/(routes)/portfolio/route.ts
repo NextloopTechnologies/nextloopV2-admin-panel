@@ -35,3 +35,17 @@ export async function POST(req: Request) {
   }  
 }
 
+export async function DELETE(req: Request) {
+  try {
+    const deleteIds =  await req.json()
+    console.log("Req delete", deleteIds)
+    const { status, ...data } = await PortfolioService.remove(deleteIds)
+    if(status!==200) return Response.json({ data }, { status });
+    return Response.json({ data }, { status });
+  } catch (error) {
+    console.error("PORTFOLIO_DELETE_CONTROLLER", error)
+    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+  }
+  
+}
+

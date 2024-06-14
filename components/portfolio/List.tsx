@@ -2,7 +2,7 @@
 
 import { PortfolioService } from '@/app/api';
 import { IPortfolio } from '@/types/portfolio'
-import { Button, Descriptions, Modal, Popconfirm, Table, TableProps } from 'antd';
+import { Button, Descriptions, Modal, Popconfirm, PopconfirmProps, Table, TableProps, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { SearchBox, ViewLink } from '../crud';
 import Image from 'next/image';
@@ -10,6 +10,7 @@ import Edit from "../../public/images/icons/edit.png";
 import Delete from "../../public/images/icons/delete.png";
 import Link from 'next/link';
 import { portfolioApi } from '.';
+import { remove } from '@/app/api/services/portfolio';
 
 const List: React.FC = () => {
 
@@ -135,11 +136,19 @@ const List: React.FC = () => {
     onChange: onSelectChange,
   };
   
-  const deleteAll = () => async () => {
+  const deleteAll: PopconfirmProps['onConfirm'] = async () => {
+    console.log("Clkiekd!")
     if (selectedRowKeys) {
       const deletePayload = {
         ids: [...selectedRowKeys],
       };
+      console.log("delete Paylaod", deletePayload)
+      try {
+        await portfolioApi.remove(selectedRowKeys);
+        message.success("Deleted!");
+      } catch (error) {
+        message.error("Something wnent wrong!")
+      }
       // if (deletePayload) {
       //   const res = await deleteGuesList(deletePayload);
       //   if (res.success == true) {
@@ -165,7 +174,7 @@ const List: React.FC = () => {
         
           <Popconfirm
             title={`Do you really wanted to delete ${selectedRowKeys.length} items`}
-            onConfirm={() => deleteAll()}
+            onConfirm={deleteAll}
           >
             {selectedRowKeys.length > 1 ? (
               <Button danger type="primary" size='large'>

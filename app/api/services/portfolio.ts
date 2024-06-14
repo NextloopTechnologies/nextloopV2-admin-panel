@@ -47,12 +47,13 @@ export const read = async (id: number) => {
 
 export const remove = async(ids: number[]) => {
   try {
-    const { data, count, error } = await supabase
+    const { data } = await supabase
     .from("portfolio")
     .delete()
     .in('id', ids)
-
-    if(data) return { data, success: true , count }
+    console.log("dta", data)
+    if(!data) return { success: false , msgText: "No record found!", status: 404 }
+    return { success: true , msgText: "Deleted!", status: 200 }
   } catch(error) {
     throw error
   }

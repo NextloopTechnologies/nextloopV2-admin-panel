@@ -34,3 +34,17 @@ export const read = async(id: number) => {
     console.log('PORTFOLIO_READ_API:', error);
   }
 }
+
+export const remove = async(ids: any) => {
+  try {
+    console.log("api remove", ids)
+    const response = await fetch(`${config.apiBaseUrl}/api/portfolio`, { 
+      method: "DELETE",
+      body: JSON.stringify(ids)
+    })
+    const { data } = await response.json();
+    return data;
+  } catch (error) {
+    console.log('PORTFOLIO_DELETE_API:', error);
+  }
+}
