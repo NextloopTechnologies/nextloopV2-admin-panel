@@ -35,9 +35,21 @@ export const read = async(id: number) => {
   }
 }
 
+export const update = async(payload: any) => {
+  try {
+    const response = await fetch(`${config.apiBaseUrl}/api/portfolio`, {
+      method: 'PUT',
+      body: payload,
+    });
+    const { data } = await response.json();
+    return data;
+  } catch (error) {
+    console.log('PORTFOLIO_UPDATE_API:', error);
+  }
+}
+
 export const remove = async(ids: any) => {
   try {
-    console.log("api remove", ids)
     const response = await fetch(`${config.apiBaseUrl}/api/portfolio`, { 
       method: "DELETE",
       body: JSON.stringify(ids)

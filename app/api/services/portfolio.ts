@@ -45,14 +45,28 @@ export const read = async (id: number) => {
   }
 } 
 
+export const update = async (values: any, id: number) => {
+  try {
+    const { error } = await supabase
+    .from('portfolio')
+    .update(values)
+    .eq('id', id)
+
+    if(!error) return { success: true, msgText: "Updated!", status: 200 }
+    return { success: false, msgText: "Failed to create!", status: 500 }
+  } catch (error) {
+    throw error
+  }
+}
+
 export const remove = async(ids: number[]) => {
   try {
-    const { data } = await supabase
+    const { error } = await supabase
     .from("portfolio")
     .delete()
     .in('id', ids)
-    console.log("dta", data)
-    if(!data) return { success: false , msgText: "No record found!", status: 404 }
+
+    if(error) return { success: false , msgText: "No record found!", status: 404 }
     return { success: true , msgText: "Deleted!", status: 200 }
   } catch(error) {
     throw error

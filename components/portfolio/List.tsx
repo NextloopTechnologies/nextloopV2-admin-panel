@@ -1,16 +1,13 @@
 "use client"
 
-import { PortfolioService } from '@/app/api';
 import { IPortfolio } from '@/types/portfolio'
 import { Button, Descriptions, Modal, Popconfirm, PopconfirmProps, Table, TableProps, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { SearchBox, ViewLink } from '../crud';
 import Image from 'next/image';
 import Edit from "../../public/images/icons/edit.png";
-import Delete from "../../public/images/icons/delete.png";
 import Link from 'next/link';
 import { portfolioApi } from '.';
-import { remove } from '@/app/api/services/portfolio';
 
 const List: React.FC = () => {
 
@@ -95,7 +92,6 @@ const List: React.FC = () => {
       title: "Action",
       key: "action",
       render: (record) => (
-        // <ActionButton />
         <div className='flex'>
           <Link href={`/portfolio/edit/${record.id}`}>
             <Image  
@@ -103,16 +99,8 @@ const List: React.FC = () => {
               alt='edit' 
               height='20'
               className='mr-2 cursor-pointer'
-              // onClick={() => console.log("Im clicked Edit")}
             />
           </Link>
-          
-          <Image  
-            src={Delete}
-            alt='delete' 
-            height='20'
-            className='cursor-pointer'
-          />
       </div>
       )
     },
@@ -127,7 +115,6 @@ const List: React.FC = () => {
   }));
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-    console.log('selectedRowKeys changed: ', newSelectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
   };
 
@@ -137,27 +124,17 @@ const List: React.FC = () => {
   };
   
   const deleteAll: PopconfirmProps['onConfirm'] = async () => {
-    console.log("Clkiekd!")
     if (selectedRowKeys) {
-      const deletePayload = {
-        ids: [...selectedRowKeys],
-      };
-      console.log("delete Paylaod", deletePayload)
       try {
-        await portfolioApi.remove(selectedRowKeys);
-        message.success("Deleted!");
+        const { success, msgText } = await portfolioApi.remove(selectedRowKeys);
+        if(!success) return message.error("Failed to Delete!");
+        const updatedPortfolioData = portfolioData.filter(portfolio => !selectedRowKeys.includes(portfolio.id as React.Key))
+        setPortfolioData(updatedPortfolioData)
+        setSelectedRowKeys([]);
+        message.success(msgText);
       } catch (error) {
-        message.error("Something wnent wrong!")
+        message.error("Something went wrong!")
       }
-      // if (deletePayload) {
-      //   const res = await deleteGuesList(deletePayload);
-      //   if (res.success == true) {
-      //     message.success(
-      //       `${selectedRowKeys.length} items deleted successfully`
-      //     );
-      //     setSelectedRowKeys([]);
-      //   }
-      // }
     }
   }
 
@@ -170,19 +147,15 @@ const List: React.FC = () => {
             Add
           </Button>
         </Link>
-        {selectedRowKeys.length > 1 && (
-        
+
+        {selectedRowKeys.length >= 1 && (
           <Popconfirm
             title={`Do you really wanted to delete ${selectedRowKeys.length} items`}
             onConfirm={deleteAll}
           >
-            {selectedRowKeys.length > 1 ? (
-              <Button danger type="primary" size='large'>
-                Delete ({selectedRowKeys.length})
-              </Button>
-            ) : (
-              ""
-            )}
+            <Button danger type="primary" size='large'>
+              Delete ({selectedRowKeys.length})
+            </Button>
           </Popconfirm>
         )}
         <SearchBox onSearchText={(value: string) => setSearchedText(value)} />

@@ -35,6 +35,33 @@ export async function POST(req: Request) {
   }  
 }
 
+export async function PUT(req: Request) {
+  try {    
+    const formData = await req.formData();
+    const id = Number(formData.get("id"));
+    const isImageDeleted = formData.get("deletedImage") || "";
+    const payload: IPortfolio = {
+      title: formData.get('title') as string, 
+      descp: formData.get('descp') as string,
+    }
+
+    const imageInfo: File | null = formData.get('imageInfo') as unknown as File; 
+    if(imageInfo) {
+      const { fileId, url } = await UploadFileService.uploadImage(imageInfo, imageInfo.name);
+      payload.image = [{ fileId, url }]
+    } 
+
+    if(isImageDeleted) payload.image = [];
+
+    const { status, ...data} = await PortfolioService.update(payload, id);
+    if(status!==200) return Response.json({ data }, { status });
+    return Response.json({ data }, { status });
+  } catch (error) {
+    console.error("PORTFOLIO_UPDATE_CONTROLLER", error)
+    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+  }  
+}
+
 export async function DELETE(req: Request) {
   try {
     const deleteIds =  await req.json()
@@ -46,6 +73,5 @@ export async function DELETE(req: Request) {
     console.error("PORTFOLIO_DELETE_CONTROLLER", error)
     return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
   }
-  
 }
 

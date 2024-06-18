@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button, Form, Input, Upload, message } from 'antd';
-import { IFileUpload, IPortfolio } from '@/types/portfolio';
+import { IPortfolio } from '@/types/portfolio';
 import { textFieldValidator } from '@/lib/utils';
 import { UploadOutlined } from '@ant-design/icons';
 import { FileType } from '@/types/antd';
@@ -14,21 +14,13 @@ import { portfolioApi } from '.';
 interface PortfolioFormProps {
   title: string,
   portfolio?: IPortfolio | null,
-  // onSubmit: (portfolioData: any) => void,
-  // isLoading: boolean,
-  // setIsLoading: (loading: boolean) => void
 }
 
 const PortfolioForm: React.FC<PortfolioFormProps> = ({ 
   title, 
-  portfolio, 
-  // onSubmit,
-  // isLoading,
-  // setIsLoading 
+  portfolio
 }) => {
-
-  const [ imageFileName, setImageFileName ] = useState<string>("");  
-  const [ imageFileInfo, setImageFileInfo ] = useState<FileType>();  
+  
   const [ isLoading, setIsLoading ] = useState<boolean>(false); 
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const router = useRouter(); 
@@ -63,22 +55,9 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({
       }
       return false;
     },
-    // onChange:(info) => {
-    //   console.log("file info", info)
-    //   setImageFileName(info.file.name)
-    //   setImageFileInfo(info.file as FileType)
-    // }
     onChange: ({ fileList: newFileList }) => {
-      console.log("new file lst", newFileList)
       setFileList(newFileList)
-      // setImageFileName(newFileList)
-      // setImageFileInfo(newFileList?.originFileObj as FileType)
-    },
-    // onRemove: (file) => {
-    //   if (file.fileId) {
-    //     setDeleteFiles((current) => [...current, file.fileId]);
-    //   }
-    // }
+    }
   }
 
   const handleFinish: FormProps<IPortfolio>['onFinish'] = async(values) => {
@@ -91,11 +70,12 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({
         if (file.originFileObj) formData.append("imageInfo", file.originFileObj);
       });
     }
-
-    if(!portfolio){
-      const { success, msgText } = await portfolioApi.create(formData);
+    if(portfolio){
+      if(!fileList.length) formData.append("deletedImage", "Yes")
+      formData.append("id", portfolio.id?.toString()!)
+      const { success, msgText } = await portfolioApi.update(formData);
       if(success) message.success(msgText);
-      else message.error(msgText  || "Failed to create!");
+      else message.error(msgText  || "Failed to update!");
       setIsLoading(false);
       return router.push('/portfolio');
     }
@@ -116,10 +96,8 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({
         layout='vertical' 
         onFinish={handleFinish}   
         size='large'
-        // encType='multipart/form-data'
       >
         <Form.Item<IPortfolio>
-          // label={<span className='text-l'>Title</span>}
           label="Title"
           name="title"
           rules={[
@@ -135,7 +113,6 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({
           <Input />
         </Form.Item>
         <Form.Item<IPortfolio>
-          // label={<span className='text-l'>Description</span>}
           label="Description"
           name="descp"
           rules={[
@@ -162,7 +139,6 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({
             span: 16,
           }}
         >
-          {/* <div className='flex'> */}
           { !isLoading && (
             <Link href={"/portfolio"} className='mr-3'>
               <Button danger type="primary">
@@ -170,11 +146,10 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({
               </Button>
             </Link>
           )}
-
-            <Button type="primary" htmlType="submit" disabled={isLoading}>
-             { isLoading ? 'Loading...': 'Submit' }
-            </Button>
-          {/* </div> */}
+          <Button type="primary" htmlType="submit" disabled={isLoading}>
+            { isLoading ? 'Loading...': 'Submit' }
+          </Button>
+         
         </Form.Item>
       </Form>
     </div>
