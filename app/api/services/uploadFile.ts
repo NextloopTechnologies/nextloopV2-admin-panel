@@ -1,3 +1,4 @@
+"use server"
 import { imagekit } from "@/lib/utils";
 
 const getBufferImage = async(fileInfo: File) => {
@@ -20,5 +21,14 @@ export const uploadImage = async(fileInfo: File, fileName: string) => {
     return result;
   } catch (error) {
     throw error;
+  }
+}
+
+export const deleteFiles = async (files: string[]) => {
+  try {
+    imagekit.bulkDeleteFiles(files);
+    return 
+  } catch (error) {
+    throw error
   }
 }

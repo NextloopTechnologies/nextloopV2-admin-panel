@@ -3,15 +3,17 @@
 import { IPortfolio } from '@/types/portfolio'
 import { Button, Descriptions, Modal, Popconfirm, PopconfirmProps, Table, TableProps, message } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { SearchBox, ViewLink } from '../crud';
+import { SearchBox } from '../crud';
 import Image from 'next/image';
 import Edit from "../../public/images/icons/edit.png";
 import Link from 'next/link';
 import { portfolioApi } from '.';
+import { UploadFileService } from '@/app/api';
 
 const List: React.FC = () => {
 
   const [portfolioData, setPortfolioData] = useState<IPortfolio[]>([]);
+  const [viewPortfolioData, setViewPortfolioData] = useState<IPortfolio>();
   const [searchedText, setSearchedText] = useState<string>("");
   const [isViewModalOpen, setIsViewModalOpen] = useState<boolean>(false);
   const [isError, setIsError] = useState<string|null>("");
@@ -34,6 +36,11 @@ const List: React.FC = () => {
     };
     fetchData();
   },[pageNo]);
+
+  const handleViewModalOpen = (values : IPortfolio) => {
+    setViewPortfolioData(values)
+    setIsViewModalOpen(true);
+  }
 
   if (isError) {
     return (
@@ -59,8 +66,10 @@ const List: React.FC = () => {
         return String(record.title?.toLowerCase())
             .includes(String(value).toLowerCase())
       },
-      render: (title) => (
-        <ViewLink title={title} onClick={() => setIsViewModalOpen(true)} />
+      render: (title, record) => (
+        <span onClick={() => handleViewModalOpen(record)} className='text-blue cursor-pointer'>
+          { title }
+        </span>
       )
     },
     {
@@ -128,6 +137,10 @@ const List: React.FC = () => {
       try {
         const { success, msgText } = await portfolioApi.remove(selectedRowKeys);
         if(!success) return message.error("Failed to Delete!");
+
+        const deleteBucketImages = portfolioData.filter(portfolio => selectedRowKeys.includes(portfolio.id as React.Key)).flatMap(item => item?.image?.map(item => item.fileId) || [])
+        if(deleteBucketImages.length) UploadFileService.deleteFiles(deleteBucketImages)
+        
         const updatedPortfolioData = portfolioData.filter(portfolio => !selectedRowKeys.includes(portfolio.id as React.Key))
         setPortfolioData(updatedPortfolioData)
         setSelectedRowKeys([]);
@@ -167,28 +180,30 @@ const List: React.FC = () => {
         title="View Portfolio"
         onCancel={() => setIsViewModalOpen(false)} 
       >  
+      { viewPortfolioData && (
         <Descriptions 
-          bordered
-          column={1}
-          labelStyle={{ fontSize: 16, fontWeight: "semi-bold" }}
-          contentStyle={{ fontSize: 16 }}
-          // size="middle"
-        >
-          <Descriptions.Item label="Title">{dataSource[0]?.title}</Descriptions.Item>
-          <Descriptions.Item label="Description">{dataSource[0]?.descp}</Descriptions.Item>
-          {/* <Descriptions.Item label="Snaps">
-            { dataSource[0]?.image ? (
-                  <Image 
-                    key={dataSource[0]?.id}  
-                    width={200} 
-                    height={200} 
-                    src={dataSource[0]?.image} 
-                    alt="image" 
-                  />
-              ) : `No snapshot available!`  
-            }
-          </Descriptions.Item> */}
-        </Descriptions>
+        bordered
+        column={1}
+        labelStyle={{ fontSize: 16, fontWeight: "semi-bold" }}
+        contentStyle={{ fontSize: 16 }}
+      >
+        <Descriptions.Item label="Title">{viewPortfolioData?.title}</Descriptions.Item>
+        <Descriptions.Item label="Description">{viewPortfolioData?.descp}</Descriptions.Item>
+        <Descriptions.Item label="Snaps">
+          { viewPortfolioData?.image?.length ? (
+                <Image 
+                  key={viewPortfolioData?.id}  
+                  width={200} 
+                  height={200}
+                  src={viewPortfolioData.image[0].url} 
+                  alt="image" 
+                />
+            ) : `No snapshot available!`  
+          }
+        </Descriptions.Item>
+      </Descriptions>
+      )}
+        
       </Modal>
 
       <Table 

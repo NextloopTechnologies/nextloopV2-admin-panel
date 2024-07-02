@@ -71,7 +71,7 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({
       });
     }
     if(portfolio){
-      if(!fileList.length) formData.append("deletedImage", "Yes")
+      if((!fileList.length || fileList.length) && portfolio.image?.length) formData.append("deletedImage", portfolio.image[0].fileId)
       formData.append("id", portfolio.id?.toString()!)
       const { success, msgText } = await portfolioApi.update(formData);
       if(success) message.success(msgText);
@@ -128,7 +128,7 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({
           <Input.TextArea />
         </Form.Item>
         <Form.Item<IPortfolio>
-          label={<span className='text-l'>Porfolio Image</span>}>
+          label={<span className='text-l'>Portfolio Image</span>}>
           <Upload {...fileProps}>
             <Button icon={<UploadOutlined />}>Click to Upload</Button>
           </Upload>

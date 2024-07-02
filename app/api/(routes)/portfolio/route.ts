@@ -39,7 +39,7 @@ export async function PUT(req: Request) {
   try {    
     const formData = await req.formData();
     const id = Number(formData.get("id"));
-    const isImageDeleted = formData.get("deletedImage") || "";
+    const deletedImage = formData.get("deletedImage")?.toString() || "";
     const payload: IPortfolio = {
       title: formData.get('title') as string, 
       descp: formData.get('descp') as string,
@@ -50,9 +50,10 @@ export async function PUT(req: Request) {
       const { fileId, url } = await UploadFileService.uploadImage(imageInfo, imageInfo.name);
       payload.image = [{ fileId, url }]
     } 
-
-    if(isImageDeleted) payload.image = [];
-
+    if(deletedImage) {
+      await UploadFileService.deleteFiles([deletedImage])
+      if(!imageInfo) payload.image = []
+    };
     const { status, ...data} = await PortfolioService.update(payload, id);
     if(status!==200) return Response.json({ data }, { status });
     return Response.json({ data }, { status });
@@ -65,7 +66,6 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const deleteIds =  await req.json()
-    console.log("Req delete", deleteIds)
     const { status, ...data } = await PortfolioService.remove(deleteIds)
     if(status!==200) return Response.json({ data }, { status });
     return Response.json({ data }, { status });
