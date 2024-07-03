@@ -1,4 +1,3 @@
-// import ImageKit from 'imagekit-javascript';
 import ImageKit from 'imagekit';
 
 export const textFieldValidator = (_: unknown, value: string) => {
