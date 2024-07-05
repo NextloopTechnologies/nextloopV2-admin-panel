@@ -8,7 +8,7 @@ interface SearchBoxProps {
 const SearchBox: React.FC<SearchBoxProps> = ({ onSearchText }) => {
   return (
     <Search 
-      placeholder="input search text" 
+      placeholder="Input search text" 
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSearchText(e.target.value)}
       allowClear
       size='large'

@@ -23,17 +23,18 @@ const List: React.FC = () => {
   const [pageNo, setPageNo] = useState<number>(1);
   const pageSize: number = 10;
 
+  const fetchData = async () => {
+    setIsLoading(true);
+    const { success, data, count }  = await portfolioApi.list();
+    if (success) {
+      setCount(count);
+      setPortfolioData(data as IPortfolio[]);
+    } 
+    else setIsError("An error occured while fetching data.")
+    setIsLoading(false)
+  };
+  
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      const { success, data, count }  = await portfolioApi.list();
-      if (success) {
-        setCount(count);
-        setPortfolioData(data as IPortfolio[]);
-      } 
-      else setIsError("An error occured while fetching data.")
-      setIsLoading(false)
-    };
     fetchData();
   },[pageNo]);
 
