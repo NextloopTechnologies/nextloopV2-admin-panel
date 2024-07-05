@@ -38,7 +38,7 @@ export const portfolio = pgTable("portfolio", {
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
 	id: bigint("id", { mode: "number" }).primaryKey().notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	image: text("image"),
+	image: text("image").array(),
 	title: text("title"),
 	descp: text("descp"),
 	active: boolean("active").default(true).notNull(),

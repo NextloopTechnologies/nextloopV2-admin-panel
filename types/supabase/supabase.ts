@@ -191,6 +191,7 @@ export type Database = {
           descp: string | null
           id: number
           image: string | null
+          image_array: Json[] | null
           title: string | null
           updated_at: string | null
         }
@@ -200,6 +201,7 @@ export type Database = {
           descp?: string | null
           id?: number
           image?: string | null
+          image_array?: Json[] | null
           title?: string | null
           updated_at?: string | null
         }
@@ -209,6 +211,7 @@ export type Database = {
           descp?: string | null
           id?: number
           image?: string | null
+          image_array?: Json[] | null
           title?: string | null
           updated_at?: string | null
         }
