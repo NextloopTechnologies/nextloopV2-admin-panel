@@ -1,4 +1,5 @@
 import ImageKit from 'imagekit';
+import config from '../config';
 
 export const textFieldValidator = (_: unknown, value: string) => {
   if (value && value.length < 3) {
@@ -10,8 +11,13 @@ export const textFieldValidator = (_: unknown, value: string) => {
 }
 
 export const imagekit = new ImageKit({
-  publicKey: process.env.NEXT_PUBLIC_IK_PUBLIC_KEY || '',
-  privateKey: process.env.NEXT_PUBLIC_IK_PRIVATE_KEY || '',
-  urlEndpoint: "https://ik.imagekit.io/nextloop/",
+  publicKey: config.imageKitPublicKey?.toString()!,
+  privateKey: config.imageKitPrivateKey?.toString()!,
+  urlEndpoint: config.imageKitCloudUrl!,
 })
 
+export function trimText(text: string, limit: number): string {
+  const words = text.split(" ");
+  const trimmed = words.slice(0, limit).join(" ");
+  return trimmed + (words.length > limit ? "..." : "");
+}

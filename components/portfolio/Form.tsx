@@ -10,6 +10,8 @@ import type { FormProps, UploadFile, UploadProps } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { portfolioApi } from '.';
+import 'react-quill/dist/quill.snow.css';
+import ReactQuill from 'react-quill';
 
 interface PortfolioFormProps {
   title: string,
@@ -55,7 +57,7 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({
       }
       return false;
     },
-    onChange: ({ fileList: newFileList }) => {
+    onChange: ({ fileList: newFileList }) => {      
       setFileList(newFileList)
     }
   }
@@ -65,13 +67,17 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({
     const formData =  new FormData();
     formData.append("title", values.title as string);
     formData.append("descp", values.descp as string);
+    
     if(fileList.length) {
       fileList.forEach(file => {
-        if (file.originFileObj) formData.append("imageInfo", file.originFileObj);
+        if (file.originFileObj) {
+          if(portfolio?.image?.length) formData.append("deletedImage", portfolio.image[0].fileId)
+          formData.append("imageInfo", file.originFileObj);
+        }
       });
     }
     if(portfolio){
-      if((!fileList.length || fileList.length) && portfolio.image?.length) formData.append("deletedImage", portfolio.image[0].fileId)
+      if(!fileList.length && portfolio.image?.length) formData.append("deletedImage", portfolio.image[0].fileId)
       formData.append("id", portfolio.id?.toString()!)
       const { success, msgText } = await portfolioApi.update(formData);
       if(success) message.success(msgText);
@@ -125,7 +131,7 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({
             }
           ]}
         >
-          <Input.TextArea />
+          <ReactQuill value={initialValues.descp!} />
         </Form.Item>
         <Form.Item<IPortfolio>
           label={<span className='text-l'>Portfolio Image</span>}>
