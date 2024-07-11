@@ -9,13 +9,13 @@ import Edit from "../../public/images/icons/edit.png";
 import Link from 'next/link';
 import { portfolioApi } from '.';
 import { UploadFileService } from '@/app/api';
+import parse from "html-react-parser"
+import { trimText } from '@/lib/utils';
 
 const List: React.FC = () => {
 
   const [portfolioData, setPortfolioData] = useState<IPortfolio[]>([]);
-  const [viewPortfolioData, setViewPortfolioData] = useState<IPortfolio>();
   const [searchedText, setSearchedText] = useState<string>("");
-  const [isViewModalOpen, setIsViewModalOpen] = useState<boolean>(false);
   const [isError, setIsError] = useState<string|null>("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -37,11 +37,6 @@ const List: React.FC = () => {
   useEffect(() => {
     fetchData();
   },[pageNo]);
-
-  const handleViewModalOpen = (values : IPortfolio) => {
-    setViewPortfolioData(values)
-    setIsViewModalOpen(true);
-  }
 
   if (isError) {
     return (
@@ -68,15 +63,16 @@ const List: React.FC = () => {
             .includes(String(value).toLowerCase())
       },
       render: (title, record) => (
-        <span onClick={() => handleViewModalOpen(record)} className='text-blue cursor-pointer'>
-          { title }
-        </span>
+        <Link href={`/portfolio/view/${record.id}`} className='text-blue-500'> 
+          { title } 
+        </Link>
       )
     },
     {
       title: "Description",
       dataIndex: "descp",
-      key: "descp"
+      key: "descp",
+      render: (descp) => parse(trimText(descp, 20))
     },
     {
       title: "Image",
@@ -174,38 +170,6 @@ const List: React.FC = () => {
         )}
         <SearchBox onSearchText={(value: string) => setSearchedText(value)} />
       </div>
-
-      {/* View Modal */}
-      <Modal
-        open={isViewModalOpen}
-        title="View Portfolio"
-        onCancel={() => setIsViewModalOpen(false)} 
-      >  
-      { viewPortfolioData && (
-        <Descriptions 
-        bordered
-        column={1}
-        labelStyle={{ fontSize: 16, fontWeight: "semi-bold" }}
-        contentStyle={{ fontSize: 16 }}
-      >
-        <Descriptions.Item label="Title">{viewPortfolioData?.title}</Descriptions.Item>
-        <Descriptions.Item label="Description">{viewPortfolioData?.descp}</Descriptions.Item>
-        <Descriptions.Item label="Snaps">
-          { viewPortfolioData?.image?.length ? (
-                <Image 
-                  key={viewPortfolioData?.id}  
-                  width={200} 
-                  height={200}
-                  src={viewPortfolioData.image[0].url} 
-                  alt="image" 
-                />
-            ) : `No snapshot available!`  
-          }
-        </Descriptions.Item>
-      </Descriptions>
-      )}
-        
-      </Modal>
 
       <Table 
         className='mt-2'
