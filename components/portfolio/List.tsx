@@ -11,6 +11,7 @@ import { portfolioApi } from '.';
 import { UploadFileService } from '@/app/api';
 import parse from "html-react-parser"
 import { trimText } from '@/lib/utils';
+import { withAuth } from '../auth';
 
 const List: React.FC = () => {
 
@@ -187,4 +188,4 @@ const List: React.FC = () => {
   )
 }
 
-export default List;
+export default withAuth(List);

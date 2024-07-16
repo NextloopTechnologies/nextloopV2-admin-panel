@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { portfolioApi } from '.';
 import 'react-quill/dist/quill.snow.css';
 import ReactQuill from 'react-quill';
+import { withAuth } from '../auth';
 
 interface PortfolioFormProps {
   title: string,
@@ -162,4 +163,4 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({
   )
 }
 
-export default PortfolioForm
+export default withAuth(PortfolioForm)
