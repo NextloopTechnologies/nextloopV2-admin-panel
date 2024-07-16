@@ -44,7 +44,7 @@ const Navbar: React.FC = () => {
           </Link>
         </li>
         <li>
-          <Link href="/testimonials"
+          <Link href="/testimonial"
             className="text-gray-700 hover:text-blue-600 transition duration-200">Testimonials
           </Link>
         </li>
