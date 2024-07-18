@@ -1,6 +1,6 @@
 "use client"
 
-import { Button, Descriptions, Modal, Popconfirm, PopconfirmProps, Table, TableProps, message } from 'antd';
+import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { SearchBox } from '../crud';
 import Image from 'next/image';
@@ -77,8 +77,7 @@ const List: React.FC = () => {
     {
       title: "Designation",
       dataIndex: "comp_and_desig",
-      key: "comp_and_desig",
-      render: (descp) => parse(trimText(descp, 20))
+      key: "comp_and_desig"
     },
     {
       title: "Action",
@@ -115,24 +114,21 @@ const List: React.FC = () => {
     onChange: onSelectChange,
   };
   
-  // const deleteAll: PopconfirmProps['onConfirm'] = async () => {
-  //   if (selectedRowKeys) {
-  //     try {
-  //       const { success, msgText } = await portfolioApi.remove(selectedRowKeys);
-  //       if(!success) return message.error("Failed to Delete!");
+  const deleteAll: PopconfirmProps['onConfirm'] = async () => {
+    if (selectedRowKeys) {
+      try {
+        const { success, msgText } = await testimonialApi.remove(selectedRowKeys);
+        if(!success) return message.error("Failed to Delete!");
 
-  //       const deleteBucketImages = portfolioData.filter(portfolio => selectedRowKeys.includes(portfolio.id as React.Key)).flatMap(item => item?.image?.map(item => item.fileId) || [])
-  //       if(deleteBucketImages.length) UploadFileService.deleteFiles(deleteBucketImages)
-        
-  //       const updatedPortfolioData = portfolioData.filter(portfolio => !selectedRowKeys.includes(portfolio.id as React.Key))
-  //       setPortfolioData(updatedPortfolioData)
-  //       setSelectedRowKeys([]);
-  //       message.success(msgText);
-  //     } catch (error) {
-  //       message.error("Something went wrong!")
-  //     }
-  //   }
-  // }
+        const updatedTestimonialData = testimonialData.filter(testimonial => !selectedRowKeys.includes(testimonial.id as React.Key))
+        setTestimonailData(updatedTestimonialData)
+        setSelectedRowKeys([]);
+        message.success(msgText);
+      } catch (error) {
+        message.error("Something went wrong!")
+      }
+    }
+  }
 
   return (
     <div className='content-container'>
@@ -147,7 +143,7 @@ const List: React.FC = () => {
         {selectedRowKeys.length >= 1 && (
           <Popconfirm
             title={`Do you really wanted to delete ${selectedRowKeys.length} items`}
-            // onConfirm={deleteAll}
+            onConfirm={deleteAll}
           >
             <Button danger type="primary" size='large'>
               Delete ({selectedRowKeys.length})
