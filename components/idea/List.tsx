@@ -3,17 +3,15 @@
 import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { SearchBox } from '../crud';
-import Image from 'next/image';
-import Edit from "../../public/images/icons/edit.png";
 import Link from 'next/link';
-import { testimonialApi } from '.';
+import { ideaApi } from '.';
 import { trimText } from '@/lib/utils';
-import { ITestimonial } from '@/types/testimonial';
 import { withAuth } from '../auth';
+import { IIdea } from '@/types/idea';
 
 const List: React.FC = () => {
 
-  const [testimonialData, setTestimonailData] = useState<ITestimonial[]>([]);
+  const [ideaData, setIdeaData] = useState<IIdea[]>([]);
   const [searchedText, setSearchedText] = useState<string>("");
   const [isError, setIsError] = useState<string|null>("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -24,10 +22,10 @@ const List: React.FC = () => {
 
   const fetchData = async () => {
     setIsLoading(true);
-    const { success, data, count }  = await testimonialApi.list();
+    const { success, data, count }  = await ideaApi.list();
     if (success) {
       setCount(count);
-      setTestimonailData(data);
+      setIdeaData(data);
     } 
     else setIsError("An error occured while fetching data.")
     setIsLoading(false)
@@ -45,7 +43,7 @@ const List: React.FC = () => {
     )
   }
 
-  const columns: TableProps<ITestimonial>['columns'] = [
+  const columns: TableProps<IIdea>['columns'] = [
     {
       title: "Sr No.",
       dataIndex: "id",
@@ -53,55 +51,33 @@ const List: React.FC = () => {
       render: (id, record, index) => ++index
     },
     {
-      title: "Feedback By",
-      dataIndex: "feedback_by",
-      key: "feedback_by",
+      title: "Mail",
+      dataIndex: "mail",
+      key: "mail",
       filteredValue: [searchedText],
       onFilter: (value, record) => {
-        return String(record.feedback_by?.toLowerCase())
+        return String(record.mail?.toLowerCase())
             .includes(String(value).toLowerCase())
       },
-      render: (feedback_by, record) => (
-        <Link href={`/testimonial/view/${record.id}`} className='text-blue-500'> 
-          { feedback_by } 
+      render: (mail, record) => (
+        <Link href={`/idea/view/${record.id}`} className='text-blue-500'> 
+          { mail } 
         </Link>
       )
     },
     {
-      title: "Feedback Descp",
-      dataIndex: "feedback_descp",
-      key: "feedback_descp",
-      render: (feedback_descp) => trimText(feedback_descp, 20)
-    },
-    {
-      title: "Designation",
-      dataIndex: "comp_and_desig",
-      key: "comp_and_desig"
-    },
-    {
-      title: "Action",
-      key: "action",
-      render: (record) => (
-        <div className='flex'>
-          <Link href={`/testimonial/edit/${record.id}`}>
-            <Image  
-              src={Edit}
-              alt='edit' 
-              height='20'
-              className='mr-2 cursor-pointer'
-            />
-          </Link>
-      </div>
-      )
-    },
+      title: "Idea Description",
+      dataIndex: "idea_descp",
+      key: "idea_descp",
+      render: (idea_descp) => trimText(idea_descp, 20)
+    }
   ];
 
-  const dataSource: ITestimonial[] = testimonialData.map((testimonial: ITestimonial) => ({
-    key: testimonial.id,
-    id: testimonial.id,
-    feedback_by: testimonial.feedback_by,
-    feedback_descp: testimonial.feedback_descp,
-    comp_and_desig: testimonial.comp_and_desig
+  const dataSource: IIdea[] = ideaData.map((idea: IIdea) => ({
+    key: idea.id,
+    id: idea.id,
+    mail: idea.mail,
+    idea_descp: idea.idea_descp
   }));
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -116,11 +92,11 @@ const List: React.FC = () => {
   const deleteAll: PopconfirmProps['onConfirm'] = async () => {
     if (selectedRowKeys) {
       try {
-        const { success, msgText } = await testimonialApi.remove(selectedRowKeys);
+        const { success, msgText } = await ideaApi.remove(selectedRowKeys);
         if(!success) return message.error("Failed to Delete!");
 
-        const updatedTestimonialData = testimonialData.filter(testimonial => !selectedRowKeys.includes(testimonial.id as React.Key))
-        setTestimonailData(updatedTestimonialData)
+        const updatedIdeaData = ideaData.filter(idea => !selectedRowKeys.includes(idea.id as React.Key))
+        setIdeaData(updatedIdeaData)
         setSelectedRowKeys([]);
         message.success(msgText);
       } catch (error) {
@@ -131,14 +107,8 @@ const List: React.FC = () => {
 
   return (
     <div className='content-container'>
-      <h1 className='font-bold text-3xl'>All Testimonials</h1>
+      <h1 className='font-bold text-3xl'>All Ideas</h1>
       <div className='flex justify-between mt-5'>
-        <Link href={"/testimonial/create"}>
-          <Button type="primary" size='large'>
-            Add
-          </Button>
-        </Link>
-
         {selectedRowKeys.length >= 1 && (
           <Popconfirm
             title={`Do you really wanted to delete ${selectedRowKeys.length} items`}
