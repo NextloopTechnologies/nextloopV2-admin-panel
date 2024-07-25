@@ -22,7 +22,7 @@ export const read = async(id: number) => {
   }
 }
 
-export const remove = async(ids: any) => {
+export const remove = async(ids: number[]) => {
   try {
     const response = await fetch(`${config.apiBaseUrl}/api/idea`, { 
       method: "DELETE",

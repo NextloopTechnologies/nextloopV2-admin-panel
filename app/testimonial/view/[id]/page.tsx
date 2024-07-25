@@ -1,5 +1,5 @@
 import { testimonialApi, View  } from '@/components/testimonial';
-import { ITestimonial } from '@/types/testimonial';
+import { ITestimonial } from '@/types/supabase';
 
 const Testimonial = async({ params }: { params: { id: string } }) => {
   let testimonial: ITestimonial | null = null;

@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { ideaApi } from '.';
 import { trimText } from '@/lib/utils';
 import { withAuth } from '../auth';
-import { IIdea } from '@/types/idea';
+import { IIdea } from '@/types/supabase';
 
 const List: React.FC = () => {
 
@@ -92,7 +92,7 @@ const List: React.FC = () => {
   const deleteAll: PopconfirmProps['onConfirm'] = async () => {
     if (selectedRowKeys) {
       try {
-        const { success, msgText } = await ideaApi.remove(selectedRowKeys);
+        const { success, msgText } = await ideaApi.remove(selectedRowKeys as number[]);
         if(!success) return message.error("Failed to Delete!");
 
         const updatedIdeaData = ideaData.filter(idea => !selectedRowKeys.includes(idea.id as React.Key))

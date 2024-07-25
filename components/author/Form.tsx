@@ -1,58 +1,56 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
-import { Button, Form, Input, Upload, message } from 'antd';
+import React, { useState } from 'react';
+import { Button, Form, Input, message } from 'antd';
 import { textFieldValidator } from '@/lib/utils';
 import type { FormProps } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ITestimonial } from '@/types/supabase';
-import { testimonialApi } from '.';
+import { IAuthor } from '@/types/supabase';
+import { authorApi } from '.';
 import { withAuth } from '../auth';
 
-interface TestimonialFormProps {
-  title: string,
-  testimonial?: ITestimonial | null,
+interface AuthorFormProps {
+  title: string;
+  author?: IAuthor|null;
 }
 
-const TestimonialForm: React.FC<TestimonialFormProps> = ({ 
+const AuthorForm: React.FC<AuthorFormProps> = ({ 
   title, 
-  testimonial
+  author
 }) => {
   
   const [ isLoading, setIsLoading ] = useState<boolean>(false); 
   const router = useRouter(); 
 
-  const initialValues: ITestimonial = {
-    feedback_by: testimonial?.feedback_by || '',
-    feedback_descp: testimonial?.feedback_descp || '',
-    comp_and_desig: testimonial?.comp_and_desig || ''
+  const initialValues: IAuthor = {
+    name: author?.name || '',
+    designation: author?.designation || ''
   }
-
-  const handleFinish: FormProps<ITestimonial>['onFinish'] = async(values) => {
+  
+  const handleFinish: FormProps<IAuthor>['onFinish'] = async(values) => {
     setIsLoading(true);
     const formData =  new FormData();
-    formData.append("feedback_by", values.feedback_by as string);
-    formData.append("feedback_descp", values.feedback_descp as string);
-    formData.append("comp_and_desig", values.comp_and_desig as string);
+    formData.append("name", values.name as string);
+    formData.append("designation", values.designation as string);
     
-    if(testimonial){
-     formData.append("id", testimonial.id?.toString()!)
-      const { success, msgText } = await testimonialApi.update(formData);
+    if(author){
+     formData.append("id", author.id?.toString()!)
+      const { success, msgText } = await authorApi.update(formData);
       if(success) message.success(msgText);
       else message.error(msgText  || "Failed to update!");
       setIsLoading(false);
-      return router.push('/testimonial');
+      return router.push('/blog/author');
     }
-
-    const { success, msgText } = await testimonialApi.create(formData); 
+    const { success, msgText } = await authorApi.create(formData); 
     if(success) message.success(msgText);
     else message.error(msgText  || "Failed to create!");
     setIsLoading(false);
-    router.push('/testimonial');
+    router.push('/blog/author');
   }
 
   return (
+  
     <div className='content-container'>
       <h1 className='font-bold text-3xl mb-7'>{title}</h1>
       <Form
@@ -62,9 +60,9 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({
         onFinish={handleFinish}   
         size='large'
       >
-        <Form.Item<ITestimonial>
-          label="Feedback By"
-          name="feedback_by"
+        <Form.Item<IAuthor>
+          label="Name"
+          name="name"
           rules={[
             {
               required: true,
@@ -77,9 +75,9 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({
         >
           <Input />
         </Form.Item>
-        <Form.Item<ITestimonial>
-          label="Feedback Description"
-          name="feedback_descp"
+        <Form.Item<IAuthor>
+          label="Designation"
+          name="designation"
           rules={[
             {
               required: true,
@@ -92,22 +90,6 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({
         >
           <Input.TextArea />
         </Form.Item>
-        <Form.Item<ITestimonial>
-          label="Company & Designation"
-          name="comp_and_desig"
-          rules={[
-            {
-              required: true,
-              message: 'Please input your company and designation!',
-            },
-            {
-              validator: textFieldValidator
-            }
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        
         <Form.Item
           wrapperCol={{
             offset: 8,
@@ -115,7 +97,7 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({
           }}
         >
           { !isLoading && (
-            <Link href={"/testimonial"} className='mr-3'>
+            <Link href={"/blog/author"} className='mr-3'>
               <Button danger type="primary">
                 Cancel
               </Button>
@@ -131,4 +113,4 @@ const TestimonialForm: React.FC<TestimonialFormProps> = ({
   )
 }
 
-export default withAuth(TestimonialForm)
+export default withAuth(AuthorForm)

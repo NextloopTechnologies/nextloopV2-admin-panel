@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase/query";
+import { IBlogMutate } from "@/types/supabase";
 
 export const list = async(page:number = 1, limit:number = 10) => {
   try {
@@ -17,7 +18,7 @@ export const list = async(page:number = 1, limit:number = 10) => {
   }
 }
 
-export const create = async (values: any) => {
+export const create = async (values: IBlogMutate) => {
   try {
     const { error } = await supabase
     .from('blogs')
@@ -45,7 +46,7 @@ export const read = async (id: number) => {
   }
 } 
 
-export const update = async (values: any, id: number) => {
+export const update = async (values: IBlogMutate, id: number) => {
   try {
     const { error } = await supabase
     .from('blogs')

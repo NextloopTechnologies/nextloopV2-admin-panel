@@ -2,7 +2,7 @@
 
 import { Descriptions } from 'antd'
 import React from 'react'
-import { ITestimonial } from '@/types/testimonial'
+import { ITestimonial } from '@/types/supabase'
 import { withAuth } from '../auth'
 
 type ViewProps = {

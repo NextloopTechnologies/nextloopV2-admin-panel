@@ -1,5 +1,5 @@
 import { ideaApi, View } from '@/components/idea';
-import { IIdea } from '@/types/idea';
+import { IIdea } from '@/types/supabase';
 
 const Idea = async({ params }: { params: { id: string } }) => {
   let idea: IIdea | null = null;

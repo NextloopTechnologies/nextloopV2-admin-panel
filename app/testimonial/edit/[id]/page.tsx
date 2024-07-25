@@ -1,5 +1,5 @@
 import { Form, testimonialApi } from '@/components/testimonial';
-import { ITestimonial } from '@/types/testimonial';
+import { ITestimonial } from '@/types/supabase';
 import React from 'react';
 
 const EditTestimonial = async({ params }: { params: { id: string } }) => {

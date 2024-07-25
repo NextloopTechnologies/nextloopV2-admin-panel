@@ -8,7 +8,7 @@ import Edit from "../../public/images/icons/edit.png";
 import Link from 'next/link';
 import { testimonialApi } from '.';
 import { trimText } from '@/lib/utils';
-import { ITestimonial } from '@/types/testimonial';
+import { ITestimonial } from '@/types/supabase';
 import { withAuth } from '../auth';
 
 const List: React.FC = () => {
@@ -116,7 +116,7 @@ const List: React.FC = () => {
   const deleteAll: PopconfirmProps['onConfirm'] = async () => {
     if (selectedRowKeys) {
       try {
-        const { success, msgText } = await testimonialApi.remove(selectedRowKeys);
+        const { success, msgText } = await testimonialApi.remove(selectedRowKeys as number[]);
         if(!success) return message.error("Failed to Delete!");
 
         const updatedTestimonialData = testimonialData.filter(testimonial => !selectedRowKeys.includes(testimonial.id as React.Key))
@@ -141,7 +141,7 @@ const List: React.FC = () => {
 
         {selectedRowKeys.length >= 1 && (
           <Popconfirm
-            title={`Do you really wanted to delete ${selectedRowKeys.length} items`}
+            title={`Do you really wanted to delete ${selectedRowKeys.length} items?`}
             onConfirm={deleteAll}
           >
             <Button danger type="primary" size='large'>

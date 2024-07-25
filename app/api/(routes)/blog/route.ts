@@ -1,5 +1,5 @@
+import { IBlogMutate } from "@/types/supabase";
 import { BlogService, UploadFileService } from "../..";
-import { IBlog } from "@/types/blog";
 
 export async function GET() {
   try {
@@ -15,7 +15,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
-    const payload: IBlog = {
+    const payload: IBlogMutate = {
       title: formData.get('title') as string, 
       descp: formData.get('descp') as string
     }
@@ -40,7 +40,7 @@ export async function PUT(req: Request) {
     const formData = await req.formData();
     const id = Number(formData.get("id"));
     const deletedImage = formData.get("deletedImage")?.toString() || "";
-    const payload: IBlog = {
+    const payload: IBlogMutate = {
       title: formData.get('title') as string, 
       descp: formData.get('descp') as string,
     }

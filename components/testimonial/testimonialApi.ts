@@ -10,7 +10,7 @@ export const list = async() => {
   }
 }
 
-export const create = async(payload: any) => {
+export const create = async(payload: FormData) => {
   try {
     const response = await fetch(`${config.apiBaseUrl}/api/testimonial`, {
       method: 'POST',
@@ -35,7 +35,7 @@ export const read = async(id: number) => {
   }
 }
 
-export const update = async(payload: any) => {
+export const update = async(payload: FormData) => {
   try {
     const response = await fetch(`${config.apiBaseUrl}/api/testimonial`, {
       method: 'PUT',
@@ -48,7 +48,7 @@ export const update = async(payload: any) => {
   }
 }
 
-export const remove = async(ids: any) => {
+export const remove = async(ids: number[]) => {
   try {
     const response = await fetch(`${config.apiBaseUrl}/api/testimonial`, { 
       method: "DELETE",

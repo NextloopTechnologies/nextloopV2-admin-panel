@@ -134,7 +134,7 @@ const List: React.FC = () => {
   const deleteAll: PopconfirmProps['onConfirm'] = async () => {
     if (selectedRowKeys) {
       try {
-        const { success, msgText } = await blogApi.remove(selectedRowKeys);
+        const { success, msgText } = await blogApi.remove(selectedRowKeys as number[]);
         if(!success) return message.error("Failed to Delete!");
 
         const deleteBucketImages = blogData.filter(blog => selectedRowKeys.includes(blog.id as React.Key)).flatMap(item => item?.image?.map(item => item.fileId) || [])

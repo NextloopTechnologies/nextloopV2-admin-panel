@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase/query";
+import { ITestimonial } from "@/types/supabase";
 
 export const list = async(page:number = 1, limit:number = 10) => {
   try {
@@ -17,7 +18,7 @@ export const list = async(page:number = 1, limit:number = 10) => {
   }
 }
 
-export const create = async (values: any) => {
+export const create = async (values: ITestimonial) => {
   try {
     const { error } = await supabase
     .from('testimonials')
@@ -45,7 +46,7 @@ export const read = async (id: number) => {
   }
 } 
 
-export const update = async (values: any, id: number) => {
+export const update = async (values: ITestimonial, id: number) => {
   try {
     const { error } = await supabase
     .from('testimonials')
