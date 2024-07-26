@@ -86,7 +86,7 @@ export type Database = {
           created_at: string
           descp: string | null
           id: number
-          image: string | null
+          image: Json | null
           title: string | null
           updated_at: string | null
         }
@@ -95,7 +95,7 @@ export type Database = {
           created_at?: string
           descp?: string | null
           id?: number
-          image?: string | null
+          image?: Json | null
           title?: string | null
           updated_at?: string | null
         }
@@ -104,7 +104,7 @@ export type Database = {
           created_at?: string
           descp?: string | null
           id?: number
-          image?: string | null
+          image?: Json | null
           title?: string | null
           updated_at?: string | null
         }
@@ -190,8 +190,7 @@ export type Database = {
           created_at: string
           descp: string | null
           id: number
-          image: string | null
-          image_array: Json[] | null
+          image: Json[] | null
           title: string | null
           updated_at: string | null
         }
@@ -200,8 +199,7 @@ export type Database = {
           created_at?: string
           descp?: string | null
           id?: number
-          image?: string | null
-          image_array?: Json[] | null
+          image?: Json[] | null
           title?: string | null
           updated_at?: string | null
         }
@@ -210,8 +208,7 @@ export type Database = {
           created_at?: string
           descp?: string | null
           id?: number
-          image?: string | null
-          image_array?: Json[] | null
+          image?: Json[] | null
           title?: string | null
           updated_at?: string | null
         }
@@ -358,3 +355,19 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never
+
+
+
+
+
+
+
+export type ITestimonial = TablesInsert<'testimonials'>
+
+export type IIdea = TablesInsert<'ideas'>
+
+export type IBlogMutate = TablesInsert<'blogs'>
+
+export type IPortfolioMutate = TablesInsert<'portfolio'>
+
+export type IAuthor = TablesInsert<'author'>

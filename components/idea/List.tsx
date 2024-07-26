@@ -1,21 +1,17 @@
 "use client"
 
-import { IPortfolio } from '@/types/portfolio'
 import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { SearchBox } from '../crud';
-import Image from 'next/image';
-import Edit from "../../public/images/icons/edit.png";
 import Link from 'next/link';
-import { portfolioApi } from '.';
-import { UploadFileService } from '@/app/api';
-import parse from "html-react-parser"
+import { ideaApi } from '.';
 import { trimText } from '@/lib/utils';
 import { withAuth } from '../auth';
+import { IIdea } from '@/types/supabase';
 
 const List: React.FC = () => {
 
-  const [portfolioData, setPortfolioData] = useState<IPortfolio[]>([]);
+  const [ideaData, setIdeaData] = useState<IIdea[]>([]);
   const [searchedText, setSearchedText] = useState<string>("");
   const [isError, setIsError] = useState<string|null>("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -26,10 +22,10 @@ const List: React.FC = () => {
 
   const fetchData = async () => {
     setIsLoading(true);
-    const { success, data, count }  = await portfolioApi.list();
+    const { success, data, count }  = await ideaApi.list();
     if (success) {
       setCount(count);
-      setPortfolioData(data as IPortfolio[]);
+      setIdeaData(data);
     } 
     else setIsError("An error occured while fetching data.")
     setIsLoading(false)
@@ -47,7 +43,7 @@ const List: React.FC = () => {
     )
   }
 
-  const columns: TableProps<IPortfolio>['columns'] = [
+  const columns: TableProps<IIdea>['columns'] = [
     {
       title: "Sr No.",
       dataIndex: "id",
@@ -55,70 +51,33 @@ const List: React.FC = () => {
       render: (id, record, index) => ++index
     },
     {
-      title: "Title",
-      dataIndex: "title",
-      key: "title",
+      title: "Mail",
+      dataIndex: "mail",
+      key: "mail",
       filteredValue: [searchedText],
       onFilter: (value, record) => {
-        return String(record.title?.toLowerCase())
+        return String(record.mail?.toLowerCase())
             .includes(String(value).toLowerCase())
       },
-      render: (title, record) => (
-        <Link href={`/portfolio/view/${record.id}`} className='text-blue-500'> 
-          { title } 
+      render: (mail, record) => (
+        <Link href={`/idea/view/${record.id}`} className='text-blue-500'> 
+          { mail } 
         </Link>
       )
     },
     {
-      title: "Description",
-      dataIndex: "descp",
-      key: "descp",
-      render: (descp) => parse(trimText(descp, 20))
-    },
-    {
-      title: "Image",
-      dataIndex: "image",
-      key: "image",
-      render: (image) => {
-        const imageSrc: string = image?.[0]?.url;
-        return (
-          imageSrc ? (
-            <Image 
-              src={imageSrc}
-              alt='portfolio-image'
-              height={100}
-              width={100} 
-            />
-          ) : (
-            <p> No image! </p>
-          )
-        );
-      }
-    },
-    {
-      title: "Action",
-      key: "action",
-      render: (record) => (
-        <div className='flex'>
-          <Link href={`/portfolio/edit/${record.id}`}>
-            <Image  
-              src={Edit}
-              alt='edit' 
-              height='20'
-              className='mr-2 cursor-pointer'
-            />
-          </Link>
-      </div>
-      )
-    },
+      title: "Idea Description",
+      dataIndex: "idea_descp",
+      key: "idea_descp",
+      render: (idea_descp) => trimText(idea_descp, 20)
+    }
   ];
 
-  const dataSource: IPortfolio[] = portfolioData.map((portfolio: IPortfolio) => ({
-    key: portfolio.id,
-    id: portfolio.id,
-    title: portfolio.title,
-    descp: portfolio.descp,
-    image: portfolio.image
+  const dataSource: IIdea[] = ideaData.map((idea: IIdea) => ({
+    key: idea.id,
+    id: idea.id,
+    mail: idea.mail,
+    idea_descp: idea.idea_descp
   }));
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -133,14 +92,11 @@ const List: React.FC = () => {
   const deleteAll: PopconfirmProps['onConfirm'] = async () => {
     if (selectedRowKeys) {
       try {
-        const { success, msgText } = await portfolioApi.remove(selectedRowKeys as number[]);
+        const { success, msgText } = await ideaApi.remove(selectedRowKeys as number[]);
         if(!success) return message.error("Failed to Delete!");
 
-        const deleteBucketImages = portfolioData.filter(portfolio => selectedRowKeys.includes(portfolio.id as React.Key)).flatMap(item => item?.image?.map(item => item.fileId) || [])
-        if(deleteBucketImages.length) UploadFileService.deleteFiles(deleteBucketImages)
-        
-        const updatedPortfolioData = portfolioData.filter(portfolio => !selectedRowKeys.includes(portfolio.id as React.Key))
-        setPortfolioData(updatedPortfolioData)
+        const updatedIdeaData = ideaData.filter(idea => !selectedRowKeys.includes(idea.id as React.Key))
+        setIdeaData(updatedIdeaData)
         setSelectedRowKeys([]);
         message.success(msgText);
       } catch (error) {
@@ -151,14 +107,8 @@ const List: React.FC = () => {
 
   return (
     <div className='content-container'>
-      <h1 className='font-bold text-3xl'>All Portfolios</h1>
+      <h1 className='font-bold text-3xl'>All Ideas</h1>
       <div className='flex justify-between mt-5'>
-        <Link href={"/portfolio/create"}>
-          <Button type="primary" size='large'>
-            Add
-          </Button>
-        </Link>
-
         {selectedRowKeys.length >= 1 && (
           <Popconfirm
             title={`Do you really wanted to delete ${selectedRowKeys.length} items`}

@@ -1,12 +1,12 @@
 import { supabase } from "@/lib/supabase/query";
-import { IPortfolioMutate } from "@/types/supabase";
+import { IBlogMutate } from "@/types/supabase";
 
 export const list = async(page:number = 1, limit:number = 10) => {
   try {
     const offset = (page-1) * limit;
 
     const { data, count } = await supabase
-    .from("portfolio")
+    .from("blogs")
     .select('id, title, descp, image ', { count: "exact" })
     .order('id', { ascending: false })
     .range(offset, offset + limit - 1)
@@ -18,10 +18,10 @@ export const list = async(page:number = 1, limit:number = 10) => {
   }
 }
 
-export const create = async (values: IPortfolioMutate) => {
+export const create = async (values: IBlogMutate) => {
   try {
     const { error } = await supabase
-    .from('portfolio')
+    .from('blogs')
     .insert(values)
 
     if(!error) return { success: true, msgText: "Created!", status: 201 }
@@ -34,22 +34,22 @@ export const create = async (values: IPortfolioMutate) => {
 export const read = async (id: number) => {
   try {
     const { data } = await supabase
-    .from('portfolio')
+    .from('blogs')
     .select()
     .filter('id', 'eq', id)
     .single();
   
     if(!data) return { success: false, msgText: "No record found!", status: 404 }
-    return { success: true , portfolio: data, status: 200 }
+    return { success: true , blog: data, status: 200 }
   } catch (error) {
     throw error
   }
 } 
 
-export const update = async (values: IPortfolioMutate, id: number) => {
+export const update = async (values: IBlogMutate, id: number) => {
   try {
     const { error } = await supabase
-    .from('portfolio')
+    .from('blogs')
     .update(values)
     .eq('id', id)
 
@@ -63,7 +63,7 @@ export const update = async (values: IPortfolioMutate, id: number) => {
 export const remove = async(ids: number[]) => {
   try {
     const { error } = await supabase
-    .from("portfolio")
+    .from("blogs")
     .delete()
     .in('id', ids)
 

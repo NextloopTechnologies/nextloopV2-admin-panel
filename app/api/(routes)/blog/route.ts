@@ -1,13 +1,13 @@
-import { PortfolioService, UploadFileService } from "../..";
-import { IPortfolioMutate } from "@/types/supabase";
+import { IBlogMutate } from "@/types/supabase";
+import { BlogService, UploadFileService } from "../..";
 
 export async function GET() {
   try {
-    const { status, ...data }  = await PortfolioService.list();
+    const { status, ...data }  = await BlogService.list();
     if(status!==200) return Response.json({ data }, { status })
     return Response.json({ data }, { status })  
   } catch (error) {
-    console.error("PORTFOLIO_LIST_CONTROLLER", error)
+    console.error("BLOG_LIST_CONTROLLER", error)
     return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
   }
 }
@@ -15,7 +15,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
-    const payload: IPortfolioMutate = {
+    const payload: IBlogMutate = {
       title: formData.get('title') as string, 
       descp: formData.get('descp') as string
     }
@@ -26,11 +26,11 @@ export async function POST(req: Request) {
       payload.image = [{ fileId, url }]
     } 
 
-    const { status, ...data} = await PortfolioService.create(payload);
+    const { status, ...data} = await BlogService.create(payload);
     if(status!==201) return Response.json({ data }, { status });
     return Response.json({ data }, { status });
   } catch (error) {
-    console.error("PORTFOLIO_CREATE_CONTROLLER", error)
+    console.error("BLOG_CREATE_CONTROLLER", error)
     return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
   }  
 }
@@ -40,7 +40,7 @@ export async function PUT(req: Request) {
     const formData = await req.formData();
     const id = Number(formData.get("id"));
     const deletedImage = formData.get("deletedImage")?.toString() || "";
-    const payload: IPortfolioMutate = {
+    const payload: IBlogMutate = {
       title: formData.get('title') as string, 
       descp: formData.get('descp') as string,
     }
@@ -54,11 +54,11 @@ export async function PUT(req: Request) {
       await UploadFileService.deleteFiles([deletedImage])
       if(!imageInfo) payload.image = []
     };
-    const { status, ...data} = await PortfolioService.update(payload, id);
+    const { status, ...data} = await BlogService.update(payload, id);
     if(status!==200) return Response.json({ data }, { status });
     return Response.json({ data }, { status });
   } catch (error) {
-    console.error("PORTFOLIO_UPDATE_CONTROLLER", error)
+    console.error("BLOG_UPDATE_CONTROLLER", error)
     return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
   }  
 }
@@ -66,11 +66,11 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const deleteIds =  await req.json()
-    const { status, ...data } = await PortfolioService.remove(deleteIds)
+    const { status, ...data } = await BlogService.remove(deleteIds)
     if(status!==200) return Response.json({ data }, { status });
     return Response.json({ data }, { status });
   } catch (error) {
-    console.error("PORTFOLIO_DELETE_CONTROLLER", error)
+    console.error("BLOG_DELETE_CONTROLLER", error)
     return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
   }
 }

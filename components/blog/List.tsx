@@ -1,13 +1,14 @@
 "use client"
 
-import { IPortfolio } from '@/types/portfolio'
+import { IBlog } from '@/types/blog';
 import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { SearchBox } from '../crud';
 import Image from 'next/image';
 import Edit from "../../public/images/icons/edit.png";
 import Link from 'next/link';
-import { portfolioApi } from '.';
+import { blogApi } from '.';
+
 import { UploadFileService } from '@/app/api';
 import parse from "html-react-parser"
 import { trimText } from '@/lib/utils';
@@ -15,7 +16,7 @@ import { withAuth } from '../auth';
 
 const List: React.FC = () => {
 
-  const [portfolioData, setPortfolioData] = useState<IPortfolio[]>([]);
+  const [blogData, setBlogData] = useState<IBlog[]>([]);
   const [searchedText, setSearchedText] = useState<string>("");
   const [isError, setIsError] = useState<string|null>("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -26,10 +27,10 @@ const List: React.FC = () => {
 
   const fetchData = async () => {
     setIsLoading(true);
-    const { success, data, count }  = await portfolioApi.list();
+    const { success, data, count }  = await blogApi.list();
     if (success) {
       setCount(count);
-      setPortfolioData(data as IPortfolio[]);
+      setBlogData(data as IBlog[]);
     } 
     else setIsError("An error occured while fetching data.")
     setIsLoading(false)
@@ -47,7 +48,7 @@ const List: React.FC = () => {
     )
   }
 
-  const columns: TableProps<IPortfolio>['columns'] = [
+  const columns: TableProps<IBlog>['columns'] = [
     {
       title: "Sr No.",
       dataIndex: "id",
@@ -64,7 +65,7 @@ const List: React.FC = () => {
             .includes(String(value).toLowerCase())
       },
       render: (title, record) => (
-        <Link href={`/portfolio/view/${record.id}`} className='text-blue-500'> 
+        <Link href={`/blog/view/${record.id}`} className='text-blue-500'> 
           { title } 
         </Link>
       )
@@ -85,7 +86,7 @@ const List: React.FC = () => {
           imageSrc ? (
             <Image 
               src={imageSrc}
-              alt='portfolio-image'
+              alt='blog-image'
               height={100}
               width={100} 
             />
@@ -100,7 +101,7 @@ const List: React.FC = () => {
       key: "action",
       render: (record) => (
         <div className='flex'>
-          <Link href={`/portfolio/edit/${record.id}`}>
+          <Link href={`/blog/edit/${record.id}`}>
             <Image  
               src={Edit}
               alt='edit' 
@@ -113,12 +114,12 @@ const List: React.FC = () => {
     },
   ];
 
-  const dataSource: IPortfolio[] = portfolioData.map((portfolio: IPortfolio) => ({
-    key: portfolio.id,
-    id: portfolio.id,
-    title: portfolio.title,
-    descp: portfolio.descp,
-    image: portfolio.image
+  const dataSource: IBlog[] = blogData.map((blog: IBlog) => ({
+    key: blog.id,
+    id: blog.id,
+    title: blog.title,
+    descp: blog.descp,
+    image: blog.image
   }));
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -133,14 +134,14 @@ const List: React.FC = () => {
   const deleteAll: PopconfirmProps['onConfirm'] = async () => {
     if (selectedRowKeys) {
       try {
-        const { success, msgText } = await portfolioApi.remove(selectedRowKeys as number[]);
+        const { success, msgText } = await blogApi.remove(selectedRowKeys as number[]);
         if(!success) return message.error("Failed to Delete!");
 
-        const deleteBucketImages = portfolioData.filter(portfolio => selectedRowKeys.includes(portfolio.id as React.Key)).flatMap(item => item?.image?.map(item => item.fileId) || [])
+        const deleteBucketImages = blogData.filter(blog => selectedRowKeys.includes(blog.id as React.Key)).flatMap(item => item?.image?.map(item => item.fileId) || [])
         if(deleteBucketImages.length) UploadFileService.deleteFiles(deleteBucketImages)
         
-        const updatedPortfolioData = portfolioData.filter(portfolio => !selectedRowKeys.includes(portfolio.id as React.Key))
-        setPortfolioData(updatedPortfolioData)
+        const updatedBlogData = blogData.filter(blog => !selectedRowKeys.includes(blog.id as React.Key))
+        setBlogData(updatedBlogData)
         setSelectedRowKeys([]);
         message.success(msgText);
       } catch (error) {
@@ -151,9 +152,9 @@ const List: React.FC = () => {
 
   return (
     <div className='content-container'>
-      <h1 className='font-bold text-3xl'>All Portfolios</h1>
+      <h1 className='font-bold text-3xl'>All Blogs</h1>
       <div className='flex justify-between mt-5'>
-        <Link href={"/portfolio/create"}>
+        <Link href={"/blog/create"}>
           <Button type="primary" size='large'>
             Add
           </Button>
