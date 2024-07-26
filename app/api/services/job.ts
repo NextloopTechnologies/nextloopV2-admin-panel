@@ -1,13 +1,13 @@
 import { supabase } from "@/lib/supabase/query";
-import { IBlogMutate } from "@/types/supabase";
+import { IJob } from "@/types/supabase";
 
 export const list = async(page:number = 1, limit:number = 10) => {
   try {
     const offset = (page-1) * limit;
 
     const { data, count } = await supabase
-    .from("blogs")
-    .select('id, title, descp, image, author(id, name) ', { count: "exact" })
+    .from("jobs")
+    .select('id, title, descp, location ', { count: "exact" })
     .order('id', { ascending: false })
     .range(offset, offset + limit - 1)
 
@@ -18,10 +18,10 @@ export const list = async(page:number = 1, limit:number = 10) => {
   }
 }
 
-export const create = async (values: IBlogMutate) => {
+export const create = async (values: IJob) => {
   try {
     const { error } = await supabase
-    .from('blogs')
+    .from('jobs')
     .insert(values)
 
     if(!error) return { success: true, msgText: "Created!", status: 201 }
@@ -34,22 +34,22 @@ export const create = async (values: IBlogMutate) => {
 export const read = async (id: number) => {
   try {
     const { data } = await supabase
-    .from('blogs')
+    .from('jobs')
     .select()
     .filter('id', 'eq', id)
     .single();
   
     if(!data) return { success: false, msgText: "No record found!", status: 404 }
-    return { success: true , blog: data, status: 200 }
+    return { success: true , job: data, status: 200 }
   } catch (error) {
     throw error
   }
 } 
 
-export const update = async (values: IBlogMutate, id: number) => {
+export const update = async (values: IJob, id: number) => {
   try {
     const { error } = await supabase
-    .from('blogs')
+    .from('jobs')
     .update(values)
     .eq('id', id)
 
@@ -63,7 +63,7 @@ export const update = async (values: IBlogMutate, id: number) => {
 export const remove = async(ids: number[]) => {
   try {
     const { error } = await supabase
-    .from("blogs")
+    .from("jobs")
     .delete()
     .in('id', ids)
 

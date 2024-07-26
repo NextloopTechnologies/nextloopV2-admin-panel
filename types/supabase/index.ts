@@ -362,6 +362,8 @@ export type Enums<
 
 
 
+export type IJob = TablesInsert<'jobs'>
+
 export type ITestimonial = TablesInsert<'testimonials'>
 
 export type IIdea = TablesInsert<'ideas'>
