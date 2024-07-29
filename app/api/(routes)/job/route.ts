@@ -1,4 +1,4 @@
-import { IJob } from "@/types/supabase";
+import { Enums, IJob } from "@/types/supabase";
 import { JobService } from "../..";
 
 export async function GET() {
@@ -18,9 +18,15 @@ export async function POST(req: Request) {
     const payload: IJob = {
       title: formData.get('title') as string, 
       descp: formData.get('descp') as string,
-      location: formData.get('location') as string
+      responsibilities: formData.getAll('responsibilities[]') as string[],
+      qualifications: formData.getAll('qualifications[]') as string[],
+      skills: formData.getAll('skills[]') as string[],
+      location: formData.get("location") as string,
+      job_mode: formData.get("job_mode") as Enums<'enum_job_mode'>,
+      package: formData.get("package") as string,
+      job_type: formData.get("job_type") as Enums<'enum_job_type'>,
     }
-
+    
     const { status, ...data} = await JobService.create(payload);
     if(status!==201) return Response.json({ data }, { status });
     return Response.json({ data }, { status });
@@ -37,7 +43,13 @@ export async function PUT(req: Request) {
     const payload: IJob = {
       title: formData.get('title') as string, 
       descp: formData.get('descp') as string,
-      location: formData.get('location') as string
+      responsibilities: formData.getAll('responsibilities[]') as string[],
+      qualifications: formData.getAll('qualifications[]') as string[],
+      skills: formData.getAll('skills[]') as string[],
+      location: formData.get("location") as string,
+      job_mode: formData.get("job_mode") as Enums<'enum_job_mode'>,
+      package: formData.get("package") as string,
+      job_type: formData.get("job_type") as Enums<'enum_job_type'>,
     }
     
     const { status, ...data} = await JobService.update(payload, id);

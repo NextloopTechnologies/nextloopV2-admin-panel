@@ -24,7 +24,7 @@ export const create = async (values: IJob) => {
     .from('jobs')
     .insert(values)
 
-    if(!error) return { success: true, msgText: "Created!", status: 201 }
+    if(!error) return { success: true, msgText: "Created!", status: 201 }    
     return { success: false, msgText: "Failed to create!", status: 500 }
   } catch (error) {
     throw error
