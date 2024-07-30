@@ -42,7 +42,7 @@ const Navbar: React.FC = () => {
     {
       key: '2',
       label: (
-        <Link href="/job/appliedjob">
+        <Link href="/job/applied_job">
           Applied Jobs
         </Link>
       ),

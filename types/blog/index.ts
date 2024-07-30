@@ -6,6 +6,6 @@ export interface IBlog {
     title: string|null;
     descp: string|null;
     image?: IFileUpload[];
-    author:IAuthor;
+    author?:IAuthor;
     active?: boolean;
 }

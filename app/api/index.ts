@@ -5,6 +5,7 @@ import * as IdeaService from './services/idea';
 import * as BlogService from './services/blog';
 import * as AuthorService from './services/author';
 import * as JobService from './services/job';
+import * as AppliedJobService from './services/applied_job';
 
 export {
   UploadFileService,
@@ -13,5 +14,6 @@ export {
   IdeaService,
   BlogService,
   AuthorService,
-  JobService
+  JobService,
+  AppliedJobService
 }

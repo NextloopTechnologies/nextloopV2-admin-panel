@@ -20,7 +20,8 @@ export type Database = {
           job_id: number | null
           linkedin_url: string | null
           phone: number
-          resume: string
+          resumeId: string | null
+          resumeUrl: string
         }
         Insert: {
           cover_letter?: string | null
@@ -32,7 +33,8 @@ export type Database = {
           job_id?: number | null
           linkedin_url?: string | null
           phone: number
-          resume: string
+          resumeId?: string | null
+          resumeUrl: string
         }
         Update: {
           cover_letter?: string | null
@@ -44,7 +46,8 @@ export type Database = {
           job_id?: number | null
           linkedin_url?: string | null
           phone?: number
-          resume?: string
+          resumeId?: string | null
+          resumeUrl?: string
         }
         Relationships: [
           {
@@ -360,9 +363,10 @@ export type Enums<
 
 
 
-
-
+    
 export type IJob = TablesInsert<'jobs'>
+
+export type IAppliedJob = TablesUpdate<'applied_jobs'> & IJob 
 
 export type ITestimonial = TablesInsert<'testimonials'>
 
