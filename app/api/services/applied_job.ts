@@ -7,7 +7,7 @@ export const list = async(page:number = 1, limit:number = 10) => {
 
     const { data, count } = await supabase
     .from("applied_jobs")
-    .select('id, fullname, email, phone, linkedin_url, github_url, cover_letter, job_id, resumeUrl, resumeId, jobs(title) ', { count: "exact" })
+    .select('id, fullname, email, phone, linkedin_url, github_url, cover_letter, job_id, resume_url, resume_id, jobs(title) ', { count: "exact" })
     .order('id', { ascending: false })
     .range(offset, offset + limit - 1)
 
@@ -20,24 +20,24 @@ export const list = async(page:number = 1, limit:number = 10) => {
   }
 }
 
-export const create = async (values: IAppliedJob) => {
-  // try {
-  //   const { error } = await supabase
-  //   .from('applied_jobs')
-  //   .insert(values)
+export const create = async (values: any) => {
+  try {
+    const { error } = await supabase
+    .from('applied_jobs')
+    .insert(values)
 
-  //   if(!error) return { success: true, msgText: "Created!", status: 201 }    
-  //   return { success: false, msgText: "Failed to create!", status: 500 }
-  // } catch (error) {
-  //   throw error
-  // }
+    if(!error) return { success: true, msgText: "Created!", status: 201 }    
+    return { success: false, msgText: "Failed to create!", status: 500 }
+  } catch (error) {
+    throw error
+  }
 }
 
 export const read = async (id: number) => {
   try {
     const { data } = await supabase
     .from('applied_jobs')
-    .select('id, fullname, email, phone, linkedin_url, github_url, cover_letter, job_id, resumeUrl, resumeId, jobs(title) ')
+    .select('id, fullname, email, phone, linkedin_url, github_url, cover_letter, job_id, resume_url, resume_id, jobs(title) ')
     .filter('id', 'eq', id)
     .single();
 

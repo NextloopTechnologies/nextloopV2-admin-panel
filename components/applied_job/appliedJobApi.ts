@@ -6,7 +6,7 @@ export const list = async() => {
     const { data } = await response.json();
     return data;
   } catch (error) {
-    console.log('BLOG_LIST_API:', error);
+    console.log('APPLIEDJOB_LIST_API:', error);
   }
 }
 
@@ -19,7 +19,7 @@ export const create = async(payload: FormData) => {
     const { data } = await response.json();
     return data;
   } catch (error) {
-    console.log('BLOG_CREATE_API:', error);
+    console.log('APPLIEDJOB_CREATE_API:', error);
   }
 }
 
@@ -31,7 +31,7 @@ export const read = async(id: number) => {
     const { data } = await response.json();
     return data;
   } catch (error) {
-    console.log('BLOG_READ_API:', error);
+    console.log('APPLIEDJOB_READ_API:', error);
   }
 }
 
@@ -44,7 +44,7 @@ export const update = async(payload: FormData) => {
     const { data } = await response.json();
     return data;
   } catch (error) {
-    console.log('BLOG_UPDATE_API:', error);
+    console.log('APPLIEDJOB_UPDATE_API:', error);
   }
 }
 
@@ -57,6 +57,6 @@ export const remove = async(ids: number[]) => {
     const { data } = await response.json();
     return data;
   } catch (error) {
-    console.log('BLOG_DELETE_API:', error);
+    console.log('APPLIEDJOB_DELETE_API:', error);
   }
 }

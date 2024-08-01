@@ -19,9 +19,9 @@ export type Database = {
           id: number
           job_id: number | null
           linkedin_url: string | null
-          phone: number
-          resumeId: string | null
-          resumeUrl: string
+          phone: string
+          resume_id: string | null
+          resume_url: string
         }
         Insert: {
           cover_letter?: string | null
@@ -32,9 +32,9 @@ export type Database = {
           id?: number
           job_id?: number | null
           linkedin_url?: string | null
-          phone: number
-          resumeId?: string | null
-          resumeUrl: string
+          phone: string
+          resume_id?: string | null
+          resume_url: string
         }
         Update: {
           cover_letter?: string | null
@@ -45,9 +45,9 @@ export type Database = {
           id?: number
           job_id?: number | null
           linkedin_url?: string | null
-          phone?: number
-          resumeId?: string | null
-          resumeUrl?: string
+          phone?: string
+          resume_id?: string | null
+          resume_url?: string
         }
         Relationships: [
           {

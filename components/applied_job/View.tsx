@@ -22,15 +22,17 @@ const View: React.FC<ViewProps> = ({
             >
                 <Descriptions.Item label="Fullname">{data?.fullname}</Descriptions.Item>
                 <Descriptions.Item label="Job Title">
-                    <Link href={`/job/view/${data?.job_id}`} className="text-blue-400" >
-                        {data?.title}
-                    </Link>
+                    {data?.job_id ? (
+                        <Link href={`/job/view/${data?.job_id}`} className="text-blue-400" >
+                            {data?.title || "NA"}
+                        </Link>
+                    ) : "NA"}
                 </Descriptions.Item>
                 <Descriptions.Item label="Email">{data?.email}</Descriptions.Item>
                 <Descriptions.Item label="Phone">{data?.phone}</Descriptions.Item>
                 <Descriptions.Item label="Resume">
-                    <a href={data?.resumeUrl} download={`${data?.fullname}.pdf`} target="_blank" className="text-blue-400" rel="noopener noreferrer">
-                        {data?.resumeUrl}
+                    <a href={data?.resume_url} download={`${data?.fullname}.pdf`} target="_blank" className="text-blue-400" rel="noopener noreferrer">
+                        {data?.resume_url}
                     </a>
                 </Descriptions.Item>
                 <Descriptions.Item label="CoverLetter">{data?.cover_letter || "NA"}</Descriptions.Item>
@@ -39,18 +41,14 @@ const View: React.FC<ViewProps> = ({
                         <a href={data?.github_url} target="_blank" className="text-blue-400" rel="noopener noreferrer">
                             {data?.github_url}
                         </a>
-                    ) : (
-                        <p>NA</p>
-                    )}
+                    ) : "NA"}
                 </Descriptions.Item>
                 <Descriptions.Item label="LinkedIn">
                     {data?.linkedin_url ? (
                         <a href={data?.linkedin_url} target="_blank" className="text-blue-400" rel="noopener noreferrer">
                             {data?.linkedin_url}
                         </a>
-                    ) : (
-                        <p>NA</p>
-                    )}
+                    ) : "NA"}
                 </Descriptions.Item>
 
             </Descriptions>
