@@ -3,8 +3,6 @@
 import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { SearchBox } from '../crud';
-import Image from 'next/image';
-import Edit from "../../public/images/icons/edit.png";
 import Link from 'next/link';
 import { appliedJobApi } from '.';
 import { withAuth } from '../auth';
@@ -91,23 +89,7 @@ const List: React.FC = () => {
       title: "Phone",
       dataIndex: "phone",
       key: "phone",
-    },
-    {
-      title: "Action",
-      key: "action",
-      render: (record) => (
-        <div className='flex'>
-          <Link href={`/job/applied_job/edit/${record.id}`}>
-            <Image  
-              src={Edit}
-              alt='edit' 
-              height='20'
-              className='mr-2 cursor-pointer'
-            />
-          </Link>
-      </div>
-      )
-    },
+    }
   ];
 
   const dataSource: IAppliedJob[] = appliedJobData.map((applied_job: IAppliedJob) => ({
@@ -135,7 +117,7 @@ const List: React.FC = () => {
         const { success, msgText } = await appliedJobApi.remove(selectedRowKeys as number[]);
         if(!success) return message.error("Failed to Delete!");
 
-        const deleteBucketImages = appliedJobData.filter(applied_job => selectedRowKeys.includes(applied_job.id as React.Key)).map(item => item.resumeId!)     
+        const deleteBucketImages = appliedJobData.filter(applied_job => selectedRowKeys.includes(applied_job.id as React.Key)).map(item => item.resume_id!)            
         if(deleteBucketImages.length) UploadFileService.deleteFiles(deleteBucketImages)
         
         const updatedAppliedJobData = appliedJobData.filter(applied_job => !selectedRowKeys.includes(applied_job.id as React.Key))
@@ -152,12 +134,6 @@ const List: React.FC = () => {
     <div className='content-container'>
       <h1 className='font-bold text-3xl'>All Applied Jobs</h1>
       <div className='flex justify-between mt-5'>
-        <Link href={"/job/applied_job/create"}>
-          <Button type="primary" size='large'>
-            Add
-          </Button>
-        </Link>
-
         {selectedRowKeys.length >= 1 && (
           <Popconfirm
             title={`Do you really wanted to delete ${selectedRowKeys.length} items`}

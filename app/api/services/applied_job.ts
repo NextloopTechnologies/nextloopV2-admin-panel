@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabase/query";
-import { IAppliedJob } from "@/types/supabase";
 
 export const list = async(page:number = 1, limit:number = 10) => {
   try {
@@ -20,19 +19,6 @@ export const list = async(page:number = 1, limit:number = 10) => {
   }
 }
 
-export const create = async (values: any) => {
-  try {
-    const { error } = await supabase
-    .from('applied_jobs')
-    .insert(values)
-
-    if(!error) return { success: true, msgText: "Created!", status: 201 }    
-    return { success: false, msgText: "Failed to create!", status: 500 }
-  } catch (error) {
-    throw error
-  }
-}
-
 export const read = async (id: number) => {
   try {
     const { data } = await supabase
@@ -49,20 +35,6 @@ export const read = async (id: number) => {
     throw error
   }
 } 
-
-export const update = async (values: IAppliedJob, id: number) => {
-  try {
-    const { error } = await supabase
-    .from('applied_jobs')
-    .update(values)
-    .eq('id', id)
-
-    if(!error) return { success: true, msgText: "Updated!", status: 200 }
-    return { success: false, msgText: "Failed to create!", status: 500 }
-  } catch (error) {
-    throw error
-  }
-}
 
 export const remove = async(ids: number[]) => {
   try {
