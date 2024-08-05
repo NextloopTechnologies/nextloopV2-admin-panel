@@ -29,7 +29,7 @@ const JobForm: React.FC<JobFormProps> = ({
     descp: job?.descp || '',
     responsibilities: job?.responsibilities?.join(',') || '',
     qualifications: job?.qualifications?.join(',') || '',
-    skills: job?.skills?.join(',') || [],
+    skills: job?.skills?.join(',') || '',
     location: job?.location || '',
     job_mode: job?.job_mode || JobModeOptions[0] as Enums<'enum_job_mode'>,
     package: job?.package,

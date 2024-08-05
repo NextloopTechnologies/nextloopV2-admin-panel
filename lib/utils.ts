@@ -22,8 +22,3 @@ export function trimText(text: string, limit: number): string {
   const trimmed = words.slice(0, limit).join(" ");
   return trimmed + (words.length > limit ? "..." : "");
 }
-
-export const formatErrorData = (error: ZodIssue[]) => {
-  const errorList = error.map((e) => ({ path: e.path[0], message: e.message }))
-  return errorList
-}
