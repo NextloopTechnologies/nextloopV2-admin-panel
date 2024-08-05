@@ -7,10 +7,10 @@ export const list = async(page:number = 1, limit:number = 10) => {
 
     const { data, count } = await supabase
     .from("jobs")
-    .select('id, title, descp, location ', { count: "exact" })
+    .select('id, title, descp, location, visibility ', { count: "exact" })
     .order('id', { ascending: false })
     .range(offset, offset + limit - 1)
-
+    
     if(data) return { success: true , data, count, status: 200 }
     return { success: false, msgText: "No records found!",  status: 404 }
   } catch(error) {
@@ -52,9 +52,9 @@ export const update = async (values: IJob, id: number) => {
     .from('jobs')
     .update(values)
     .eq('id', id)
-
+    
     if(!error) return { success: true, msgText: "Updated!", status: 200 }
-    return { success: false, msgText: "Failed to create!", status: 500 }
+    return { success: false, msgText: "Failed to update!", status: 500 }
   } catch (error) {
     throw error
   }

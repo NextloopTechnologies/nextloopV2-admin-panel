@@ -144,6 +144,7 @@ export type Database = {
       }
       jobs: {
         Row: {
+          visibility: boolean
           created_at: string
           descp: string | null
           id: number
@@ -158,6 +159,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          visibility?: boolean
           created_at?: string
           descp?: string | null
           id?: number
@@ -172,6 +174,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          visibility?: boolean
           created_at?: string
           descp?: string | null
           id?: number
