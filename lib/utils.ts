@@ -1,5 +1,6 @@
 import ImageKit from 'imagekit';
 import config from '../config';
+import { ZodIssue } from 'zod';
 
 export const textFieldValidator = (_: unknown, value: string) => {
   if (value && value.length < 3) {

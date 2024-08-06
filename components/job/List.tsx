@@ -1,24 +1,22 @@
 "use client"
 
-import { IBlog } from '@/types/blog';
-import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message } from 'antd';
+import { Button, Popconfirm, PopconfirmProps, Switch, Table, TableProps, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { SearchBox } from '../crud';
 import Image from 'next/image';
 import Edit from "../../public/images/icons/edit.png";
 import Link from 'next/link';
-import { blogApi } from '.';
-
-import { UploadFileService } from '@/app/api';
-import parse from "html-react-parser"
+import { jobApi } from '.';
 import { trimText } from '@/lib/utils';
+import { IJob } from '@/types/supabase';
 import { withAuth } from '../auth';
+import { JobService } from '@/app/api';
 
 const List: React.FC = () => {
 
-  const [blogData, setBlogData] = useState<IBlog[]>([]);
+  const [jobData, setJobData] = useState<IJob[]>([]);
   const [searchedText, setSearchedText] = useState<string>("");
-  const [isError, setIsError] = useState<string|null>("");
+  const [isError, setIsError] = useState<string | null>("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [count, setCount] = useState<number>(0);
@@ -27,18 +25,18 @@ const List: React.FC = () => {
 
   const fetchData = async () => {
     setIsLoading(true);
-    const { success, data, count }  = await blogApi.list();
+    const { success, data, count } = await jobApi.list();
     if (success) {
-      setCount(count);      
-      setBlogData(data);
-    } 
+      setCount(count);
+      setJobData(data);
+    }
     else setIsError("An error occured while fetching data.")
     setIsLoading(false)
   };
-  
+
   useEffect(() => {
     fetchData();
-  },[pageNo]);
+  }, [pageNo]);
 
   if (isError) {
     return (
@@ -48,27 +46,12 @@ const List: React.FC = () => {
     )
   }
 
-  const columns: TableProps<IBlog>['columns'] = [
+  const columns: TableProps<IJob>['columns'] = [
     {
       title: "Sr No.",
       dataIndex: "id",
       key: "id",
       render: (id, record, index) => ++index
-    },
-    {
-      title: "Author",
-      dataIndex: "author",
-      key: "author",
-      filteredValue: [searchedText],
-      onFilter: (value, record) => {        
-        return String(record.author?.name?.toLowerCase())
-            .includes(String(value).toLowerCase())
-      },
-      render: ({ id, name }) => (
-        <Link href={`/blog/author/view/${id}`} className='text-blue-500'> 
-          { name } 
-        </Link>
-      )
     },
     {
       title: "Title",
@@ -77,11 +60,11 @@ const List: React.FC = () => {
       filteredValue: [searchedText],
       onFilter: (value, record) => {
         return String(record.title?.toLowerCase())
-            .includes(String(value).toLowerCase())
+          .includes(String(value).toLowerCase())
       },
       render: (title, record) => (
-        <Link href={`/blog/view/${record.id}`} className='text-blue-500'> 
-          { title } 
+        <Link href={`/job/view/${record.id}`} className='text-blue-500'>
+          {title}
         </Link>
       )
     },
@@ -89,55 +72,72 @@ const List: React.FC = () => {
       title: "Description",
       dataIndex: "descp",
       key: "descp",
-      render: (descp) => parse(trimText(descp, 20))
+      render: (descp) => trimText(descp, 20)
     },
     {
-      title: "Image",
-      dataIndex: "image",
-      key: "image",
-      render: (image) => {
-        const imageSrc: string = image?.[0]?.url;
-        return (
-          imageSrc ? (
-            <Image 
-              src={imageSrc}
-              alt='blog-image'
-              height={100}
-              width={100} 
-            />
-          ) : (
-            <p> No image! </p>
-          )
-        );
-      }
+      title: "Location",
+      dataIndex: "location",
+      key: "location"
+    },
+    {
+      title: "Visibility",
+      dataIndex: "visibility",
+      key: "visibility",
+      render: (visibility, record) => (
+        <Switch
+          checked={visibility}
+          onChange={async (checked: boolean) => {
+            setIsLoading(true)
+            try {
+              const { success, msgText } = await JobService.update({ visibility: checked }, record.id as number)
+              if (!success) return message.error(msgText)
+              const updatedJobData = jobData.map((job) => {
+                if (job.id === record.id) {
+                  return {
+                    ...job,
+                    visibility: checked
+                  }
+                }
+                return job
+              })
+              setJobData(updatedJobData)
+              message.success(msgText)
+            } catch (error) {
+              message.error("Semething went wrong!")
+            }
+            setIsLoading(false)
+          }}
+          loading={isLoading}
+        />
+      )
     },
     {
       title: "Action",
       key: "action",
       render: (record) => (
         <div className='flex'>
-          <Link href={`/blog/edit/${record.id}`}>
-            <Image  
+          <Link href={`/job/edit/${record.id}`}>
+            <Image
               src={Edit}
-              alt='edit' 
+              alt='edit'
               height='20'
               className='mr-2 cursor-pointer'
             />
           </Link>
-      </div>
+        </div>
       )
     },
   ];
 
-  const dataSource: IBlog[] = blogData.map((blog: IBlog) => ({
-    key: blog.id,
-    id: blog.id,
-    title: blog.title,
-    descp: blog.descp,
-    image: blog.image,
-    author: blog.author
+  const dataSource: IJob[] = jobData.map((job: IJob) => ({
+    key: job.id,
+    id: job.id,
+    title: job.title,
+    descp: job.descp,
+    visibility: job.visibility,
+    location: job.location
   }));
-  
+
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     setSelectedRowKeys(newSelectedRowKeys);
   };
@@ -146,18 +146,15 @@ const List: React.FC = () => {
     selectedRowKeys,
     onChange: onSelectChange,
   };
-  
+
   const deleteAll: PopconfirmProps['onConfirm'] = async () => {
     if (selectedRowKeys) {
       try {
-        const { success, msgText } = await blogApi.remove(selectedRowKeys as number[]);
-        if(!success) return message.error("Failed to Delete!");
+        const { success, msgText } = await jobApi.remove(selectedRowKeys as number[]);
+        if (!success) return message.error("Failed to Delete!");
 
-        const deleteBucketImages = blogData.filter(blog => selectedRowKeys.includes(blog.id as React.Key)).flatMap(item => item?.image?.map(item => item.fileId) || [])
-        if(deleteBucketImages.length) UploadFileService.deleteFiles(deleteBucketImages)
-        
-        const updatedBlogData = blogData.filter(blog => !selectedRowKeys.includes(blog.id as React.Key))
-        setBlogData(updatedBlogData)
+        const updatedJobData = jobData.filter(job => !selectedRowKeys.includes(job.id as React.Key))
+        setJobData(updatedJobData)
         setSelectedRowKeys([]);
         message.success(msgText);
       } catch (error) {
@@ -168,9 +165,9 @@ const List: React.FC = () => {
 
   return (
     <div className='content-container'>
-      <h1 className='font-bold text-3xl'>All Blogs</h1>
+      <h1 className='font-bold text-3xl'>All Jobs</h1>
       <div className='flex justify-between mt-5'>
-        <Link href={"/blog/create"}>
+        <Link href={"/job/create"}>
           <Button type="primary" size='large'>
             Add
           </Button>
@@ -178,7 +175,7 @@ const List: React.FC = () => {
 
         {selectedRowKeys.length >= 1 && (
           <Popconfirm
-            title={`Do you really wanted to delete ${selectedRowKeys.length} items`}
+            title={`Do you really wanted to delete ${selectedRowKeys.length} items?`}
             onConfirm={deleteAll}
           >
             <Button danger type="primary" size='large'>
@@ -189,7 +186,7 @@ const List: React.FC = () => {
         <SearchBox onSearchText={(value: string) => setSearchedText(value)} />
       </div>
 
-      <Table 
+      <Table
         className='mt-2'
         rowSelection={rowSelection}
         columns={columns}
