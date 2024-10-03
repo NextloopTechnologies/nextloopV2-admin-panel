@@ -98,6 +98,11 @@ const Navbar: React.FC = () => {
           </Link>
         </li>
         <li>
+          <Link href="/enquiry"
+            className=" py-2 px-3 hover:bg-gray-100 hover:rounded-md">Enquiry
+          </Link>
+        </li>
+        <li>
           <Link href="/testimonial"
             className=" py-2 px-3 hover:bg-gray-100 hover:rounded-md">Testimonial
           </Link>
