@@ -121,6 +121,33 @@ export type Database = {
           },
         ]
       }
+      enquiry: {
+        Row: {
+          contact: string | null
+          created_at: string
+          email: string
+          fullname: string
+          id: number
+          subject: string
+        }
+        Insert: {
+          contact?: string | null
+          created_at?: string
+          email: string
+          fullname: string
+          id?: number
+          subject: string
+        }
+        Update: {
+          contact?: string | null
+          created_at?: string
+          email?: string
+          fullname?: string
+          id?: number
+          subject?: string
+        }
+        Relationships: []
+      }
       ideas: {
         Row: {
           created_at: string
@@ -372,6 +399,8 @@ export type IJob = TablesInsert<'jobs'>
 export type IAppliedJob = TablesUpdate<'applied_jobs'> & IJob 
 
 export type ITestimonial = TablesInsert<'testimonials'>
+
+export type IEnquiry = TablesInsert<'enquiry'>
 
 export type IIdea = TablesInsert<'ideas'>
 
