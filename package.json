@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postbuild": "prisma db pull",
     "start": "next start",
     "lint": "next lint",
     "db:push": "drizzle-kit push:pg",
