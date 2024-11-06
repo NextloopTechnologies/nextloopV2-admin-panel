@@ -6,7 +6,7 @@ export const list = async(page:number = 1, limit:number = 10) => {
 
     const { data, count } = await supabase
     .from("applied_jobs")
-    .select('id, fullname, email, phone, linkedin_url, github_url, cover_letter, job_id, resume_url, resume_id, jobs(title) ', { count: "exact" })
+    .select('id, fullname, email, phone, linkedin_url, github_url, cover_letter, job_id, resume_url, resume_id, created_at, jobs(title) ', { count: "exact" })
     .order('id', { ascending: false })
     .range(offset, offset + limit - 1)
 

@@ -24,6 +24,7 @@ const View: React.FC<ViewProps> = ({
                 <Descriptions.Item label="Email">{data.email}</Descriptions.Item>
                 <Descriptions.Item label="Subject">{data.subject}</Descriptions.Item>
                 <Descriptions.Item label="Contact">{data.contact || "NA"}</Descriptions.Item>
+                <Descriptions.Item label="Message">{data.message || "NA"}</Descriptions.Item>
             </Descriptions>
         </div>
     )

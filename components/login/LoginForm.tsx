@@ -7,6 +7,7 @@ import { ILogin } from '@/types/login';
 import { AuthContext } from '../auth/AuthContext';
 import { AuthContextProps } from '@/types/auth';
 import config from '@/config';
+import { validateCredentials } from '@/app/api/services/user';
 
 const headingTitle: string = "Log in to Nextloop Admin";
 
@@ -19,9 +20,10 @@ const LoginForm: React.FC = () => {
     if(authUser) router.push('/dashboard');
   },[authUser])
 
-  const handleSubmit = (values: ILogin) => {
+  const handleSubmit = async (values: ILogin) => {
     setIsLoading(true);
-    if(values.username === config.adminUsername && values.password === config.adminPassword) {
+  
+    if(await validateCredentials(values)) {
       login();
       return router.push('/dashboard') 
     }

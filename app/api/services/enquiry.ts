@@ -6,7 +6,7 @@ export const list = async(page:number = 1, limit:number = 10) => {
 
     const { data, count } = await supabase
     .from("enquiry")
-    .select('id, fullname, email, contact, subject ', { count: "exact" })
+    .select('id, fullname, email, contact, subject, message, created_at ', { count: "exact" })
     .order('id', { ascending: false })
     .range(offset, offset + limit - 1)
 
@@ -26,7 +26,7 @@ export const read = async (id: number) => {
     .single();
   
     if(!data) return { success: false, msgText: "No record found!", status: 404 }
-    return { success: true , blog: data, status: 200 }
+    return { success: true , enquiry: data, status: 200 }
   } catch (error) {
     throw error
   }

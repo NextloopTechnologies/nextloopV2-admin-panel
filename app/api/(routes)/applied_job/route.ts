@@ -1,8 +1,10 @@
+import { NextRequest } from "next/server";
 import { AppliedJobService } from "../..";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const { status, ...data }  = await AppliedJobService.list();
+    const pageNo = Number(req.nextUrl.searchParams.get('page'))    
+    const { status, ...data }  = await AppliedJobService.list(pageNo);
     if(status!==200) return Response.json({ data }, { status })
     return Response.json({ data }, { status })  
   } catch (error) {

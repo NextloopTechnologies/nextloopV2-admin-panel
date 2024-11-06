@@ -1,12 +1,13 @@
 "use client"
 
 import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { SearchBox } from '../crud';
 import Link from 'next/link';
 import { enquiryApi } from '.';
 import { withAuth } from '../auth';
 import { IEnquiry } from '@/types/supabase';
+import { formattedDate, trimText } from '@/lib/utils';
 
 const List: React.FC = () => {
 
@@ -19,16 +20,20 @@ const List: React.FC = () => {
   const [pageNo, setPageNo] = useState<number>(1);
   const pageSize: number = 10;
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {    
     setIsLoading(true);
-    const { success, data, count }  = await enquiryApi.list();
-    if (success) {
-      setCount(count);
-      setEnquiryData(data);
-    } 
-    else setIsError("An error occured while fetching data.")
-    setIsLoading(false)
-  };
+    try {
+      const { success, data, count }  = await enquiryApi.list(pageNo);
+      if (success) {
+        setCount(count);
+        setEnquiryData(data);
+      } 
+    } catch (error) {
+      setIsError("An error occured while fetching data.")
+    } finally {
+      setIsLoading(false)
+    }   
+  }, [pageNo]);
   
   useEffect(() => {
     fetchData();
@@ -59,7 +64,7 @@ const List: React.FC = () => {
             .includes(String(value).toLowerCase())
       },
       render: (fullname, record) => (
-        <Link href={`/idea/view/${record.id}`} className='text-blue-500'> 
+        <Link href={`/enquiry/view/${record.id}`} className='text-blue-500'> 
           { fullname } 
         </Link>
       )
@@ -78,6 +83,17 @@ const List: React.FC = () => {
       title: "Subject",
       dataIndex: "subject",
       key: "subject"
+    },
+    {
+      title: "Message",
+      dataIndex: "message",
+      key: "message",
+      render: (message) => trimText(message, 20)
+    },
+    {
+      title: "Enquired On",
+      dataIndex: "created_at",
+      key: "created_at",
     }
   ];
 
@@ -88,6 +104,8 @@ const List: React.FC = () => {
     email: enquiry.email,
     contact: enquiry.contact || "NA",
     subject: enquiry.subject,
+    message: enquiry.message,
+    created_at: formattedDate(enquiry.created_at!)
   }));
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {

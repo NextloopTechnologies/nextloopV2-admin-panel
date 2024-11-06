@@ -129,6 +129,7 @@ export type Database = {
           fullname: string
           id: number
           subject: string
+          message: string
         }
         Insert: {
           contact?: string | null
@@ -137,6 +138,7 @@ export type Database = {
           fullname: string
           id?: number
           subject: string
+          message: string
         }
         Update: {
           contact?: string | null
@@ -145,6 +147,7 @@ export type Database = {
           fullname?: string
           id?: number
           subject?: string
+          message?: string
         }
         Relationships: []
       }
