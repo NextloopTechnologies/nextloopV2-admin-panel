@@ -6,7 +6,7 @@ export const list = async(page:number = 1, limit:number = 10) => {
 
     const { data, count } = await supabase
     .from("enquiry")
-    .select('id, fullname, email, contact, subject, message ', { count: "exact" })
+    .select('id, fullname, email, contact, subject, message, created_at ', { count: "exact" })
     .order('id', { ascending: false })
     .range(offset, offset + limit - 1)
 

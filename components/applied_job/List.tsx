@@ -1,13 +1,14 @@
 "use client"
 
 import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { SearchBox } from '../crud';
 import Link from 'next/link';
 import { appliedJobApi } from '.';
 import { withAuth } from '../auth';
 import { IAppliedJob } from '@/types/supabase';
 import { UploadFileService } from '@/app/api';
+import { formattedDate } from '@/lib/utils';
 
 const List: React.FC = () => {
 
@@ -20,16 +21,16 @@ const List: React.FC = () => {
   const [pageNo, setPageNo] = useState<number>(1);
   const pageSize: number = 10;
 
-  const fetchData = async () => {
+  const fetchData =  useCallback(async () => {
     setIsLoading(true);
-    const { success, data, count }  = await appliedJobApi.list();
+    const { success, data, count }  = await appliedJobApi.list(pageNo);
     if (success) {
       setCount(count);      
       setAppliedJobData(data);
     } 
     else setIsError("An error occured while fetching data.")
     setIsLoading(false)
-  };
+  }, [pageNo]);
   
   useEffect(() => {
     fetchData();
@@ -89,6 +90,11 @@ const List: React.FC = () => {
       title: "Phone",
       dataIndex: "phone",
       key: "phone",
+    },
+    {
+      title: "Applied On",
+      dataIndex: "created_at",
+      key: "created_at",
     }
   ];
 
@@ -100,6 +106,7 @@ const List: React.FC = () => {
     fullname: applied_job.fullname,
     email: applied_job.email,
     phone: applied_job.phone,
+    created_at: formattedDate(applied_job.created_at!)
   }));
   
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {

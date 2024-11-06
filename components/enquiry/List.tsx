@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { enquiryApi } from '.';
 import { withAuth } from '../auth';
 import { IEnquiry } from '@/types/supabase';
-import { trimText } from '@/lib/utils';
+import { formattedDate, trimText } from '@/lib/utils';
 
 const List: React.FC = () => {
 
@@ -89,6 +89,11 @@ const List: React.FC = () => {
       dataIndex: "message",
       key: "message",
       render: (message) => trimText(message, 20)
+    },
+    {
+      title: "Enquired On",
+      dataIndex: "created_at",
+      key: "created_at",
     }
   ];
 
@@ -100,6 +105,7 @@ const List: React.FC = () => {
     contact: enquiry.contact || "NA",
     subject: enquiry.subject,
     message: enquiry.message,
+    created_at: formattedDate(enquiry.created_at!)
   }));
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
