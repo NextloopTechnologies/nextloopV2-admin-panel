@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { ILogin } from '@/types/login';
 import { AuthContext } from '../auth/AuthContext';
 import { AuthContextProps } from '@/types/auth';
-import config from '@/config';
 import { validateCredentials } from '@/app/api/services/user';
 
 const headingTitle: string = "Log in to Nextloop Admin";
@@ -18,11 +17,10 @@ const LoginForm: React.FC = () => {
   
   useLayoutEffect(() => { 
     if(authUser) router.push('/dashboard');
-  },[authUser])
+  },[authUser]) 
 
   const handleSubmit = async (values: ILogin) => {
-    setIsLoading(true);
-  
+    setIsLoading(true);    
     if(await validateCredentials(values)) {
       login();
       return router.push('/dashboard') 

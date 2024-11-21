@@ -107,6 +107,11 @@ const Navbar: React.FC = () => {
             className=" py-2 px-3 hover:bg-gray-100 hover:rounded-md">Testimonial
           </Link>
         </li>
+        <li>
+          <Link href="/user"
+            className=" py-2 px-3 hover:bg-gray-100 hover:rounded-md">User
+          </Link>
+        </li>
        
       </ul>
 

@@ -4,14 +4,13 @@ import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message } from 
 import React, { useCallback, useEffect, useState } from 'react';
 import { SearchBox } from '../crud';
 import Link from 'next/link';
-import { enquiryApi } from '.';
+import { IUser } from '@/types/supabase';
 import { withAuth } from '../auth';
-import { IEnquiry } from '@/types/supabase';
-import { formattedDate, trimText } from '@/lib/utils';
+import { list, remove } from '@/app/api/services/user';
 
 const List: React.FC = () => {
 
-  const [enquiryData, setEnquiryData] = useState<IEnquiry[]>([]);
+  const [userData, setUserData] = useState<IUser[]>([]);
   const [searchedText, setSearchedText] = useState<string>("");
   const [isError, setIsError] = useState<string|null>("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
@@ -20,22 +19,22 @@ const List: React.FC = () => {
   const [pageNo, setPageNo] = useState<number>(1);
   const pageSize: number = 10;
 
-  const fetchData = useCallback(async () => {    
-    setIsLoading(true);
+  const fetchData =  useCallback(async () => { 
     try {
-      const { success, data, count }  = await enquiryApi.list(pageNo, pageSize);
-      if (success) {
-        setCount(count);
-        setEnquiryData(data);
+      setIsLoading(true);
+      const { data, count }  = await list(pageNo, pageSize);
+      if (data?.length || data != null ) {
+        setCount(count || 0);
+        setUserData(data);
       } 
     } catch (error) {
       setIsError("An error occured while fetching data.")
     } finally {
       setIsLoading(false)
-    }   
+    }
   }, [pageNo]);
   
-  useEffect(() => {
+  useEffect(() => {    
     fetchData();
   },[pageNo]);
 
@@ -47,7 +46,7 @@ const List: React.FC = () => {
     )
   }
 
-  const columns: TableProps<IEnquiry>['columns'] = [
+  const columns: TableProps<IUser>['columns'] = [
     {
       title: "Sr No.",
       dataIndex: "id",
@@ -55,57 +54,27 @@ const List: React.FC = () => {
       render: (id, record, index) => ++index
     },
     {
-      title: "Fullname",
-      dataIndex: "fullname",
-      key: "fullname",
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
       filteredValue: [searchedText],
       onFilter: (value, record) => {
-        return String(record.fullname?.toLowerCase())
+        return String(record.name?.toLowerCase())
             .includes(String(value).toLowerCase())
-      },
-      render: (fullname, record) => (
-        <Link href={`/enquiry/view/${record.id}`} className='text-blue-500'> 
-          { fullname } 
-        </Link>
-      )
+      }
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email"
-    },
-    {
-      title: "Contact",
-      dataIndex: "contact",
-      key: "contact"
-    },
-    {
-      title: "Subject",
-      dataIndex: "subject",
-      key: "subject"
-    },
-    {
-      title: "Message",
-      dataIndex: "message",
-      key: "message",
-      render: (message) => trimText(message, 20)
-    },
-    {
-      title: "Enquired On",
-      dataIndex: "created_at",
-      key: "created_at",
     }
   ];
 
-  const dataSource: IEnquiry[] = enquiryData.map((enquiry: IEnquiry) => ({
-    key: enquiry.id,
-    id: enquiry.id,
-    fullname: enquiry.fullname,
-    email: enquiry.email,
-    contact: enquiry.contact || "NA",
-    subject: enquiry.subject,
-    message: enquiry.message,
-    created_at: formattedDate(enquiry.created_at!)
+  const dataSource: IUser[] = userData.map((user: IUser) => ({
+    key: user.id,
+    id: user.id,
+    name: user.name,
+    email: user.email
   }));
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -120,13 +89,13 @@ const List: React.FC = () => {
   const deleteAll: PopconfirmProps['onConfirm'] = async () => {
     if (selectedRowKeys) {
       try {
-        const { success, msgText } = await enquiryApi.remove(selectedRowKeys as number[]);
-        if(!success) return message.error("Failed to Delete!");
+        const status = await remove(selectedRowKeys as number[]);
+        if(status !== 204) return message.error("Failed to Delete!");
 
-        const updatedIdeaData = enquiryData.filter(idea => !selectedRowKeys.includes(idea.id as React.Key))
-        setEnquiryData(updatedIdeaData)
+        const updatedUserData = userData.filter(user => !selectedRowKeys.includes(user.id as React.Key))
+        setUserData(updatedUserData)
         setSelectedRowKeys([]);
-        message.success(msgText);
+        message.success("Deleted!");
       } catch (error) {
         message.error("Something went wrong!")
       }
@@ -135,8 +104,14 @@ const List: React.FC = () => {
 
   return (
     <div className='content-container'>
-      <h1 className='font-bold text-3xl'>All Enquiries</h1>
+      <h1 className='font-bold text-3xl'>All Users</h1>
       <div className='flex justify-between mt-5'>
+        <Link href={"/user/create"}>
+          <Button type="primary" size='large'>
+            Add
+          </Button>
+        </Link>
+
         {selectedRowKeys.length >= 1 && (
           <Popconfirm
             title={`Do you really wanted to delete ${selectedRowKeys.length} items`}

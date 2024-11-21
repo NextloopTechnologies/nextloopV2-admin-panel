@@ -1,8 +1,8 @@
 import config from "@/config";
 
-export const list = async() => {
+export const list = async(pageNo: number, pageSize: number) => {
   try {
-    const response = await fetch(`${config.apiBaseUrl}/api/job`)
+    const response = await fetch(`${config.apiBaseUrl}/api/job?page=${pageNo}&row=${pageSize}`)
     const { data } = await response.json();
     return data;
   } catch (error) {

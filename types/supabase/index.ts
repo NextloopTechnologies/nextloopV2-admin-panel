@@ -220,6 +220,71 @@ export type Database = {
         }
         Relationships: []
       }
+      offer_applications: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          email: string
+          id: number
+          mobile: string
+          name: string
+          offer_id: number | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          email: string
+          id?: number
+          mobile: string
+          name: string
+          offer_id?: number | null
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          email?: string
+          id?: number
+          mobile?: string
+          name?: string
+          offer_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_applications_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offers: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string
+          id: number
+          "t&c_points": string[] | null
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description: string
+          id?: number
+          "t&c_points"?: string[] | null
+          title: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string
+          id?: number
+          "t&c_points"?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
       portfolio: {
         Row: {
           active: boolean
@@ -271,6 +336,30 @@ export type Database = {
           feedback_by?: string | null
           feedback_descp?: string | null
           id?: number
+        }
+        Relationships: []
+      }
+      user: {
+        Row: {
+          created_at: string
+          email: string
+          id: number
+          name: string
+          password: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: number
+          name: string
+          password: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: number
+          name?: string
+          password?: string
         }
         Relationships: []
       }
@@ -412,3 +501,11 @@ export type IBlogMutate = TablesInsert<'blogs'>
 export type IPortfolioMutate = TablesInsert<'portfolio'>
 
 export type IAuthor = TablesInsert<'author'>
+
+export type IUser = {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export type IUserMutate = TablesInsert<'user'>

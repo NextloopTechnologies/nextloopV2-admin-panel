@@ -2,7 +2,7 @@
 
 import { IBlog } from '@/types/blog';
 import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { SearchBox } from '../crud';
 import Image from 'next/image';
 import Edit from "../../public/images/icons/edit.png";
@@ -25,16 +25,16 @@ const List: React.FC = () => {
   const [pageNo, setPageNo] = useState<number>(1);
   const pageSize: number = 10;
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
-    const { success, data, count }  = await blogApi.list();
+    const { success, data, count }  = await blogApi.list(pageNo, pageSize);
     if (success) {
       setCount(count);      
       setBlogData(data);
     } 
     else setIsError("An error occured while fetching data.")
     setIsLoading(false)
-  };
+  }, [pageNo]);
   
   useEffect(() => {
     fetchData();
