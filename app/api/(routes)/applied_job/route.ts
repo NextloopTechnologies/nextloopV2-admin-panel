@@ -3,8 +3,9 @@ import { AppliedJobService } from "../..";
 
 export async function GET(req: NextRequest) {
   try {
-    const pageNo = Number(req.nextUrl.searchParams.get('page'))    
-    const { status, ...data }  = await AppliedJobService.list(pageNo);
+    const pageNo = Number(req.nextUrl.searchParams.get('page')) 
+    const pageSize = Number(req.nextUrl.searchParams.get('row'))  
+    const { status, ...data }  = await AppliedJobService.list(pageNo, pageSize);
     if(status!==200) return Response.json({ data }, { status })
     return Response.json({ data }, { status })  
   } catch (error) {

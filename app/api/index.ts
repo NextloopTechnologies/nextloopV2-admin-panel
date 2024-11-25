@@ -7,6 +7,7 @@ import * as AuthorService from './services/author';
 import * as JobService from './services/job';
 import * as AppliedJobService from './services/applied_job';
 import * as EnquiryService from './services/enquiry';
+import * as UserService from './services/user';
 
 export {
   UploadFileService,
@@ -17,5 +18,6 @@ export {
   AuthorService,
   JobService,
   AppliedJobService,
-  EnquiryService
+  EnquiryService,
+  UserService
 }

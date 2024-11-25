@@ -38,8 +38,12 @@ const JobForm: React.FC<JobFormProps> = ({
   
   const handleFinish: FormProps<IJob>['onFinish'] = async (values) => {
     setIsLoading(true);
-    const responsibilities = (values.responsibilities! as unknown as string).split(",")
-    const qualifications = (values.qualifications! as unknown as string).split(",")
+    const responsibilities = (values.responsibilities! as unknown as string)
+      .split(".,")
+      .map((s) => s.trim() + ".");
+    const qualifications = (values.qualifications! as unknown as string)
+      .split(".,")
+      .map((s) => s.trim() + ".");
     const skills = (values.skills! as unknown as string).split(",")
     
     const formData = new FormData();
@@ -113,10 +117,10 @@ const JobForm: React.FC<JobFormProps> = ({
             }
           ]}
         >
-          <Input.TextArea placeholder='Ex. We are looking for a passionate React Native Developer to bild...'/>
+          <Input.TextArea placeholder='Ex. We are looking for a passionate React Native Developer...'/>
         </Form.Item>
         <Form.Item<IJob>
-          label="Responsibilities"
+          label="Responsibilities (Comma Separated)"
           name="responsibilities"
           rules={[
             {
@@ -125,10 +129,10 @@ const JobForm: React.FC<JobFormProps> = ({
             }
           ]}
         >
-          <Input.TextArea placeholder='Ex. Managing native app, End-to-End App testing'/>
+          <Input.TextArea placeholder='Ex. Managing native app., End-to-End App testing., Complete Deployment'/>
         </Form.Item>
         <Form.Item<IJob>
-          label="Qualifications"
+          label="Qualifications (Comma Separated)"
           name="qualifications"
           rules={[
             {
@@ -137,10 +141,10 @@ const JobForm: React.FC<JobFormProps> = ({
             }
           ]}
         >
-          <Input.TextArea placeholder='Ex. Bachelors Degree in IT or realted Field, 2 years of experience in app development'/>
+          <Input.TextArea placeholder='Ex. Bachelors Degree in IT or realted Field., 2 years of experience in app development., Working in a paced environment'/>
         </Form.Item>
         <Form.Item<IJob>
-          label="Skills"
+          label="Skills (Comma Separated)"
           name="skills"
           rules={[
             {

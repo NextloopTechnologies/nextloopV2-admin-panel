@@ -1,9 +1,12 @@
 import { IAuthor } from "@/types/supabase";
 import { AuthorService } from "../..";
+import { NextRequest } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const { status, ...data }  = await AuthorService.list();
+    const pageNo = Number(req.nextUrl.searchParams.get('page')) 
+    const pageSize = Number(req.nextUrl.searchParams.get('row')) 
+    const { status, ...data }  = await AuthorService.list(pageNo, pageSize);
     if(status!==200) return Response.json({ data }, { status })
     return Response.json({ data }, { status })  
   } catch (error) {

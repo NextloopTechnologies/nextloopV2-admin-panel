@@ -1,7 +1,7 @@
 "use client"
 
 import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { SearchBox } from '../crud';
 import Link from 'next/link';
 import { ideaApi } from '.';
@@ -20,16 +20,16 @@ const List: React.FC = () => {
   const [pageNo, setPageNo] = useState<number>(1);
   const pageSize: number = 10;
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
-    const { success, data, count }  = await ideaApi.list();
+    const { success, data, count }  = await ideaApi.list(pageNo, pageSize);
     if (success) {
       setCount(count);
       setIdeaData(data);
     } 
     else setIsError("An error occured while fetching data.")
     setIsLoading(false)
-  };
+  }, [pageNo]);
   
   useEffect(() => {
     fetchData();

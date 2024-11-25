@@ -23,7 +23,7 @@ const List: React.FC = () => {
 
   const fetchData =  useCallback(async () => {
     setIsLoading(true);
-    const { success, data, count }  = await appliedJobApi.list(pageNo);
+    const { success, data, count }  = await appliedJobApi.list(pageNo, pageSize);
     if (success) {
       setCount(count);      
       setAppliedJobData(data);
