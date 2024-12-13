@@ -32,7 +32,7 @@ const JobForm: React.FC<JobFormProps> = ({
     skills: job?.skills?.join(',') || '',
     location: job?.location || '',
     job_mode: job?.job_mode || JobModeOptions[0] as Enums<'enum_job_mode'>,
-    package: job?.package,
+    // package: job?.package,
     job_type: job?.job_type || JobTypeOptions[0] as Enums<'enum_job_type'>
   }
   
@@ -60,7 +60,7 @@ const JobForm: React.FC<JobFormProps> = ({
     });
     formData.append("location", values.location!);
     formData.append("job_mode", values.job_mode!);
-    formData.append("package", values.package!);
+    // formData.append("package", values.package!);
     formData.append("job_type", values.job_type!);
 
     if (job) {
@@ -190,7 +190,7 @@ const JobForm: React.FC<JobFormProps> = ({
             ))}
           />
         </Form.Item>
-        <Form.Item<IJob>
+        {/* <Form.Item<IJob>
           label="Package"
           name="package"
           rules={[
@@ -204,7 +204,7 @@ const JobForm: React.FC<JobFormProps> = ({
           ]}
         >
           <Input placeholder='2-3LPA'/>
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item
           wrapperCol={{
             offset: 8,

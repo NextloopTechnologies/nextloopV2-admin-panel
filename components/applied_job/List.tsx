@@ -60,11 +60,14 @@ const List: React.FC = () => {
         return String(record.title?.toLowerCase())
             .includes(String(value).toLowerCase())
       },
-      render: (title, record) => (
-        <Link href={`/job/view/${record.job_id}`} className='text-blue-500'> 
-          { title } 
-        </Link>
-      )
+      render: (title, record) => {        
+        if(!title) return "NA"
+        return (
+          <Link href={`/job/view/${record.id}`} className='text-blue-500'>
+            {title}
+          </Link>
+        )
+      }
     },
     {
       title: "Fullname",
