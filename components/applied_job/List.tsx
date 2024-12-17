@@ -58,6 +58,8 @@ const List: React.FC = () => {
       filteredValue: [searchedText],
       onFilter: (value, record) => {        
         return String(record.title?.toLowerCase())
+            .includes(String(value).toLowerCase()) ||
+            String(record.fullname?.toLowerCase())
             .includes(String(value).toLowerCase())
       },
       render: (title, record) => {        
@@ -73,11 +75,6 @@ const List: React.FC = () => {
       title: "Fullname",
       dataIndex: "fullname",
       key: "fullname",
-      filteredValue: [searchedText],
-      onFilter: (value, record) => {
-        return String(record.fullname?.toLowerCase())
-            .includes(String(value).toLowerCase())
-      },
       render: (fullname, record) => (
         <Link href={`/job/applied_job/view/${record.id}`} className='text-blue-500'> 
           { fullname } 
@@ -95,6 +92,13 @@ const List: React.FC = () => {
       key: "phone",
     },
     {
+      title: "Experience",
+      dataIndex: "experience",
+      key: "experience",
+      // defaultSortOrder: 'descend',
+      // sorter: (a, b) => a.experience! - b.experience!,
+    },
+    {
       title: "Applied On",
       dataIndex: "created_at",
       key: "created_at",
@@ -109,6 +113,7 @@ const List: React.FC = () => {
     fullname: applied_job.fullname,
     email: applied_job.email,
     phone: applied_job.phone,
+    experience: applied_job.experience || "0-1",
     created_at: formattedDate(applied_job.created_at!)
   }));
   
