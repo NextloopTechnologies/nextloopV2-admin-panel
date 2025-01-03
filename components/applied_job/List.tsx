@@ -2,18 +2,18 @@
 
 import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
-import { SearchBox } from '../crud';
 import Link from 'next/link';
 import { appliedJobApi } from '.';
 import { withAuth } from '../auth';
-import { IAppliedJob } from '@/types/supabase';
+import { IAppliedJob, IJob } from '@/types/supabase';
 import { UploadFileService } from '@/app/api';
 import { formattedDate } from '@/lib/utils';
+import { jobApi } from '../job';
 
 const List: React.FC = () => {
 
   const [appliedJobData, setAppliedJobData] = useState<IAppliedJob[]>([]);
-  const [searchedText, setSearchedText] = useState<string>("");
+  const [jobData, setJobData] = useState<IJob[]>([]);
   const [isError, setIsError] = useState<string|null>("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -36,6 +36,19 @@ const List: React.FC = () => {
     fetchData();
   },[pageNo]);
 
+  useEffect(() => {
+    async function fetchJobs() {
+      setIsLoading(true);
+      const { success, data } = await jobApi.list(pageNo, 1000);
+      if (success) {
+        setJobData(data);
+      }
+      else setIsError("An error occured while fetching job filter data.")
+      setIsLoading(false)
+    }
+    fetchJobs()
+  },[])
+
   if (isError) {
     return (
       <div className='h-screen flex items-center justify-center text-l'>
@@ -43,6 +56,8 @@ const List: React.FC = () => {
       </div>
     )
   }
+
+  const uniqueJobTitleFilters = jobData?.map(({ title }) => ({ text: title!, value: title! }))
 
   const columns: TableProps<IAppliedJob>['columns'] = [
     {
@@ -55,13 +70,8 @@ const List: React.FC = () => {
       title: "Job Title",
       dataIndex: "title",
       key: "title",
-      filteredValue: [searchedText],
-      onFilter: (value, record) => {        
-        return String(record.title?.toLowerCase())
-            .includes(String(value).toLowerCase()) ||
-            String(record.fullname?.toLowerCase())
-            .includes(String(value).toLowerCase())
-      },
+      filters: uniqueJobTitleFilters,
+      onFilter: (value, record) => record.title?.indexOf(value as string) === 0 || false,
       render: (title, record) => {        
         if(!title) return "NA"
         return (
@@ -95,8 +105,13 @@ const List: React.FC = () => {
       title: "Experience",
       dataIndex: "experience",
       key: "experience",
-      // defaultSortOrder: 'descend',
-      // sorter: (a, b) => a.experience! - b.experience!,
+      filters: [
+        { text: '0-1', value: '0-1'},
+        { text: '1-3', value: '1-3'},
+        { text: '3-5', value: '3-5'},
+        { text: '5+',  value: '5+' }
+      ], 
+      onFilter: (value, record) => record.experience?.indexOf(value as string) === 0 || false
     },
     {
       title: "Applied On",
@@ -159,10 +174,9 @@ const List: React.FC = () => {
             </Button>
           </Popconfirm>
         )}
-        <SearchBox onSearchText={(value: string) => setSearchedText(value)} />
       </div>
 
-      <Table 
+      <Table <IAppliedJob>
         className='mt-2'
         rowSelection={rowSelection}
         columns={columns}
