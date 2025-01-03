@@ -26,7 +26,6 @@ export async function POST(req: Request) {
       skills: formData.getAll('skills[]') as string[],
       location: formData.get("location") as string,
       job_mode: formData.get("job_mode") as Enums<'enum_job_mode'>,
-      // package: formData.get("package") as string,
       job_type: formData.get("job_type") as Enums<'enum_job_type'>,
     }
     
@@ -51,7 +50,6 @@ export async function PUT(req: Request) {
       skills: formData.getAll('skills[]') as string[],
       location: formData.get("location") as string,
       job_mode: formData.get("job_mode") as Enums<'enum_job_mode'>,
-      // package: formData.get("package") as string,
       job_type: formData.get("job_type") as Enums<'enum_job_type'>,
     }
     

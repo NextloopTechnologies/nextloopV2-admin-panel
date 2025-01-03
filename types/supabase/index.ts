@@ -179,7 +179,6 @@ export type Database = {
         Row: {
           created_at: string
           descp: string | null
-          // experience: string | null
           id: number
           job_mode: Database["public"]["Enums"]["enum_job_mode"] | null
           job_type: Database["public"]["Enums"]["enum_job_type"] | null
@@ -194,7 +193,6 @@ export type Database = {
         Insert: {
           created_at?: string
           descp?: string | null
-          // experience?: string | null
           id?: number
           job_mode?: Database["public"]["Enums"]["enum_job_mode"] | null
           job_type?: Database["public"]["Enums"]["enum_job_type"] | null
@@ -209,7 +207,6 @@ export type Database = {
         Update: {
           created_at?: string
           descp?: string | null
-          // experience?: string | null
           id?: number
           job_mode?: Database["public"]["Enums"]["enum_job_mode"] | null
           job_type?: Database["public"]["Enums"]["enum_job_type"] | null
