@@ -41,7 +41,6 @@ const View: React.FC<ViewProps> = ({
                 </Descriptions.Item>
                 <Descriptions.Item label="Location">{data?.location}</Descriptions.Item>
                 <Descriptions.Item label="Job Mode">{data?.job_mode}</Descriptions.Item>
-                <Descriptions.Item label="Package">{data?.package}</Descriptions.Item>
                 <Descriptions.Item label="Job Type">{data?.job_type}</Descriptions.Item>
             </Descriptions>
         </div>

@@ -31,6 +31,7 @@ const View: React.FC<ViewProps> = ({
                 </Descriptions.Item>
                 <Descriptions.Item label="Email">{data?.email}</Descriptions.Item>
                 <Descriptions.Item label="Phone">{data?.phone}</Descriptions.Item>
+                <Descriptions.Item label="Experience">{data?.experience || "0-1" }</Descriptions.Item>
                 <Descriptions.Item label="Resume">
                     {data?.resume_url ? (
                         <a href={formattedUrl(data?.resume_url)} download={`${data?.fullname}.pdf`} target="_blank" className="text-blue-400" rel="noopener noreferrer">

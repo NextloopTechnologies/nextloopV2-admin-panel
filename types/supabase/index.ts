@@ -22,6 +22,7 @@ export type Database = {
           phone: string
           resume_id: string | null
           resume_url: string
+          experience: string | null
         }
         Insert: {
           cover_letter?: string | null
@@ -35,6 +36,7 @@ export type Database = {
           phone: string
           resume_id?: string | null
           resume_url: string
+          experience?: string | null
         }
         Update: {
           cover_letter?: string | null
@@ -48,6 +50,7 @@ export type Database = {
           phone?: string
           resume_id?: string | null
           resume_url?: string
+          experience?: string | null
         }
         Relationships: [
           {
@@ -174,49 +177,46 @@ export type Database = {
       }
       jobs: {
         Row: {
-          visibility: boolean
           created_at: string
           descp: string | null
           id: number
           job_mode: Database["public"]["Enums"]["enum_job_mode"] | null
           job_type: Database["public"]["Enums"]["enum_job_type"] | null
           location: string | null
-          package: string | null
           qualifications: string[] | null
           responsibilities: string[] | null
           skills: string[] | null
           title: string | null
           updated_at: string | null
+          visibility: boolean
         }
         Insert: {
-          visibility?: boolean
           created_at?: string
           descp?: string | null
           id?: number
           job_mode?: Database["public"]["Enums"]["enum_job_mode"] | null
           job_type?: Database["public"]["Enums"]["enum_job_type"] | null
           location?: string | null
-          package?: string | null
           qualifications?: string[] | null
           responsibilities?: string[] | null
           skills?: string[] | null
           title?: string | null
           updated_at?: string | null
+          visibility?: boolean
         }
         Update: {
-          visibility?: boolean
           created_at?: string
           descp?: string | null
           id?: number
           job_mode?: Database["public"]["Enums"]["enum_job_mode"] | null
           job_type?: Database["public"]["Enums"]["enum_job_type"] | null
           location?: string | null
-          package?: string | null
           qualifications?: string[] | null
           responsibilities?: string[] | null
           skills?: string[] | null
           title?: string | null
           updated_at?: string | null
+          visibility?: boolean
         }
         Relationships: []
       }
