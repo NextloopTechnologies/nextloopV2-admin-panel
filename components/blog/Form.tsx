@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Button, Form, Input, Upload, message } from 'antd';
 import { IBlog } from '@/types/blog';
 import { textFieldValidator } from '@/lib/utils';
@@ -11,8 +11,18 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { blogApi } from '.';
 import 'react-quill/dist/quill.snow.css';
-import ReactQuill from 'react-quill';
 import { withAuth } from '../auth';
+import dynamic from 'next/dynamic';
+import config from '@/config';
+
+const QuillNoSSRWrapper = dynamic(() => import('../quill/QuillEditor'), {
+  ssr: false,
+});
+
+const ForwardedQuill = React.forwardRef((props: any, ref) => (
+  <QuillNoSSRWrapper {...props} forwardedRef={ref} />
+));
+ForwardedQuill.displayName = 'ForwardedQuill';
 
 interface BlogFormProps {
   title: string,
@@ -27,6 +37,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
   const [ isLoading, setIsLoading ] = useState<boolean>(false); 
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const router = useRouter(); 
+  const quillRef = useRef<any | null>(null);
 
   useEffect(() => {
     if (blog?.image?.length) {
@@ -39,6 +50,89 @@ const BlogForm: React.FC<BlogFormProps> = ({
       setFileList(files);
     }
   }, []);
+
+  const imageHandler = () => {
+    const quill = quillRef.current?.getEditor?.();
+    if (!quill) return;
+
+    let fileInput = quill.root.querySelector("input.ql-image[type=file]") as HTMLInputElement | null;
+
+    if (!fileInput) {
+      fileInput = document.createElement("input");
+      fileInput.setAttribute("type", "file");
+      fileInput.setAttribute("accept", "image/*");
+      fileInput.classList.add("ql-image");
+
+      fileInput.addEventListener("change", async () => {
+        const files = fileInput!.files;
+        const range = quill.getSelection(true);
+
+        if (!files || !files.length) {
+          message.warning("No image selected");
+          return;
+        }
+        if (files.length > 1) {
+          message.warning("Please select only one image");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", files[0]);
+
+        try {
+          setIsLoading(true);
+          const res = await fetch(`${config.apiBaseUrl}/api/upload`, {
+            method: "POST",
+            body: formData
+          });
+
+          const { success, msgText, ...rest} = await res.json();
+          if (!success) {
+            message.error("Failed to upload image");
+            throw new Error("Upload failed");
+          }
+
+          const { fileId, url } = rest.data;
+          if (!fileId || !url) {
+            message.error("Image upload failed");
+            throw new Error("Image upload failed");
+          }
+
+          quill.enable(true);
+          quill.insertEmbed(range.index, "image", url);
+          quill.setSelection(range.index + 1);
+          fileInput!.value = "";
+        } catch (err) {
+          message.error("Image upload failed");
+          console.error("Failed to upload",err);
+          quill.enable(true);
+        } finally {
+          setIsLoading(false);
+        }
+      });
+      quill.root.appendChild(fileInput);
+    }
+    fileInput.click();
+  };
+
+  const modules = useMemo(() => ({
+    toolbar: {
+      container: [ 
+        // [{ font: [] }],
+        [{ size: [] }],
+        ['bold', 'italic', 'underline', 'strike', 'blockquote','code-block'],
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        [{ color: [] }, { background: [] }],
+        [{ align: [] }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        ['link', 'image'],
+        ['clean']
+      ],
+      handlers: {
+        image: imageHandler
+      }
+    },
+  }), []);
 
   const initialValues: IBlog = {
     title: blog?.title || '',
@@ -99,7 +193,6 @@ const BlogForm: React.FC<BlogFormProps> = ({
       <h1 className='font-bold text-3xl mb-7'>{title}</h1>
       <Form
         initialValues={initialValues}
-        style={{ maxWidth: 500 }}
         layout='vertical' 
         onFinish={handleFinish}   
         size='large'
@@ -132,7 +225,11 @@ const BlogForm: React.FC<BlogFormProps> = ({
             }
           ]}
         >
-          <ReactQuill value={initialValues.descp!} />
+          <ForwardedQuill 
+            ref={quillRef}
+            value={initialValues.descp!} 
+            modules={modules} 
+          />
         </Form.Item>
         <Form.Item<IBlog>
           label={<span className='text-l'>Blog Image</span>}>

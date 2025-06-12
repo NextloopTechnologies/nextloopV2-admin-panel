@@ -11,12 +11,14 @@ const getBufferImage = async(fileInfo: File) => {
   }
 }
 
-export const uploadImage = async(fileInfo: File, fileName: string) => {
+export const uploadImage = async(fileInfo: File, fileName: string, folder?: string) => {
   try {
     const bufferImage: Buffer = await getBufferImage(fileInfo);
     const result = await imagekit.upload({
       file: bufferImage, 
       fileName: fileName, 
+      folder: folder || "NextloopAdmin",
+      transformation: {"pre": "height: 400,width:400"}
     });
     return result;
   } catch (error) {
