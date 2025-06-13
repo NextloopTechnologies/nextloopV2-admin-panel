@@ -14,6 +14,7 @@ import 'react-quill/dist/quill.snow.css';
 import { withAuth } from '../auth';
 import dynamic from 'next/dynamic';
 import config from '@/config';
+import { getTransformedUrl } from '@/app/api/services/uploadFile';
 
 const QuillNoSSRWrapper = dynamic(() => import('../quill/QuillEditor'), {
   ssr: false,
@@ -78,6 +79,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
 
         const formData = new FormData();
         formData.append("file", files[0]);
+        formData.append("folder", "/AdminNextloop/Blogs")
 
         try {
           setIsLoading(true);
@@ -98,8 +100,14 @@ const BlogForm: React.FC<BlogFormProps> = ({
             throw new Error("Image upload failed");
           }
 
+          const transformedUrl = await getTransformedUrl(url);
+          if (!transformedUrl) {
+            message.error("Failed to transform image URL");
+            throw new Error("Failed to transform image URL");
+          }
+
           quill.enable(true);
-          quill.insertEmbed(range.index, "image", url);
+          quill.insertEmbed(range.index, "image", transformedUrl);
           quill.setSelection(range.index + 1);
           fileInput!.value = "";
         } catch (err) {

@@ -17,11 +17,12 @@ export async function POST(req: Request) {
     try {
         const formData = await req.formData();
         
+        const folder = (formData.get('folder') || 'AdminNextloop') as string;
         const imageInfo: File | undefined = formData.get('file') as unknown as File;
         
         if (imageInfo === null) return Response.json({ msgText: "File is required!" }, { status: 400 })
 
-        const { fileId, url } = await UploadFileService.uploadImage(imageInfo, imageInfo.name);
+        const { fileId, url } = await UploadFileService.uploadImage(imageInfo, imageInfo.name, folder);
         
         if (fileId) return Response.json({ success: true, data: { fileId, url }, msgText: "Uploaded!" }, { status: 201, headers: {
             'Access-Control-Allow-Origin': '*'

@@ -18,13 +18,25 @@ export const uploadImage = async(fileInfo: File, fileName: string, folder?: stri
       file: bufferImage, 
       fileName: fileName, 
       folder: folder || "NextloopAdmin",
-      transformation: {"pre": "height: 400,width:400"}
     });
     return result;
   } catch (error) {
     throw error;
   }
 }
+
+export const getTransformedUrl = (url: string) => {
+    return imagekit.url({
+      src: url,
+      transformation: [
+        {
+          height: "400",
+          crop: "maintain_ratio",
+        },
+      ],
+    });
+}
+
 
 export const deleteFiles = async (files: string[]) => {
   try {
