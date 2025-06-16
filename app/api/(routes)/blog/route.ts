@@ -4,10 +4,9 @@ import { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    const pageNo = Number(req.nextUrl.searchParams.get('page')) 
-    const pageSize = Number(req.nextUrl.searchParams.get('row')) 
+    const pageNo = Number(req.nextUrl.searchParams.get('page')) || 1; 
+    const pageSize = Number(req.nextUrl.searchParams.get('row')) || 10;
     const { status, ...data }  = await BlogService.list(pageNo, pageSize);
-    if(status!==200) return Response.json({ data }, { status })
     return Response.json({ data }, { status })  
   } catch (error) {
     console.error("BLOG_LIST_CONTROLLER", error)
