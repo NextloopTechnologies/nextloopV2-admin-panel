@@ -5,36 +5,38 @@ import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { appliedJobApi } from '.';
 import { withAuth } from '../auth';
-import { IAppliedJob, IJob } from '@/types/supabase';
+import { IAppliedJobView, IJob } from '@/types/supabase';
 import { UploadFileService } from '@/app/api';
 import { formattedDate } from '@/lib/utils';
 import { jobApi } from '../job';
+import { IAppliedJobFilters } from '@/types/applied_job';
 
 const List: React.FC = () => {
 
-  const [appliedJobData, setAppliedJobData] = useState<IAppliedJob[]>([]);
+  const [appliedJobData, setAppliedJobData] = useState<IAppliedJobView[]>([]);
   const [jobData, setJobData] = useState<IJob[]>([]);
   const [isError, setIsError] = useState<string|null>("");
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [count, setCount] = useState<number>(0);
   const [pageNo, setPageNo] = useState<number>(1);
+  const [filters, setFilters] = useState<IAppliedJobFilters>({ title: null, experience: null })
   const pageSize: number = 10;
 
   const fetchData =  useCallback(async () => {
     setIsLoading(true);
-    const { success, data, count }  = await appliedJobApi.list(pageNo, pageSize);
+    const { success, data, count }  = await appliedJobApi.list(pageNo, pageSize, filters);
     if (success) {
       setCount(count);      
       setAppliedJobData(data);
     } 
     else setIsError("An error occured while fetching data.")
     setIsLoading(false)
-  }, [pageNo]);
+  }, [pageNo, filters]);
   
   useEffect(() => {
     fetchData();
-  },[pageNo]);
+  },[fetchData]);
 
   useEffect(() => {
     async function fetchJobs() {
@@ -57,9 +59,7 @@ const List: React.FC = () => {
     )
   }
 
-  const uniqueJobTitleFilters = jobData?.map(({ title }) => ({ text: title!, value: title! }))
-
-  const columns: TableProps<IAppliedJob>['columns'] = [
+  const columns: TableProps<IAppliedJobView>['columns'] = [
     {
       title: "Sr No.",
       dataIndex: "id",
@@ -70,8 +70,7 @@ const List: React.FC = () => {
       title: "Job Title",
       dataIndex: "title",
       key: "title",
-      filters: uniqueJobTitleFilters,
-      onFilter: (value, record) => record.title?.indexOf(value as string) === 0 || false,
+      filters: jobData?.map(({ title }) => ({ text: title!, value: title! })),
       render: (title, record) => {        
         if(!title) return "NA"
         return (
@@ -111,7 +110,6 @@ const List: React.FC = () => {
         { text: '3-5', value: '3-5'},
         { text: '5+',  value: '5+' }
       ], 
-      onFilter: (value, record) => record.experience?.indexOf(value as string) === 0 || false
     },
     {
       title: "Applied On",
@@ -120,16 +118,12 @@ const List: React.FC = () => {
     }
   ];
 
-  const dataSource: IAppliedJob[] = appliedJobData.map((applied_job: IAppliedJob) => ({
+  const dataSource: IAppliedJobView[] = appliedJobData.map((applied_job: IAppliedJobView) => ({
+    ...applied_job,
     key: applied_job.id,
-    id: applied_job.id,
-    title: applied_job.title,
-    job_id: applied_job.job_id,
-    fullname: applied_job.fullname,
-    email: applied_job.email,
-    phone: applied_job.phone,
+    title: applied_job.job_title,
     experience: applied_job.experience || "0-1",
-    created_at: formattedDate(applied_job.created_at!)
+    created_at: formattedDate(applied_job.created_at!),
   }));
   
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -176,7 +170,7 @@ const List: React.FC = () => {
         )}
       </div>
 
-      <Table <IAppliedJob>
+      <Table <IAppliedJobView>
         className='mt-2'
         rowSelection={rowSelection}
         columns={columns}
@@ -186,6 +180,16 @@ const List: React.FC = () => {
           pageSize,
           total: count,
           onChange: (page) => setPageNo(page)
+        }}
+        onChange={(_, filters ) => {
+          const titleFilters = Array.isArray(filters.title) && filters.title.length > 0 ? filters.title as [] : undefined;
+          const experienceFilters = Array.isArray(filters.experience) && filters.experience.length > 0 ? filters.experience as [] : undefined;
+
+          setFilters({
+            title: titleFilters ?? null,
+            experience: experienceFilters ?? null
+          });
+          setPageNo(1);
         }}
       />
     </div>

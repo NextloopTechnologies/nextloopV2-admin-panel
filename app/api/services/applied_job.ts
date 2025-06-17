@@ -1,18 +1,27 @@
 import { supabase } from "@/lib/supabase/query";
+import { IAppliedJobFilters } from "@/types/applied_job";
 
-export const list = async(page:number = 1, limit:number = 10) => {
+export const list = async(page:number = 1, limit:number = 10, filters: IAppliedJobFilters) => {
   try {
+   
     const offset = (page-1) * limit;
 
-    const { data, count } = await supabase
-    .from("applied_jobs")
-    .select('id, fullname, email, phone, linkedin_url, github_url, cover_letter, job_id, resume_url, resume_id, experience, created_at, jobs(title) ', { count: "exact" })
+    let query = supabase
+    .from("applied_jobs_with_title")
+    .select('*', { count: "exact" })
     .order('id', { ascending: false })
-    .range(offset, offset + limit - 1)
 
-    const modifiedData = data?.map((value) => ({ title: value.jobs?.title, ...value }))
+    if(Array.isArray(filters?.title)) {
+      query = query.in('job_title', filters.title)
+    }    
+    if(Array.isArray(filters?.experience)) {
+      query = query.in('experience', filters.experience)
+    }
+
+    query = query.range(offset, offset + limit - 1)
+    const { data, count, error } = await query
     
-    if(data) return { success: true , data: modifiedData, count, status: 200 }
+    if(data) return { success: true , data , count, status: 200 }
     return { success: false, msgText: "No records found!",  status: 404 }
   } catch(error) {
     throw error

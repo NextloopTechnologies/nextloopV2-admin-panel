@@ -3,10 +3,10 @@ import { AppliedJobService } from "../..";
 
 export async function GET(req: NextRequest) {
   try {
-    const pageNo = Number(req.nextUrl.searchParams.get('page')) 
-    const pageSize = Number(req.nextUrl.searchParams.get('row'))  
-    const { status, ...data }  = await AppliedJobService.list(pageNo, pageSize);
-    if(status!==200) return Response.json({ data }, { status })
+    const pageNo = Number(req.nextUrl.searchParams.get('page')) || 1
+    const pageSize = Number(req.nextUrl.searchParams.get('row')) || 10  
+    const filters = JSON.parse(req.nextUrl.searchParams.get('filters') ?? "{}");
+    const { status, ...data }  = await AppliedJobService.list(pageNo, pageSize, filters);
     return Response.json({ data }, { status })  
   } catch (error) {
     console.error("JOB_LIST_CONTROLLER", error)
