@@ -23,20 +23,29 @@ const List: React.FC = () => {
   const [filters, setFilters] = useState<IAppliedJobFilters>({ title: null, experience: null })
   const pageSize: number = 10;
 
-  const fetchData =  useCallback(async () => {
-    setIsLoading(true);
-    const { success, data, count }  = await appliedJobApi.list(pageNo, pageSize, filters);
-    if (success) {
-      setCount(count);      
-      setAppliedJobData(data);
-    } 
-    else setIsError("An error occured while fetching data.")
-    setIsLoading(false)
-  }, [pageNo, filters]);
-  
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        console.log("pageNo", pageNo);
+        const { success, data, count } = await appliedJobApi.list(pageNo, pageSize, filters);
+        if (success) {
+          setCount(count);
+          setAppliedJobData(data);
+        } else {
+          setIsError("An error occurred while fetching data.");
+        }
+      } catch (error) {
+        console.error("APPLIED_JOB_LIST_CONTROLLER", error);
+        message.error("An error occurred while fetching data.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchData();
-  },[fetchData]);
+  }, [pageNo, filters]);
+
 
   useEffect(() => {
     async function fetchJobs() {
@@ -179,9 +188,12 @@ const List: React.FC = () => {
         pagination={{
           pageSize,
           total: count,
-          onChange: (page) => setPageNo(page)
+          current: pageNo,
         }}
-        onChange={(_, filters ) => {
+        onChange={(pagination, filters ) => {
+          //handle pagination
+          setPageNo(pagination.current || 1);
+
           const titleFilters = Array.isArray(filters.title) && filters.title.length > 0 ? filters.title as [] : undefined;
           const experienceFilters = Array.isArray(filters.experience) && filters.experience.length > 0 ? filters.experience as [] : undefined;
 
@@ -189,7 +201,6 @@ const List: React.FC = () => {
             title: titleFilters ?? null,
             experience: experienceFilters ?? null
           });
-          setPageNo(1);
         }}
       />
     </div>

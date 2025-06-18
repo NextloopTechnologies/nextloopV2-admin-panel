@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase/query";
 import { IAppliedJobFilters } from "@/types/applied_job";
+import { deleteFiles } from "./uploadFile";
 
 export const list = async(page:number = 1, limit:number = 10, filters: IAppliedJobFilters) => {
   try {
@@ -58,3 +59,29 @@ export const remove = async(ids: number[]) => {
     throw error
   }
 }
+
+export const removeBacklogCandidates = async() => {
+  try {
+    const date = new Date();
+    date.setDate(date.getDate() - 150) // 150 days ago
+    
+    const { data, error } = await supabase
+    .from("applied_jobs")
+    .delete()
+    .lt('created_at', date.toISOString()) 
+    .select('fullname, resume_id')
+  
+    if(error) return { success: false , msgText: "No record found!", status: 404 }
+    if(!data || data.length === 0) return { success: false , msgText: "No record found!", status: 404 }
+   
+    // delete resume files from storage
+    const deleteIds = data
+      .map(item => item.resume_id)
+      .filter((id): id is string => typeof id === 'string' && id !== '');
+    
+    if(deleteIds.length>0)  return await deleteFiles(deleteIds)
+    return { success: true , msgText: "Deleted!", status: 200 }
+  } catch(error) {
+    throw error
+  }
+} 
