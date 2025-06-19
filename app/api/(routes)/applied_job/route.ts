@@ -16,9 +16,17 @@ export async function GET(req: NextRequest) {
 
 export async function DELETE(req: Request) {
   try {
+    let response
     const deleteIds =  await req.json()
-    const { status, ...data } = await AppliedJobService.remove(deleteIds)
-    if(status!==200) return Response.json({ data }, { status });
+    if(Array.isArray(deleteIds) && deleteIds.length>0) {
+      response = await AppliedJobService.remove(deleteIds)
+    } else {
+      response = await AppliedJobService.removeBacklogCandidates()
+    }
+    if (!response) {
+      return Response.json({ msgText: "No response from service." }, { status: 500 });
+    }
+    const { status, ...data } = response;
     return Response.json({ data }, { status });
   } catch (error) {
     console.error("JOB_DELETE_CONTROLLER", error)

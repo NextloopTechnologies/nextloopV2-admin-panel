@@ -63,8 +63,8 @@ export const remove = async(ids: number[]) => {
 export const removeBacklogCandidates = async() => {
   try {
     const date = new Date();
-    date.setDate(date.getDate() - 150) // 150 days ago
-    
+    date.setDate(date.getDate() - 60) 
+
     const { data, error } = await supabase
     .from("applied_jobs")
     .delete()
@@ -72,15 +72,22 @@ export const removeBacklogCandidates = async() => {
     .select('fullname, resume_id')
   
     if(error) return { success: false , msgText: "No record found!", status: 404 }
-    if(!data || data.length === 0) return { success: false , msgText: "No record found!", status: 404 }
    
-    // delete resume files from storage
+    // get resume ids to delete from imagekit
     const deleteIds = data
       .map(item => item.resume_id)
       .filter((id): id is string => typeof id === 'string' && id !== '');
-    
-    if(deleteIds.length>0)  return await deleteFiles(deleteIds)
-    return { success: true , msgText: "Deleted!", status: 200 }
+
+    //process 99 request for imagekit
+    if(deleteIds.length>0){
+      const BATCH_SIZE = 98; 
+      for(let i=0; i<deleteIds.length; i+= BATCH_SIZE){
+        const batch = deleteIds.slice(i, i + BATCH_SIZE);
+        await deleteFiles(batch);
+      }
+    }
+   
+    return { success: true , msgText: `${deleteIds.length} Deleted!`, status: 200 }
   } catch(error) {
     throw error
   }
