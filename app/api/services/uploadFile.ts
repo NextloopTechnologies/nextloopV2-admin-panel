@@ -17,7 +17,7 @@ export const uploadImage = async(fileInfo: File, fileName: string, folder?: stri
     const result = await imagekit.upload({
       file: bufferImage, 
       fileName: fileName, 
-      folder: folder || "NextloopAdmin",
+      folder: folder || "AdminNextloop",
     });
     return result;
   } catch (error) {
