@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Button, Form, Input, Upload, message } from 'antd';
 import { IBlog } from '@/types/blog';
-import { textFieldValidator } from '@/lib/utils';
+import { extractImageUrlsFromHtml, textFieldValidator } from '@/lib/utils';
 import { UploadOutlined } from '@ant-design/icons';
 import { FileType } from '@/types/antd';
 import type { FormProps, UploadFile, UploadProps } from 'antd';
@@ -14,7 +14,7 @@ import 'react-quill/dist/quill.snow.css';
 import { withAuth } from '../auth';
 import dynamic from 'next/dynamic';
 import config from '@/config';
-import { getTransformedUrl } from '@/app/api/services/uploadFile';
+import { deleteFiles, getTransformedUrl } from '@/app/api/services/uploadFile';
 
 const QuillNoSSRWrapper = dynamic(() => import('../quill/QuillEditor'), {
   ssr: false,
@@ -29,6 +29,8 @@ interface BlogFormProps {
   title: string,
   blog?: IBlog | null,
 }
+
+const uploadedImageUrls: { "fileId": string; "transformedUrl": string }[] = [];
 
 const BlogForm: React.FC<BlogFormProps> = ({ 
   title, 
@@ -105,6 +107,8 @@ const BlogForm: React.FC<BlogFormProps> = ({
             message.error("Failed to transform image URL");
             throw new Error("Failed to transform image URL");
           }
+          // Store the uploaded image URL and fileId
+          uploadedImageUrls.push({ fileId, transformedUrl });
 
           quill.enable(true);
           quill.insertEmbed(range.index, "image", transformedUrl);
@@ -167,6 +171,12 @@ const BlogForm: React.FC<BlogFormProps> = ({
 
   const handleFinish: FormProps<IBlog>['onFinish'] = async(values) => {
     setIsLoading(true);
+    // delete backspaced images after adding it to quill
+    const currentHtml = quillRef.current?.getEditor().root.innerHTML; 
+    const usedImages = new Set(extractImageUrlsFromHtml(currentHtml));
+    const toDelete = uploadedImageUrls.filter(({ transformedUrl }) => !usedImages.has(transformedUrl));
+    await deleteFiles(toDelete.map(({ fileId }) => fileId));
+    
     const formData =  new FormData();
     formData.append("title", values.title as string);
     formData.append("descp", values.descp as string);
