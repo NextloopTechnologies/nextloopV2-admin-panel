@@ -170,40 +170,54 @@ const BlogForm: React.FC<BlogFormProps> = ({
   }
 
   const handleFinish: FormProps<IBlog>['onFinish'] = async(values) => {
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
     // delete backspaced images after adding it to quill
-    const currentHtml = quillRef.current?.getEditor().root.innerHTML; 
-    const usedImages = new Set(extractImageUrlsFromHtml(currentHtml));
-    const toDelete = uploadedImageUrls.filter(({ transformedUrl }) => !usedImages.has(transformedUrl));
-    await deleteFiles(toDelete.map(({ fileId }) => fileId));
-    
-    const formData =  new FormData();
-    formData.append("title", values.title as string);
-    formData.append("descp", values.descp as string);
-    
-    if(fileList.length) {
-      fileList.forEach(file => {
-        if (file.originFileObj) {
-          if(blog?.image?.length) formData.append("deletedImage", blog.image[0].fileId)
-          formData.append("imageInfo", file.originFileObj);
+      const currentHtml = quillRef.current?.getEditor().root.innerHTML; 
+      const usedImages = new Set(extractImageUrlsFromHtml(currentHtml));
+      const toDelete = uploadedImageUrls.filter(({ transformedUrl }) => !usedImages.has(transformedUrl));
+     
+      if(toDelete.length>0) await deleteFiles(toDelete.map(({ fileId }) => fileId));
+      
+      const formData =  new FormData();
+      formData.append("title", values.title as string);
+      formData.append("descp", values.descp as string);
+      formData.append("folder", "/AdminNextloop/Blogs");
+      if(uploadedImageUrls.length) {
+        const uploadedImages = uploadedImageUrls.filter(({ transformedUrl }) => usedImages.has(transformedUrl));
+        if(uploadedImages.length) {
+          uploadedImages.forEach(({ fileId, transformedUrl }) => {
+            formData.append("descp_image_ids", JSON.stringify({ fileId, url: transformedUrl }));
+          });
         }
-      });
-    }
-    if(blog){
-      if(!fileList.length && blog.image?.length) formData.append("deletedImage", blog.image[0].fileId)
-      formData.append("id", blog.id?.toString()!)
-      const { success, msgText } = await blogApi.update(formData);
-      if(success) message.success(msgText);
-      else message.error(msgText  || "Failed to update!");
-      setIsLoading(false);
-      return router.push('/blog');
-    }
+      }
 
-    const { success, msgText } = await blogApi.create(formData); 
-    if(success) message.success(msgText);
-    else message.error(msgText  || "Failed to create!");
-    setIsLoading(false);
-    router.push('/blog');
+      if(fileList.length) {
+        fileList.forEach(file => {
+          if (file.originFileObj) {
+            if(blog?.image?.length) formData.append("deletedImage", blog.image[0].fileId)
+            formData.append("imageInfo", file.originFileObj);
+          }
+        });
+      }
+      if(blog){
+        if(!fileList.length && blog.image?.length) formData.append("deletedImage", blog.image[0].fileId)
+        formData.append("id", blog.id?.toString()!)
+        const { success, msgText } = await blogApi.update(formData);
+        if(!success) return message.error(msgText  || "Failed to update!");
+        message.success(msgText || "Blog updated successfully!");
+      }
+
+      const { success, msgText } = await blogApi.create(formData); 
+      if(!success) return message.error(msgText  || "Failed to create!");
+      message.success(msgText || "Blog created successfully!");
+    } catch (error) {
+      console.error("Error in handleFinish", error);
+      message.error("Something went wrong!");
+    } finally{
+      setIsLoading(false);
+      router.push('/blog');
+    }
   }
 
   return (

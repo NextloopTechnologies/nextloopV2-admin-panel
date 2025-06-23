@@ -62,13 +62,14 @@ export const update = async (values: IBlogMutate, id: number) => {
 
 export const remove = async(ids: number[]) => {
   try {
-    const { error } = await supabase
+    const { data, error } = await supabase
     .from("blogs")
     .delete()
     .in('id', ids)
-
-    if(error) return { success: false , msgText: "No record found!", status: 404 }
-    return { success: true , msgText: "Deleted!", status: 200 }
+    .select();
+    
+    if(error) return { success: false , msgText: "Failed to delete!", status: 404 }
+    return { success: true , deletedData: data,  msgText: "Deleted!", status: 200 }
   } catch(error) {
     throw error
   }
