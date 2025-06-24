@@ -26,19 +26,27 @@ const List: React.FC = () => {
   const pageSize: number = 10;
 
   const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    const { success, data, count }  = await blogApi.list(pageNo, pageSize);
-    if (success) {
-      setCount(count);      
-      setBlogData(data);
-    } 
-    else setIsError("An error occured while fetching data.")
-    setIsLoading(false)
+    try {
+      setIsLoading(true);
+      const result = await blogApi.list(pageNo, pageSize);
+      const { success, data, count }  = result;
+      if (success){
+        setCount(count);      
+        setBlogData(data);
+      } 
+        
+      else setIsError("An error occured while fetching data.")
+    } catch (error) {
+      console.error("BLOG_LIST_CONTROLLER", error);
+      setIsError("Something went wrong while fetching data!");
+    } finally {
+      setIsLoading(false);
+    }
   }, [pageNo]);
   
   useEffect(() => {
     fetchData();
-  },[pageNo]);
+  }, [fetchData]);
 
   if (isError) {
     return (

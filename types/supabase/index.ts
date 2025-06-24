@@ -365,7 +365,32 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+       applied_jobs_with_title: {
+        Row: {
+          cover_letter: string | null
+          created_at: string | null
+          email: string | null
+          experience: string | null
+          fullname: string | null
+          github_url: string | null
+          id: number | null
+          job_id: number | null
+          job_title: string | null
+          linkedin_url: string | null
+          phone: string | null
+          resume_id: string | null
+          resume_url: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applied_jobs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never
@@ -489,6 +514,8 @@ export type Enums<
 export type IJob = TablesInsert<'jobs'>
 
 export type IAppliedJob = TablesUpdate<'applied_jobs'> & IJob 
+
+export type IAppliedJobView = Tables<'applied_jobs_with_title'>
 
 export type ITestimonial = TablesInsert<'testimonials'>
 
