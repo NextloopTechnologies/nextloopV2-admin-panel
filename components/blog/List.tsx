@@ -9,7 +9,6 @@ import Edit from "../../public/images/icons/edit.png";
 import Link from 'next/link';
 import { blogApi } from '.';
 
-import { UploadFileService } from '@/app/api';
 import parse from "html-react-parser"
 import { trimText } from '@/lib/utils';
 import { withAuth } from '../auth';
@@ -160,10 +159,7 @@ const List: React.FC = () => {
       try {
         const { success, msgText } = await blogApi.remove(selectedRowKeys as number[]);
         if(!success) return message.error("Failed to Delete!");
-
-        const deleteBucketImages = blogData.filter(blog => selectedRowKeys.includes(blog.id as React.Key)).flatMap(item => item?.image?.map(item => item.fileId) || [])
-        if(deleteBucketImages.length) UploadFileService.deleteFiles(deleteBucketImages)
-        
+ 
         const updatedBlogData = blogData.filter(blog => !selectedRowKeys.includes(blog.id as React.Key))
         setBlogData(updatedBlogData)
         setSelectedRowKeys([]);
