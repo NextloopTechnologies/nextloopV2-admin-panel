@@ -3,7 +3,9 @@ import { IAppliedJobFilters } from "@/types/applied_job";
 
 export const list = async(pageNo: number, pageSize: number, filters: IAppliedJobFilters) => {
   try {
-    const response = await fetch(`${config.apiBaseUrl}/api/applied_job?page=${pageNo}&row=${pageSize}&filters=${JSON.stringify(filters)}`)
+     const encodedFilters = encodeURIComponent(JSON.stringify(filters));
+    const response = await fetch(`
+      ${config.apiBaseUrl}/api/applied_job?page=${pageNo}&row=${pageSize}&filters=${encodedFilters}`)
     const { data } = await response.json();
     return data;
   } catch (error) {
