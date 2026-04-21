@@ -8,6 +8,7 @@ import * as JobService from './services/job';
 import * as AppliedJobService from './services/applied_job';
 import * as EnquiryService from './services/enquiry';
 import * as UserService from './services/user';
+import * as PopupFormService from './services/popupForm'; 
 
 export {
   UploadFileService,
@@ -19,5 +20,6 @@ export {
   JobService,
   AppliedJobService,
   EnquiryService,
-  UserService
+  UserService,
+  PopupFormService 
 }
