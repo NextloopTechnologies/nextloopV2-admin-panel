@@ -4,7 +4,6 @@ export async function GET(req: Request) {
   try {
     const id = Number(req.url.split('/job/')[1]);
     const { status, ...data }  = await JobService.read(id);
-    if(status!==200) return Response.json({ data }, { status })
     return Response.json({ data }, { status })  
   } catch (error) {
     console.error("JOB_READ_CONTROLLER", error)

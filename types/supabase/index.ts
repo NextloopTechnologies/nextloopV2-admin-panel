@@ -175,6 +175,36 @@ export type Database = {
         }
         Relationships: []
       }
+      popup_form: {
+        Row: {
+          id: string
+          name: string
+          email: string
+          service: string
+          phone: string | null
+          country: string | null
+          created_at: string
+        }
+        Insert: {
+          id: string
+          name: string
+          email: string
+          service: string
+          phone?: string | null
+          country?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          email?: string
+          service?: string
+          phone?: string | null
+          country?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       jobs: {
         Row: {
           created_at: string
@@ -537,12 +567,4 @@ export type IUser = {
 
 export type IUserMutate = TablesInsert<'user'>
 
-export interface IPopupForm {
-  id: string
-  name: string
-  email: string
-  service: string
-  phone: string | null
-  country: string | null
-  created_at: string
-}
+export type IPopupForm = TablesInsert<'popup_form'>
