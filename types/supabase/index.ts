@@ -567,4 +567,4 @@ export type IUser = {
 
 export type IUserMutate = TablesInsert<'user'>
 
-export type IPopupForm = TablesInsert<'popup_form'>
+export type IPopupForm = Tables<'popup_form'>
