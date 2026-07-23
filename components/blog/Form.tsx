@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Button, Form, Input, Upload, message } from 'antd';
+import { Button, Form, Input, Upload, message, Modal } from 'antd';
 import { IBlog } from '@/types/blog';
 import { extractImageUrlsFromHtml, textFieldValidator } from '@/lib/utils';
 import { UploadOutlined } from '@ant-design/icons';
@@ -15,6 +15,7 @@ import { withAuth } from '../auth';
 import dynamic from 'next/dynamic';
 import config from '@/config';
 import { deleteFiles, getTransformedUrl } from '@/app/api/services/uploadFile';
+import parse from "html-react-parser";
 
 const QuillNoSSRWrapper = dynamic(() => import('../quill/QuillEditor'), {
   ssr: false,
@@ -32,15 +33,21 @@ interface BlogFormProps {
 
 const uploadedImageUrls: { "fileId": string; "transformedUrl": string }[] = [];
 
-const BlogForm: React.FC<BlogFormProps> = ({ 
-  title, 
+const BlogForm: React.FC<BlogFormProps> = ({
+  title,
   blog
 }) => {
-  
-  const [ isLoading, setIsLoading ] = useState<boolean>(false); 
+
+  const [form] = Form.useForm();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const router = useRouter(); 
+  const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
+  const router = useRouter();
   const quillRef = useRef<any | null>(null);
+
+  const handlePreview = () => {
+    setIsPreviewOpen(true);
+  }
 
   useEffect(() => {
     if (blog?.image?.length) {
@@ -52,7 +59,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
       });
       setFileList(files);
     }
-  }, []);
+  }, [blog]);
 
   const imageHandler = () => {
     const quill = quillRef.current?.getEditor?.();
@@ -90,7 +97,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
             body: formData
           });
 
-          const { success, msgText, ...rest} = await res.json();
+          const { success, msgText, ...rest } = await res.json();
           if (!success) {
             message.error("Failed to upload image");
             throw new Error("Upload failed");
@@ -116,7 +123,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
           fileInput!.value = "";
         } catch (err) {
           message.error("Image upload failed");
-          console.error("Failed to upload",err);
+          console.error("Failed to upload", err);
           quill.enable(true);
         } finally {
           setIsLoading(false);
@@ -129,26 +136,26 @@ const BlogForm: React.FC<BlogFormProps> = ({
 
   const modules = useMemo(() => ({
     toolbar: {
-      container: [ 
-        // [{ font: [] }],
+      container: [
         [{ size: [] }],
-        ['bold', 'italic', 'underline', 'strike', 'blockquote','code-block'],
+        ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'],
         [{ header: [1, 2, 3, 4, 5, 6, false] }],
         [{ color: [] }, { background: [] }],
         [{ align: [] }],
         [{ list: 'ordered' }, { list: 'bullet' }],
-        ['link', 'image'],
+        ['link', 'image', 'video'],
         ['clean']
       ],
       handlers: {
         image: imageHandler
       }
     },
+    imageResize: {}
   }), []);
 
-  const initialValues: IBlog = {
+  const initialValues = {
     title: blog?.title || '',
-    descp: blog?.descp || ''
+    descp: blog?.descp || '',
   }
 
   const fileProps: UploadProps = {
@@ -164,57 +171,58 @@ const BlogForm: React.FC<BlogFormProps> = ({
       }
       return false;
     },
-    onChange: ({ fileList: newFileList }) => {      
+    onChange: ({ fileList: newFileList }) => {
       setFileList(newFileList)
     }
   }
 
-  const handleFinish: FormProps<IBlog>['onFinish'] = async(values) => {
+  const handleFinish: FormProps<IBlog>['onFinish'] = async (values) => {
     try {
       setIsLoading(true);
-    // delete backspaced images after adding it to quill
-      const currentHtml = quillRef.current?.getEditor().root.innerHTML; 
+      // delete backspaced images after adding it to quill
+      const currentHtml = quillRef.current?.getEditor().root.innerHTML;
       const usedImages = new Set(extractImageUrlsFromHtml(currentHtml));
       const toDelete = uploadedImageUrls.filter(({ transformedUrl }) => !usedImages.has(transformedUrl));
-     
-      if(toDelete.length>0) await deleteFiles(toDelete.map(({ fileId }) => fileId));
-      
-      const formData =  new FormData();
+
+      if (toDelete.length > 0) await deleteFiles(toDelete.map(({ fileId }) => fileId));
+
+      const formData = new FormData();
       formData.append("title", values.title as string);
       formData.append("descp", values.descp as string);
       formData.append("folder", "/AdminNextloop/Blogs");
-      if(uploadedImageUrls.length) {
+      
+      if (uploadedImageUrls.length) {
         const uploadedImages = uploadedImageUrls.filter(({ transformedUrl }) => usedImages.has(transformedUrl));
-        if(uploadedImages.length) {
+        if (uploadedImages.length) {
           uploadedImages.forEach(({ fileId, transformedUrl }) => {
             formData.append("descp_image_ids", JSON.stringify({ fileId, url: transformedUrl }));
           });
         }
       }
 
-      if(fileList.length) {
+      if (fileList.length) {
         fileList.forEach(file => {
           if (file.originFileObj) {
-            if(blog?.image?.length) formData.append("deletedImage", blog.image[0].fileId)
+            if (blog?.image?.length) formData.append("deletedImage", blog.image[0].fileId)
             formData.append("imageInfo", file.originFileObj);
           }
         });
       }
-      if(blog){
-        if(!fileList.length && blog.image?.length) formData.append("deletedImage", blog.image[0].fileId)
+      if (blog) {
+        if (!fileList.length && blog.image?.length) formData.append("deletedImage", blog.image[0].fileId)
         formData.append("id", blog.id?.toString()!)
         const { success, msgText } = await blogApi.update(formData);
-        if(!success) return message.error(msgText  || "Failed to update!");
+        if (!success) return message.error(msgText || "Failed to update!");
         message.success(msgText || "Blog updated successfully!");
+      } else {
+        const { success, msgText } = await blogApi.create(formData);
+        if (!success) return message.error(msgText || "Failed to create!");
+        message.success(msgText || "Blog created successfully!");
       }
-
-      const { success, msgText } = await blogApi.create(formData); 
-      if(!success) return message.error(msgText  || "Failed to create!");
-      message.success(msgText || "Blog created successfully!");
     } catch (error) {
       console.error("Error in handleFinish", error);
       message.error("Something went wrong!");
-    } finally{
+    } finally {
       setIsLoading(false);
       router.push('/blog');
     }
@@ -224,9 +232,10 @@ const BlogForm: React.FC<BlogFormProps> = ({
     <div className='content-container'>
       <h1 className='font-bold text-3xl mb-7'>{title}</h1>
       <Form
+        form={form}
         initialValues={initialValues}
-        layout='vertical' 
-        onFinish={handleFinish}   
+        layout='vertical'
+        onFinish={handleFinish}
         size='large'
       >
         <Form.Item<IBlog>
@@ -244,6 +253,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
         >
           <Input />
         </Form.Item>
+
         <Form.Item<IBlog>
           label="Description"
           name="descp"
@@ -257,10 +267,10 @@ const BlogForm: React.FC<BlogFormProps> = ({
             }
           ]}
         >
-          <ForwardedQuill 
+          <ForwardedQuill
             ref={quillRef}
-            value={initialValues.descp!} 
-            modules={modules} 
+            value={initialValues.descp!}
+            modules={modules}
           />
         </Form.Item>
         <Form.Item<IBlog>
@@ -275,19 +285,61 @@ const BlogForm: React.FC<BlogFormProps> = ({
             span: 16,
           }}
         >
-          { !isLoading && (
+          {!isLoading && (
             <Link href={"/blog"} className='mr-3'>
               <Button danger type="primary">
                 Cancel
               </Button>
             </Link>
           )}
-          <Button type="primary" htmlType="submit" disabled={isLoading}>
-            { isLoading ? 'Loading...': 'Submit' }
+          <Button 
+            type="default" 
+            onClick={handlePreview} 
+            style={{ marginRight: 8 }}
+            disabled={isLoading}
+          >
+            Preview
           </Button>
-         
+          <Button type="primary" htmlType="submit" disabled={isLoading}>
+            {isLoading ? 'Loading...' : 'Submit'}
+          </Button>
         </Form.Item>
       </Form>
+
+      <Modal
+        title="Blog Preview"
+        open={isPreviewOpen}
+        onCancel={() => setIsPreviewOpen(false)}
+        footer={[
+          <Button key="close" onClick={() => setIsPreviewOpen(false)}>
+            Close
+          </Button>
+        ]}
+        width={800}
+      >
+        <div style={{ padding: '20px 0' }}>
+          {fileList.length > 0 && (
+            <div style={{ marginBottom: 20, display: 'flex', justifyContent: 'center' }}>
+              <img
+                src={
+                  fileList[0].originFileObj
+                    ? URL.createObjectURL(fileList[0].originFileObj)
+                    : fileList[0].url
+                }
+                alt="Featured Banner"
+                style={{ maxWidth: '100%', maxHeight: 300, objectFit: 'cover', borderRadius: 8 }}
+              />
+            </div>
+          )}
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: 15 }}>
+            {form.getFieldValue('title') || 'Untitled Blog'}
+          </h1>
+          <div style={{ borderBottom: '1px solid #f0f0f0', marginBottom: 20 }} />
+          <div className="ql-editor" style={{ fontSize: 16, lineHeight: 1.6 }}>
+            {parse(quillRef.current?.getEditor?.().root.innerHTML || form.getFieldValue('descp') || '')}
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }

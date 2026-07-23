@@ -58,7 +58,7 @@ export const appliedJobs = pgTable("applied_jobs", {
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
 	id: bigint("id", { mode: "number" }).primaryKey().notNull(),
 	jobId: bigint("job_id", { mode: "number" }).references(() => jobs.id, { onDelete: 'restrict' }),
-  resume: text("resume").notNull(),
+	resume: text("resume").notNull(),
 	fullname: text("fullname").notNull(),
 	email: text("email").notNull(),
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
@@ -78,6 +78,5 @@ export const blogs = pgTable("blogs", {
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
-	authorId: bigint("author_id", { mode: "number" }).references(() => author.id, { onDelete: "restrict" } ),
+	authorId: bigint("author_id", { mode: "number" }).references(() => author.id, { onDelete: "restrict" }),
 });
-

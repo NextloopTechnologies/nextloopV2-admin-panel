@@ -3,9 +3,11 @@ import { IAuthor } from "../supabase";
 
 export interface IBlog {
     id?: number;
-    title: string|null;
-    descp: string|null;
+    title: string | null;
+    descp: string | null;
     image?: IFileUpload[];
-    author?:IAuthor;
+    author?: IAuthor;
     active?: boolean;
+    created_at?: string;
+    service?: string | null;
 }

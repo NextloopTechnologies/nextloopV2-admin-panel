@@ -1,19 +1,19 @@
 import { supabase } from "@/lib/supabase/query";
 import { IBlogMutate } from "@/types/supabase";
 
-export const list = async(page:number = 1, limit:number = 10) => {
+export const list = async (page: number = 1, limit: number = 10) => {
   try {
-    const offset = (page-1) * limit;
+    const offset = (page - 1) * limit;
 
     const { data, count } = await supabase
-    .from("blogs")
-    .select('id, title, descp, image, author(id, name) ', { count: "exact" })
-    .order('id', { ascending: false })
-    .range(offset, offset + limit - 1)
+      .from("blogs")
+      .select('id, title, descp, image, created_at, author(id, name) ', { count: "exact" })
+      .order('id', { ascending: false })
+      .range(offset, offset + limit - 1)
 
-    if(data) return { success: true , data, count, status: 200 }
-    return { success: false, msgText: "No records found!",  status: 404 }
-  } catch(error) {
+    if (data) return { success: true, data, count, status: 200 }
+    return { success: false, msgText: "No records found!", status: 404 }
+  } catch (error) {
     throw error
   }
 }
@@ -21,10 +21,10 @@ export const list = async(page:number = 1, limit:number = 10) => {
 export const create = async (values: IBlogMutate) => {
   try {
     const { error } = await supabase
-    .from('blogs')
-    .insert(values)
+      .from('blogs')
+      .insert(values)
 
-    if(!error) return { success: true, msgText: "Created!", status: 201 }
+    if (!error) return { success: true, msgText: "Created!", status: 201 }
     return { success: false, msgText: "Failed to create!", status: 500 }
   } catch (error) {
     throw error
@@ -34,43 +34,43 @@ export const create = async (values: IBlogMutate) => {
 export const read = async (id: number) => {
   try {
     const { data } = await supabase
-    .from('blogs')
-    .select()
-    .filter('id', 'eq', id)
-    .single();
-  
-    if(!data) return { success: false, msgText: "No record found!", status: 404 }
-    return { success: true , blog: data, status: 200 }
+      .from('blogs')
+      .select()
+      .filter('id', 'eq', id)
+      .single();
+
+    if (!data) return { success: false, msgText: "No record found!", status: 404 }
+    return { success: true, blog: data, status: 200 }
   } catch (error) {
     throw error
   }
-} 
+}
 
 export const update = async (values: IBlogMutate, id: number) => {
   try {
     const { error } = await supabase
-    .from('blogs')
-    .update(values)
-    .eq('id', id)
+      .from('blogs')
+      .update(values)
+      .eq('id', id)
 
-    if(!error) return { success: true, msgText: "Updated!", status: 200 }
+    if (!error) return { success: true, msgText: "Updated!", status: 200 }
     return { success: false, msgText: "Failed to create!", status: 500 }
   } catch (error) {
     throw error
   }
 }
 
-export const remove = async(ids: number[]) => {
+export const remove = async (ids: number[]) => {
   try {
     const { data, error } = await supabase
-    .from("blogs")
-    .delete()
-    .in('id', ids)
-    .select();
-    
-    if(error) return { success: false , msgText: "Failed to delete!", status: 404 }
-    return { success: true , deletedData: data,  msgText: "Deleted!", status: 200 }
-  } catch(error) {
+      .from("blogs")
+      .delete()
+      .in('id', ids)
+      .select();
+
+    if (error) return { success: false, msgText: "Failed to delete!", status: 404 }
+    return { success: true, deletedData: data, msgText: "Deleted!", status: 200 }
+  } catch (error) {
     throw error
   }
 }
