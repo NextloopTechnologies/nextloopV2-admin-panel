@@ -60,3 +60,14 @@ export const remove = async(ids: number[]) => {
     console.log('BLOG_DELETE_API:', error);
   }
 }
+
+export const search = async (query: string) => {
+  try {
+    const response = await fetch(`${config.apiBaseUrl}/api/blog/search?q=${encodeURIComponent(query)}`);
+    const { data } = await response.json();
+    return data;
+  } catch (error) {
+    console.log('BLOG_SEARCH_API:', error);
+    return { success: false, data: [] };
+  }
+}

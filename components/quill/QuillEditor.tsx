@@ -164,7 +164,7 @@ class ImageResize {
     if (!imgBlot) return null;
     const [line] = this.quill.getLine(this.quill.getIndex(imgBlot));
     const nextLine = line?.next;
-    
+
     if (nextLine && nextLine.domNode) {
       const node = nextLine.domNode as HTMLElement;
       const hasCenterClass = node.classList.contains('ql-align-center');
@@ -373,7 +373,7 @@ class ImageResize {
     okBtn.style.color = '#ffffff';
     okBtn.style.cursor = 'pointer';
     okBtn.style.fontSize = '12px';
-    
+
     const handleSave = () => {
       const trimmed = input.value.trim();
       const imgBlot = this.quill.constructor.find(img);
@@ -400,7 +400,7 @@ class ImageResize {
     };
 
     okBtn.addEventListener('click', handleSave);
-    
+
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -527,7 +527,7 @@ class ImageResize {
     okBtn.style.color = '#ffffff';
     okBtn.style.cursor = 'pointer';
     okBtn.style.fontSize = '12px';
-    
+
     const handleSave = () => {
       const trimmed = input.value.trim();
       if (trimmed === '') {
@@ -541,7 +541,7 @@ class ImageResize {
     };
 
     okBtn.addEventListener('click', handleSave);
-    
+
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -608,7 +608,7 @@ class ImageResize {
 
     const ctx = canvas.getContext('2d')!;
     const sourceImg = new window.Image();
-    sourceImg.crossOrigin = 'anonymous'; 
+    sourceImg.crossOrigin = 'anonymous';
     sourceImg.src = img.src;
 
     let isDrawing = false;
@@ -660,13 +660,13 @@ class ImageResize {
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(sourceImg, 0, 0, canvas.width, canvas.height);
-        
+
         ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
+
         ctx.clearRect(cropX, cropY, cropW, cropH);
         ctx.drawImage(sourceImg, 0, 0, canvas.width, canvas.height);
-        
+
         ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
         ctx.fillRect(0, 0, canvas.width, cropY);
         ctx.fillRect(0, cropY + cropH, canvas.width, canvas.height - (cropY + cropH));
@@ -768,8 +768,29 @@ class ImageResize {
 }
 Quill.register('modules/imageResize', ImageResize);
 
+import { InternalLinkSuggestion } from './InternalLinkSuggestion';
+
 const QuillEditor: React.FC<QuillEditorProps> = ({ forwardedRef, ...props }) => {
-  return <ReactQuill ref={forwardedRef} {...props} />;
+  const localRef = React.useRef<ReactQuill | null>(null);
+
+  return (
+    <>
+      <ReactQuill
+        ref={(el) => {
+          localRef.current = el;
+          if (forwardedRef) {
+            if (typeof forwardedRef === 'function') {
+              forwardedRef(el);
+            } else {
+              (forwardedRef as any).current = el;
+            }
+          }
+        }}
+        {...props}
+      />
+      <InternalLinkSuggestion editorRef={localRef} />
+    </>
+  );
 };
 
 export default QuillEditor;

@@ -74,3 +74,19 @@ export const remove = async (ids: number[]) => {
     throw error
   }
 }
+
+export const search = async (query: string, limit: number = 10) => {
+  try {
+    const { data, error } = await supabase
+      .from("blogs")
+      .select('id, title')
+      .ilike('title', `%${query}%`)
+      .order('title', { ascending: true })
+      .limit(limit);
+
+    if (error) throw error;
+    return { success: true, data: data || [], status: 200 };
+  } catch (error) {
+    throw error;
+  }
+}

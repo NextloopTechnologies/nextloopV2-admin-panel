@@ -1,9 +1,10 @@
 "use client"
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Button, Form, Input, Upload, message, Modal } from 'antd';
+import { Button, Form, Input, Upload, message, Modal, Select } from 'antd';
 import { IBlog } from '@/types/blog';
 import { extractImageUrlsFromHtml, textFieldValidator } from '@/lib/utils';
+import { authorApi } from '@/components/author';
 import { UploadOutlined } from '@ant-design/icons';
 import { FileType } from '@/types/antd';
 import type { FormProps, UploadFile, UploadProps } from 'antd';
@@ -42,6 +43,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
+  const [authorsList, setAuthorsList] = useState<{ id: number, name: string | null }[]>([]);
   const router = useRouter();
   const quillRef = useRef<any | null>(null);
 
@@ -50,16 +52,37 @@ const BlogForm: React.FC<BlogFormProps> = ({
   }
 
   useEffect(() => {
-    if (blog?.image?.length) {
-      const files = blog.image.map((file: any) => {
-        return {
-          ...file,
-          status: 'done'
+    const fetchAuthors = async () => {
+      try {
+        const result = await authorApi.list(1, 100);
+        if (result && result.data) {
+          setAuthorsList(result.data);
         }
+      } catch (err) {
+        console.error("Failed to fetch authors", err);
+      }
+    };
+    fetchAuthors();
+  }, []);
+
+  useEffect(() => {
+    if (blog) {
+      form.setFieldsValue({
+        title: blog.title || '',
+        descp: blog.descp || '',
+        author_id: blog.author_id || blog.author?.id || undefined,
       });
-      setFileList(files);
+      if (blog.image?.length) {
+        const files = blog.image.map((file: any) => {
+          return {
+            ...file,
+            status: 'done'
+          }
+        });
+        setFileList(files);
+      }
     }
-  }, [blog]);
+  }, [blog, form]);
 
   const imageHandler = () => {
     const quill = quillRef.current?.getEditor?.();
@@ -156,6 +179,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
   const initialValues = {
     title: blog?.title || '',
     descp: blog?.descp || '',
+    author_id: blog?.author_id || blog?.author?.id || undefined,
   }
 
   const fileProps: UploadProps = {
@@ -190,7 +214,11 @@ const BlogForm: React.FC<BlogFormProps> = ({
       formData.append("title", values.title as string);
       formData.append("descp", values.descp as string);
       formData.append("folder", "/AdminNextloop/Blogs");
-      
+
+      if (values.author_id) {
+        formData.append("author_id", values.author_id.toString());
+      }
+
       if (uploadedImageUrls.length) {
         const uploadedImages = uploadedImageUrls.filter(({ transformedUrl }) => usedImages.has(transformedUrl));
         if (uploadedImages.length) {
@@ -208,13 +236,16 @@ const BlogForm: React.FC<BlogFormProps> = ({
           }
         });
       }
+      //console.log("blog before submit:", blog);
       if (blog) {
+        // console.log("UPDATE API CALLED");
         if (!fileList.length && blog.image?.length) formData.append("deletedImage", blog.image[0].fileId)
         formData.append("id", blog.id?.toString()!)
         const { success, msgText } = await blogApi.update(formData);
         if (!success) return message.error(msgText || "Failed to update!");
         message.success(msgText || "Blog updated successfully!");
       } else {
+        // console.log("CREATE API CALLED");
         const { success, msgText } = await blogApi.create(formData);
         if (!success) return message.error(msgText || "Failed to create!");
         message.success(msgText || "Blog created successfully!");
@@ -255,6 +286,22 @@ const BlogForm: React.FC<BlogFormProps> = ({
         </Form.Item>
 
         <Form.Item<IBlog>
+          label="Author"
+          name="author_id"
+          rules={[
+            {
+              required: true,
+              message: 'Please select an author!',
+            }
+          ]}
+        >
+          <Select
+            placeholder="Select an Author"
+            options={authorsList.map(a => ({ value: a.id, label: a.name || 'Unknown' }))}
+          />
+        </Form.Item>
+
+        <Form.Item<IBlog>
           label="Description"
           name="descp"
           rules={[
@@ -292,9 +339,9 @@ const BlogForm: React.FC<BlogFormProps> = ({
               </Button>
             </Link>
           )}
-          <Button 
-            type="default" 
-            onClick={handlePreview} 
+          <Button
+            type="default"
+            onClick={handlePreview}
             style={{ marginRight: 8 }}
             disabled={isLoading}
           >

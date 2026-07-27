@@ -7,6 +7,7 @@ export interface IBlog {
     descp: string | null;
     image?: IFileUpload[];
     author?: IAuthor;
+    author_id?: number | null;
     active?: boolean;
     created_at?: string;
     service?: string | null;

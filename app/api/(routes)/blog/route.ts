@@ -21,7 +21,8 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const payload: IBlogMutate = {
       title: formData.get('title') as string,
-      descp: formData.get('descp') as string
+      descp: formData.get('descp') as string,
+      author_id: formData.get('author_id') ? Number(formData.get('author_id')) : null
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";
@@ -37,6 +38,8 @@ export async function POST(req: Request) {
       if (!Array.isArray(payload.image)) payload.image = [];
       payload.image = [...payload.image, ...descpImagesIds];
     }
+    // console.log("========== POST ==========");
+    // console.log("Payload:", payload);
 
     const { status, ...data } = await BlogService.create(payload);
     return Response.json({ data }, { status });
@@ -54,7 +57,8 @@ export async function PUT(req: Request) {
     const deletedImage = formData.get("deletedImage")?.toString() || "";
     const payload: IBlogMutate = {
       title: formData.get('title') as string,
-      descp: formData.get('descp') as string
+      descp: formData.get('descp') as string,
+      author_id: formData.get('author_id') ? Number(formData.get('author_id')) : null
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";
@@ -67,6 +71,9 @@ export async function PUT(req: Request) {
       await UploadFileService.deleteFiles([deletedImage])
       if (!imageInfo) payload.image = []
     };
+    // console.log("========== PUT ==========");
+    //console.log("ID:", id);
+    // console.log("Payload:", payload);
     const { status, ...data } = await BlogService.update(payload, id);
     return Response.json({ data }, { status });
   } catch (error) {

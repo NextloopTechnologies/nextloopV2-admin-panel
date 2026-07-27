@@ -1,9 +1,9 @@
 "use client"
 
 import { IBlog } from '@/types/blog';
-import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message, Select, DatePicker, Input, Modal, Tooltip } from 'antd';
+import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message, Select, DatePicker, Input, Modal, Tooltip, Dropdown, MenuProps } from 'antd';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { EyeOutlined } from '@ant-design/icons';
+import { EyeOutlined, GlobalOutlined, CopyOutlined, MoreOutlined } from '@ant-design/icons';
 import Image from 'next/image';
 import Edit from "../../public/images/icons/edit.png";
 import Link from 'next/link';
@@ -113,6 +113,40 @@ const List: React.FC = () => {
     });
   }, [blogData, globalSearch, filterAuthor, filterDateRange]);
 
+  const handleDuplicate = async (record: IBlog) => {
+    try {
+      setIsLoading(true);
+      const formData = new FormData();
+      formData.append("title", `${record.title || ''} (Copy)`);
+      formData.append("descp", record.descp || '');
+      formData.append("folder", "/AdminNextloop/Blogs");
+
+      if (record.author?.id) {
+        formData.append("author_id", record.author.id.toString());
+      }
+
+      if (record.image && Array.isArray(record.image)) {
+        record.image.forEach((img) => {
+          formData.append("descp_image_ids", JSON.stringify({ fileId: img.fileId, url: img.url }));
+        });
+      }
+
+      const { success, msgText } = await blogApi.create(formData);
+      if (!success) {
+        message.error(msgText || "Failed to duplicate!");
+        return;
+      }
+
+      message.success("Blog duplicated successfully!");
+      fetchData();
+    } catch (error) {
+      console.error("Duplicate Error:", error);
+      message.error("Something went wrong while duplicating!");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const columns: TableProps<any>['columns'] = [
     {
       title: "Sr No.",
@@ -177,30 +211,62 @@ const List: React.FC = () => {
     {
       title: "Action",
       key: "action",
-      render: (record) => (
-        <div className='flex items-center gap-3'>
-          <Tooltip title="Preview">
-            <EyeOutlined
-              style={{ fontSize: '20px', color: '#1890ff', cursor: 'pointer' }}
-              onClick={() => {
-                setPreviewBlog(record);
-                setIsPreviewOpen(true);
-              }}
-            />
-          </Tooltip>
-          <Link href={`/blog/edit/${record.id}`}>
-            <Tooltip title="Edit">
-              <Image
-                src={Edit}
-                alt='edit'
-                height={20}
-                width={20}
-                className='cursor-pointer'
+      render: (record) => {
+        const menuItems: MenuProps['items'] = [
+          {
+            key: 'duplicate',
+            label: (
+              <span className="flex items-center gap-2">
+                <CopyOutlined />
+                <span>Duplicate</span>
+              </span>
+            ),
+            onClick: () => handleDuplicate(record),
+          },
+          {
+            key: 'view-live',
+            label: (
+              <span className="flex items-center gap-2">
+                <GlobalOutlined />
+                <span>View Live</span>
+              </span>
+            ),
+            onClick: () => {
+              window.open(`https://www.nextlooptechnologies.com/blog/${record.id}/`, "_blank");
+            },
+          },
+        ];
+
+        return (
+          <div className='flex items-center gap-3'>
+            <Tooltip title="Preview">
+              <EyeOutlined
+                style={{ fontSize: '20px', color: '#1890ff', cursor: 'pointer' }}
+                onClick={() => {
+                  setPreviewBlog(record);
+                  setIsPreviewOpen(true);
+                }}
               />
             </Tooltip>
-          </Link>
-        </div>
-      )
+            <Link href={`/blog/edit/${record.id}`}>
+              <Tooltip title="Edit">
+                <Image
+                  src={Edit}
+                  alt='edit'
+                  height={20}
+                  width={20}
+                  className='cursor-pointer'
+                />
+              </Tooltip>
+            </Link>
+            <Dropdown menu={{ items: menuItems }} trigger={['click']}>
+              <MoreOutlined
+                style={{ fontSize: '20px', color: '#1890ff', cursor: 'pointer' }}
+              />
+            </Dropdown>
+          </div>
+        );
+      }
     },
   ];
 
