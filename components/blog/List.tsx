@@ -71,14 +71,6 @@ const List: React.FC = () => {
     fetchAuthors();
   }, []);
 
-  if (isError) {
-    return (
-      <div className='h-screen flex items-center justify-center text-l'>
-        {isError}
-      </div>
-    )
-  }
-
   const filteredBlogs = useMemo(() => {
     return blogData.filter(blog => {
       // 1. Global Search
@@ -112,6 +104,14 @@ const List: React.FC = () => {
       return true;
     });
   }, [blogData, globalSearch, filterAuthor, filterDateRange]);
+
+  if (isError) {
+    return (
+      <div className='h-screen flex items-center justify-center text-l'>
+        {isError}
+      </div>
+    )
+  }
 
   const handleDuplicate = async (record: IBlog) => {
     try {

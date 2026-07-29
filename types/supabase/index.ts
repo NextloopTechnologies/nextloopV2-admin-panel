@@ -96,6 +96,9 @@ export type Database = {
           title: string | null
           updated_at: string | null
           service: string | null
+          slug: string | null
+          meta_title: string | null
+          meta_description: string | null
         }
         Insert: {
           author_id?: number | null
@@ -106,6 +109,9 @@ export type Database = {
           title?: string | null
           updated_at?: string | null
           service?: string | null
+          slug?: string | null
+          meta_title?: string | null
+          meta_description?: string | null
         }
         Update: {
           author_id?: number | null
@@ -116,6 +122,9 @@ export type Database = {
           title?: string | null
           updated_at?: string | null
           service?: string | null
+          slug?: string | null
+          meta_title?: string | null
+          meta_description?: string | null
         }
         Relationships: [
           {

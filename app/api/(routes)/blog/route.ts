@@ -22,7 +22,10 @@ export async function POST(req: Request) {
     const payload: IBlogMutate = {
       title: formData.get('title') as string,
       descp: formData.get('descp') as string,
-      author_id: formData.get('author_id') ? Number(formData.get('author_id')) : null
+      author_id: formData.get('author_id') ? Number(formData.get('author_id')) : null,
+      slug: formData.get('slug') as string || null,
+      meta_title: formData.get('meta_title') as string || null,
+      meta_description: formData.get('meta_description') as string || null,
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";
@@ -58,7 +61,10 @@ export async function PUT(req: Request) {
     const payload: IBlogMutate = {
       title: formData.get('title') as string,
       descp: formData.get('descp') as string,
-      author_id: formData.get('author_id') ? Number(formData.get('author_id')) : null
+      author_id: formData.get('author_id') ? Number(formData.get('author_id')) : null,
+      slug: formData.get('slug') as string || null,
+      meta_title: formData.get('meta_title') as string || null,
+      meta_description: formData.get('meta_description') as string || null,
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";

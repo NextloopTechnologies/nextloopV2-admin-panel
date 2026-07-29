@@ -11,4 +11,7 @@ export interface IBlog {
     active?: boolean;
     created_at?: string;
     service?: string | null;
+    slug?: string | null;
+    meta_title?: string | null;
+    meta_description?: string | null;
 }

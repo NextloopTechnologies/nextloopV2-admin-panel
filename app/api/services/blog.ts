@@ -5,11 +5,15 @@ export const list = async (page: number = 1, limit: number = 10) => {
   try {
     const offset = (page - 1) * limit;
 
-    const { data, count } = await supabase
+    const { data, count, error } = await supabase
       .from("blogs")
       .select('id, title, descp, image, created_at, author(id, name) ', { count: "exact" })
       .order('id', { ascending: false })
       .range(offset, offset + limit - 1)
+
+    if (error) {
+      console.error("SUPABASE_LIST_ERROR:", error);
+    }
 
     if (data) return { success: true, data, count, status: 200 }
     return { success: false, msgText: "No records found!", status: 404 }
@@ -25,6 +29,7 @@ export const create = async (values: IBlogMutate) => {
       .insert(values)
 
     if (!error) return { success: true, msgText: "Created!", status: 201 }
+    console.error("SUPABASE_CREATE_ERROR:", error);
     return { success: false, msgText: "Failed to create!", status: 500 }
   } catch (error) {
     throw error
@@ -54,7 +59,8 @@ export const update = async (values: IBlogMutate, id: number) => {
       .eq('id', id)
 
     if (!error) return { success: true, msgText: "Updated!", status: 200 }
-    return { success: false, msgText: "Failed to create!", status: 500 }
+    console.error("SUPABASE_UPDATE_ERROR:", error);
+    return { success: false, msgText: "Failed to update!", status: 500 }
   } catch (error) {
     throw error
   }

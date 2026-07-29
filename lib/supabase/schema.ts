@@ -79,4 +79,7 @@ export const blogs = pgTable("blogs", {
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
 	authorId: bigint("author_id", { mode: "number" }).references(() => author.id, { onDelete: "restrict" }),
+	slug: varchar("slug").unique(),
+	metaTitle: varchar("meta_title", { length: 60 }),
+	metaDescription: varchar("meta_description", { length: 160 }),
 });

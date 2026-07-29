@@ -41,6 +41,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
 
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState<boolean>(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
   const [authorsList, setAuthorsList] = useState<{ id: number, name: string | null }[]>([]);
@@ -67,11 +68,20 @@ const BlogForm: React.FC<BlogFormProps> = ({
 
   useEffect(() => {
     if (blog) {
+      const generatedSlug = blog.slug || (blog.title || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)+/g, '');
+
       form.setFieldsValue({
         title: blog.title || '',
+        slug: generatedSlug,
+        meta_title: blog.meta_title || '',
+        meta_description: blog.meta_description || '',
         descp: blog.descp || '',
         author_id: blog.author_id || blog.author?.id || undefined,
       });
+      setIsSlugManuallyEdited(!!blog.slug);
       if (blog.image?.length) {
         const files = blog.image.map((file: any) => {
           return {
@@ -176,8 +186,35 @@ const BlogForm: React.FC<BlogFormProps> = ({
     imageResize: {}
   }), []);
 
+  const handleValuesChange = (changedValues: any, allValues: any) => {
+    if ('slug' in changedValues) {
+      if (!changedValues.slug) {
+        setIsSlugManuallyEdited(false);
+        const generatedSlug = (allValues.title || '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)+/g, '');
+        form.setFieldsValue({ slug: generatedSlug });
+      } else {
+        setIsSlugManuallyEdited(true);
+      }
+    }
+    if ('title' in changedValues) {
+      if (!isSlugManuallyEdited) {
+        const generatedSlug = (allValues.title || '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)+/g, '');
+        form.setFieldsValue({ slug: generatedSlug });
+      }
+    }
+  };
+
   const initialValues = {
     title: blog?.title || '',
+    slug: blog?.slug || (blog?.title ? blog.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') : ''),
+    meta_title: blog?.meta_title || '',
+    meta_description: blog?.meta_description || '',
     descp: blog?.descp || '',
     author_id: blog?.author_id || blog?.author?.id || undefined,
   }
@@ -218,6 +255,10 @@ const BlogForm: React.FC<BlogFormProps> = ({
       if (values.author_id) {
         formData.append("author_id", values.author_id.toString());
       }
+
+      formData.append("slug", values.slug || "");
+      formData.append("meta_title", values.meta_title || "");
+      formData.append("meta_description", values.meta_description || "");
 
       if (uploadedImageUrls.length) {
         const uploadedImages = uploadedImageUrls.filter(({ transformedUrl }) => usedImages.has(transformedUrl));
@@ -266,6 +307,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
         form={form}
         initialValues={initialValues}
         layout='vertical'
+        onValuesChange={handleValuesChange}
         onFinish={handleFinish}
         size='large'
       >
@@ -279,6 +321,23 @@ const BlogForm: React.FC<BlogFormProps> = ({
             },
             {
               validator: textFieldValidator
+            }
+          ]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item<IBlog>
+          label="Slug"
+          name="slug"
+          rules={[
+            {
+              required: true,
+              message: 'Please input your slug!',
+            },
+            {
+              pattern: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+              message: 'Slug must be lowercase alphanumeric characters and hyphens only, and cannot start or end with a hyphen!',
             }
           ]}
         >
@@ -325,6 +384,32 @@ const BlogForm: React.FC<BlogFormProps> = ({
           <Upload {...fileProps}>
             <Button icon={<UploadOutlined />}>Click to Upload</Button>
           </Upload>
+        </Form.Item>
+
+        <Form.Item<IBlog>
+          label="Meta Title"
+          name="meta_title"
+          rules={[
+            {
+              max: 60,
+              message: 'Meta title cannot exceed 60 characters!',
+            }
+          ]}
+        >
+          <Input maxLength={60} showCount placeholder="Enter Meta Title (max 60 characters)" />
+        </Form.Item>
+
+        <Form.Item<IBlog>
+          label="Meta Description"
+          name="meta_description"
+          rules={[
+            {
+              max: 160,
+              message: 'Meta description cannot exceed 160 characters!',
+            }
+          ]}
+        >
+          <Input.TextArea maxLength={160} showCount placeholder="Enter Meta Description (max 160 characters)" rows={4} />
         </Form.Item>
         <Form.Item
           wrapperCol={{
