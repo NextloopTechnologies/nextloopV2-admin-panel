@@ -1,5 +1,7 @@
 import { enumJobMode, enumJobType } from "@/migrations/schema";
-import { bigint, boolean, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { bigint, boolean, pgTable, text, timestamp, varchar, pgEnum } from "drizzle-orm/pg-core";
+
+export const enumBlogStatus = pgEnum("enum_blog_status", ["draft", "published"]);
 
 export const ideas = pgTable("ideas", {
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
@@ -82,4 +84,16 @@ export const blogs = pgTable("blogs", {
 	slug: varchar("slug").unique(),
 	metaTitle: varchar("meta_title", { length: 60 }),
 	metaDescription: varchar("meta_description", { length: 160 }),
+	status: enumBlogStatus("status").default("draft").notNull(),
+	categoryId: bigint("category_id", { mode: "number" }).references(() => categories.id, { onDelete: "restrict" }),
+	tags: text("tags").array(),
+});
+
+export const categories = pgTable("categories", {
+	id: bigint("id", { mode: "number" }).primaryKey().notNull(),
+	name: varchar("name", { length: 100 }).notNull(),
+	slug: varchar("slug", { length: 100 }).unique().notNull(),
+	description: text("description"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 });

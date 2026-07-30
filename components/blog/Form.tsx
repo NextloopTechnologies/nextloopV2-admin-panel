@@ -5,6 +5,7 @@ import { Button, Form, Input, Upload, message, Modal, Select } from 'antd';
 import { IBlog } from '@/types/blog';
 import { extractImageUrlsFromHtml, textFieldValidator } from '@/lib/utils';
 import { authorApi } from '@/components/author';
+import { categoryApi } from '@/components/category';
 import { UploadOutlined } from '@ant-design/icons';
 import { FileType } from '@/types/antd';
 import type { FormProps, UploadFile, UploadProps } from 'antd';
@@ -45,6 +46,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
   const [authorsList, setAuthorsList] = useState<{ id: number, name: string | null }[]>([]);
+  const [categoriesList, setCategoriesList] = useState<{ id: number, name: string | null }[]>([]);
   const router = useRouter();
   const quillRef = useRef<any | null>(null);
 
@@ -67,6 +69,20 @@ const BlogForm: React.FC<BlogFormProps> = ({
   }, []);
 
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await categoryApi.list();
+        if (result && result.data) {
+          setCategoriesList(result.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories", err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
     if (blog) {
       const generatedSlug = blog.slug || (blog.title || '')
         .toLowerCase()
@@ -80,6 +96,9 @@ const BlogForm: React.FC<BlogFormProps> = ({
         meta_description: blog.meta_description || '',
         descp: blog.descp || '',
         author_id: blog.author_id || blog.author?.id || undefined,
+        status: blog.status || 'draft',
+        category_id: blog.category_id || blog.categories?.id || undefined,
+        tags: blog.tags || [],
       });
       setIsSlugManuallyEdited(!!blog.slug);
       if (blog.image?.length) {
@@ -217,6 +236,9 @@ const BlogForm: React.FC<BlogFormProps> = ({
     meta_description: blog?.meta_description || '',
     descp: blog?.descp || '',
     author_id: blog?.author_id || blog?.author?.id || undefined,
+    status: blog?.status || 'draft',
+    category_id: blog?.category_id || blog?.categories?.id || undefined,
+    tags: blog?.tags || [],
   }
 
   const fileProps: UploadProps = {
@@ -259,6 +281,15 @@ const BlogForm: React.FC<BlogFormProps> = ({
       formData.append("slug", values.slug || "");
       formData.append("meta_title", values.meta_title || "");
       formData.append("meta_description", values.meta_description || "");
+      formData.append("status", values.status || "draft");
+
+      if (values.category_id) {
+        formData.append("category_id", values.category_id.toString());
+      }
+
+      if (values.tags) {
+        formData.append("tags", JSON.stringify(values.tags));
+      }
 
       if (uploadedImageUrls.length) {
         const uploadedImages = uploadedImageUrls.filter(({ transformedUrl }) => usedImages.has(transformedUrl));
@@ -357,6 +388,58 @@ const BlogForm: React.FC<BlogFormProps> = ({
           <Select
             placeholder="Select an Author"
             options={authorsList.map(a => ({ value: a.id, label: a.name || 'Unknown' }))}
+          />
+        </Form.Item>
+
+        <Form.Item<IBlog>
+          label="Category"
+          name="category_id"
+          rules={[
+            {
+              required: false,
+            }
+          ]}
+        >
+          <Select
+            placeholder="Select a Category"
+            options={categoriesList.map(c => ({ value: c.id, label: c.name || 'Unknown' }))}
+            allowClear
+          />
+        </Form.Item>
+
+        <Form.Item<IBlog>
+          label="Status"
+          name="status"
+          rules={[
+            {
+              required: true,
+              message: 'Please select a status!',
+            }
+          ]}
+        >
+          <Select
+            placeholder="Select Status"
+            options={[
+              { value: 'draft', label: 'Draft' },
+              { value: 'published', label: 'Published' }
+            ]}
+          />
+        </Form.Item>
+
+        <Form.Item<IBlog>
+          label="Tags"
+          name="tags"
+          rules={[
+            {
+              required: false,
+            }
+          ]}
+        >
+          <Select
+            mode="tags"
+            style={{ width: '100%' }}
+            placeholder="Enter tags (press Enter or comma to add)"
+            tokenSeparators={[',']}
           />
         </Form.Item>
 

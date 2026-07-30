@@ -99,6 +99,9 @@ export type Database = {
           slug: string | null
           meta_title: string | null
           meta_description: string | null
+          status: "draft" | "published"
+          category_id: number | null
+          tags: string[] | null
         }
         Insert: {
           author_id?: number | null
@@ -112,6 +115,9 @@ export type Database = {
           slug?: string | null
           meta_title?: string | null
           meta_description?: string | null
+          status?: "draft" | "published"
+          category_id?: number | null
+          tags?: string[] | null
         }
         Update: {
           author_id?: number | null
@@ -125,6 +131,9 @@ export type Database = {
           slug?: string | null
           meta_title?: string | null
           meta_description?: string | null
+          status?: "draft" | "published"
+          category_id?: number | null
+          tags?: string[] | null
         }
         Relationships: [
           {
@@ -134,7 +143,41 @@ export type Database = {
             referencedRelation: "author"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "blogs_category_id_categories_id_fk"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          }
         ]
+      }
+      categories: {
+        Row: {
+          id: number
+          name: string
+          slug: string
+          description: string | null
+          created_at: string
+          updated_at: string | null
+        }
+        Insert: {
+          id?: number
+          name: string
+          slug: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: number
+          name?: string
+          slug?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       enquiry: {
         Row: {

@@ -1,7 +1,7 @@
 "use client"
 
 import { IBlog } from '@/types/blog';
-import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message, Select, DatePicker, Input, Modal, Tooltip, Dropdown, MenuProps } from 'antd';
+import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message, Select, DatePicker, Input, Modal, Tooltip, Dropdown, MenuProps, Tag } from 'antd';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { EyeOutlined, GlobalOutlined, CopyOutlined, MoreOutlined } from '@ant-design/icons';
 import Image from 'next/image';
@@ -13,6 +13,7 @@ import { trimText } from '@/lib/utils';
 import { withAuth } from '../auth';
 import dayjs from 'dayjs';
 import { authorApi } from '@/components/author';
+import { categoryApi } from '@/components/category';
 
 const List: React.FC = () => {
 
@@ -25,10 +26,14 @@ const List: React.FC = () => {
   // Search & Filter State
   const [globalSearch, setGlobalSearch] = useState<string>("");
   const [filterAuthor, setFilterAuthor] = useState<string>("ALL");
+  const [filterCategory, setFilterCategory] = useState<string>("ALL");
+  const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [filterDateRange, setFilterDateRange] = useState<any>(null);
 
   // Authors state
   const [authorsList, setAuthorsList] = useState<{ id: number, name: string | null }[]>([]);
+  // Categories state
+  const [categoriesList, setCategoriesList] = useState<{ id: number, name: string | null }[]>([]);
 
   // Preview state
   const [previewBlog, setPreviewBlog] = useState<IBlog | null>(null);
@@ -71,6 +76,20 @@ const List: React.FC = () => {
     fetchAuthors();
   }, []);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await categoryApi.list();
+        if (result && result.data) {
+          setCategoriesList(result.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories", err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   const filteredBlogs = useMemo(() => {
     return blogData.filter(blog => {
       // 1. Global Search
@@ -101,9 +120,20 @@ const List: React.FC = () => {
         }
       }
 
+      // 4. Category Filter
+      if (filterCategory !== 'ALL') {
+        const catId = blog.category_id?.toString();
+        if (catId !== filterCategory) return false;
+      }
+
+      // 5. Status Filter
+      if (filterStatus !== 'ALL') {
+        if (blog.status !== filterStatus) return false;
+      }
+
       return true;
     });
-  }, [blogData, globalSearch, filterAuthor, filterDateRange]);
+  }, [blogData, globalSearch, filterAuthor, filterDateRange, filterCategory, filterStatus]);
 
   if (isError) {
     return (
@@ -125,11 +155,21 @@ const List: React.FC = () => {
         formData.append("author_id", record.author.id.toString());
       }
 
+      if (record.category_id) {
+        formData.append("category_id", record.category_id.toString());
+      }
+
+      if (record.tags && record.tags.length > 0) {
+        formData.append("tags", JSON.stringify(record.tags));
+      }
+
       if (record.image && Array.isArray(record.image)) {
         record.image.forEach((img) => {
           formData.append("descp_image_ids", JSON.stringify({ fileId: img.fileId, url: img.url }));
         });
       }
+
+      formData.append("status", "draft");
 
       const { success, msgText } = await blogApi.create(formData);
       if (!success) {
@@ -167,6 +207,16 @@ const List: React.FC = () => {
       )
     },
     {
+      title: "Category",
+      dataIndex: "categories",
+      key: "categories",
+      render: (categories) => (
+        categories?.name ? (
+          <Tag color="cyan">{categories.name}</Tag>
+        ) : '-'
+      )
+    },
+    {
       title: "Title",
       dataIndex: "title",
       key: "title",
@@ -181,6 +231,19 @@ const List: React.FC = () => {
       dataIndex: "created_at",
       key: "created_at",
       render: (created_at) => created_at ? dayjs(created_at).format('DD-MM-YYYY') : '-'
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => {
+        const color = status === 'published' ? 'green' : 'orange';
+        return (
+          <Tag color={color}>
+            {(status || 'draft').toUpperCase()}
+          </Tag>
+        )
+      }
     },
     {
       title: "Description",
@@ -223,7 +286,10 @@ const List: React.FC = () => {
             ),
             onClick: () => handleDuplicate(record),
           },
-          {
+        ];
+
+        if (record.status === 'published') {
+          menuItems.push({
             key: 'view-live',
             label: (
               <span className="flex items-center gap-2">
@@ -234,8 +300,8 @@ const List: React.FC = () => {
             onClick: () => {
               window.open(`https://www.nextlooptechnologies.com/blog/${record.id}/`, "_blank");
             },
-          },
-        ];
+          });
+        }
 
         return (
           <div className='flex items-center gap-3'>
@@ -277,7 +343,11 @@ const List: React.FC = () => {
     descp: blog.descp,
     image: blog.image,
     author: blog.author,
-    created_at: blog.created_at
+    created_at: blog.created_at,
+    status: blog.status,
+    categories: blog.categories,
+    category_id: blog.category_id,
+    tags: blog.tags
   }));
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -308,57 +378,90 @@ const List: React.FC = () => {
   const handleResetFilters = () => {
     setGlobalSearch("");
     setFilterAuthor("ALL");
+    setFilterCategory("ALL");
+    setFilterStatus("ALL");
     setFilterDateRange(null);
   };
 
   return (
     <div className='content-container'>
-      <h1 className='font-bold text-3xl mb-5'>All Blogs</h1>
-
-      {/* Add Button & Filter Panel */}
-      <div className='flex flex-wrap items-center gap-4 mb-6'>
-        <Link href={"/blog/create"}>
-          <Button type="primary" size='large' style={{ height: '40px', display: 'flex', alignItems: 'center' }}>
-            Add
-          </Button>
-        </Link>
-
-        <div className='bg-gray-50 px-4 rounded-lg flex flex-wrap gap-4 items-center border border-gray-200 flex-1' style={{ minHeight: '40px', paddingTop: '4px', paddingBottom: '4px' }}>
-          <div style={{ flex: '1 1 200px' }}>
-            <Input
-              placeholder="Search title, desc, author..."
-              value={globalSearch}
-              onChange={e => setGlobalSearch(e.target.value)}
-              allowClear
-              style={{ height: '32px' }}
-            />
-          </div>
-
-          <div style={{ width: 180 }}>
-            <Select
-              value={filterAuthor}
-              onChange={setFilterAuthor}
-              style={{ width: '100%', height: '32px' }}
-              options={[
-                { value: 'ALL', label: 'All Authors' },
-                ...authorsList.map(a => ({ value: a.id.toString(), label: a.name || 'Unknown' }))
-              ]}
-            />
-          </div>
-
-          <div style={{ flex: '1 1 240px' }}>
-            <DatePicker.RangePicker
-              value={filterDateRange}
-              onChange={setFilterDateRange}
-              style={{ width: '100%', height: '32px' }}
-            />
-          </div>
-
-          <div>
-            <Button onClick={handleResetFilters} style={{ height: '32px', display: 'flex', alignItems: 'center' }}>
-              Reset
+      <div className="flex justify-between items-center mb-6">
+        <h1 className='font-bold text-3xl'>All Blogs</h1>
+        <div className="flex gap-3">
+          <Link href={"/blog/category"}>
+            <Button size='large' style={{ height: '40px', display: 'flex', alignItems: 'center' }}>
+              Manage Categories
             </Button>
-          </div>
+          </Link>
+          <Link href={"/blog/create"}>
+            <Button type="primary" size='large' style={{ height: '40px', display: 'flex', alignItems: 'center' }}>
+              + Add
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Filter Panel */}
+      <div className='bg-gray-50 px-4 py-2 rounded-lg flex flex-wrap gap-4 items-center border border-gray-200 mb-6' style={{ minHeight: '48px' }}>
+        <div style={{ flex: '1 1 200px' }}>
+          <Input
+            placeholder="Search title, desc, author..."
+            value={globalSearch}
+            onChange={e => setGlobalSearch(e.target.value)}
+            allowClear
+            style={{ height: '32px' }}
+          />
+        </div>
+
+        <div style={{ width: 160 }}>
+          <Select
+            value={filterAuthor}
+            onChange={setFilterAuthor}
+            style={{ width: '100%', height: '32px' }}
+            options={[
+              { value: 'ALL', label: 'All Authors' },
+              ...authorsList.map(a => ({ value: a.id.toString(), label: a.name || 'Unknown' }))
+            ]}
+          />
+        </div>
+
+        <div style={{ width: 160 }}>
+          <Select
+            value={filterCategory}
+            onChange={setFilterCategory}
+            style={{ width: '100%', height: '32px' }}
+            options={[
+              { value: 'ALL', label: 'All Categories' },
+              ...categoriesList.map(c => ({ value: c.id?.toString() || '', label: c.name || 'Unknown' }))
+            ]}
+          />
+        </div>
+
+        <div style={{ width: 140 }}>
+          <Select
+            value={filterStatus}
+            onChange={setFilterStatus}
+            style={{ width: '100%', height: '32px' }}
+            options={[
+              { value: 'ALL', label: 'All Status' },
+              { value: 'draft', label: 'Draft' },
+              { value: 'published', label: 'Published' }
+            ]}
+          />
+        </div>
+
+        <div style={{ flex: '1 1 240px' }}>
+          <DatePicker.RangePicker
+            value={filterDateRange}
+            onChange={setFilterDateRange}
+            style={{ width: '100%', height: '32px' }}
+          />
+        </div>
+
+        <div>
+          <Button onClick={handleResetFilters} style={{ height: '32px', display: 'flex', alignItems: 'center' }}>
+            Reset
+          </Button>
         </div>
       </div>
 

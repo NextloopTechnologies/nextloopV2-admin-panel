@@ -26,6 +26,9 @@ export async function POST(req: Request) {
       slug: formData.get('slug') as string || null,
       meta_title: formData.get('meta_title') as string || null,
       meta_description: formData.get('meta_description') as string || null,
+      status: (formData.get('status') as "draft" | "published") || 'draft',
+      category_id: formData.get('category_id') ? Number(formData.get('category_id')) : null,
+      tags: formData.get('tags') ? JSON.parse(formData.get('tags') as string) : null,
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";
@@ -65,6 +68,9 @@ export async function PUT(req: Request) {
       slug: formData.get('slug') as string || null,
       meta_title: formData.get('meta_title') as string || null,
       meta_description: formData.get('meta_description') as string || null,
+      status: (formData.get('status') as "draft" | "published") || 'draft',
+      category_id: formData.get('category_id') ? Number(formData.get('category_id')) : null,
+      tags: formData.get('tags') ? JSON.parse(formData.get('tags') as string) : null,
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";
