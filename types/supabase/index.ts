@@ -69,6 +69,7 @@ export type Database = {
           id: number
           name: string | null
           profile: string | null
+          description: string | null
         }
         Insert: {
           created_at?: string
@@ -76,6 +77,7 @@ export type Database = {
           id?: number
           name?: string | null
           profile?: string | null
+          description?: string | null
         }
         Update: {
           created_at?: string
@@ -83,6 +85,7 @@ export type Database = {
           id?: number
           name?: string | null
           profile?: string | null
+          description?: string | null
         }
         Relationships: []
       }
@@ -102,6 +105,7 @@ export type Database = {
           status: "draft" | "published"
           category_id: number | null
           tags: string[] | null
+          canonical_url: string | null
         }
         Insert: {
           author_id?: number | null
@@ -118,6 +122,7 @@ export type Database = {
           status?: "draft" | "published"
           category_id?: number | null
           tags?: string[] | null
+          canonical_url?: string | null
         }
         Update: {
           author_id?: number | null
@@ -134,6 +139,7 @@ export type Database = {
           status?: "draft" | "published"
           category_id?: number | null
           tags?: string[] | null
+          canonical_url?: string | null
         }
         Relationships: [
           {

@@ -19,8 +19,10 @@ export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const payload: IAuthor = {
-      name: formData.get('name') as string, 
-      designation: formData.get('designation') as string
+      name: formData.get('name') as string,
+      designation: formData.get('designation') as string,
+      profile: (formData.get('profile') as string) || null,
+      description: (formData.get('description') as string) || null,
     }
 
     const { status, ...data} = await AuthorService.create(payload);
@@ -37,8 +39,10 @@ export async function PUT(req: Request) {
     const formData = await req.formData();
     const id = Number(formData.get("id"));
     const payload: IAuthor = {
-      name: formData.get('name') as string, 
-      designation: formData.get('designation') as string
+      name: formData.get('name') as string,
+      designation: formData.get('designation') as string,
+      profile: (formData.get('profile') as string) || null,
+      description: (formData.get('description') as string) || null,
     }
     
     const { status, ...data} = await AuthorService.update(payload, id);

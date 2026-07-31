@@ -16,6 +16,8 @@ import 'react-quill/dist/quill.snow.css';
 import { withAuth } from '../auth';
 import dynamic from 'next/dynamic';
 import config from '@/config';
+import { Tooltip } from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
 import { deleteFiles, getTransformedUrl } from '@/app/api/services/uploadFile';
 import parse from "html-react-parser";
 
@@ -43,6 +45,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState<boolean>(false);
+  const [isCanonicalManuallyEdited, setIsCanonicalManuallyEdited] = useState<boolean>(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
   const [authorsList, setAuthorsList] = useState<{ id: number, name: string | null }[]>([]);
@@ -89,9 +92,13 @@ const BlogForm: React.FC<BlogFormProps> = ({
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)+/g, '');
 
+      const generatedCanonical = blog.canonical_url ||
+        (generatedSlug ? `${config.siteUrl}/blog/${generatedSlug}` : '');
+
       form.setFieldsValue({
         title: blog.title || '',
         slug: generatedSlug,
+        canonical_url: generatedCanonical,
         meta_title: blog.meta_title || '',
         meta_description: blog.meta_description || '',
         descp: blog.descp || '',
@@ -101,6 +108,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
         tags: blog.tags || [],
       });
       setIsSlugManuallyEdited(!!blog.slug);
+      setIsCanonicalManuallyEdited(!!blog.canonical_url);
       if (blog.image?.length) {
         const files = blog.image.map((file: any) => {
           return {
@@ -206,6 +214,15 @@ const BlogForm: React.FC<BlogFormProps> = ({
   }), []);
 
   const handleValuesChange = (changedValues: any, allValues: any) => {
+    if ('canonical_url' in changedValues) {
+      if (!changedValues.canonical_url) {
+        setIsCanonicalManuallyEdited(false);
+        const currentSlug = allValues.slug || '';
+        form.setFieldsValue({ canonical_url: currentSlug ? `${config.siteUrl}/blog/${currentSlug}` : '' });
+      } else {
+        setIsCanonicalManuallyEdited(true);
+      }
+    }
     if ('slug' in changedValues) {
       if (!changedValues.slug) {
         setIsSlugManuallyEdited(false);
@@ -214,8 +231,14 @@ const BlogForm: React.FC<BlogFormProps> = ({
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/(^-|-$)+/g, '');
         form.setFieldsValue({ slug: generatedSlug });
+        if (!isCanonicalManuallyEdited) {
+          form.setFieldsValue({ canonical_url: generatedSlug ? `${config.siteUrl}/blog/${generatedSlug}` : '' });
+        }
       } else {
         setIsSlugManuallyEdited(true);
+        if (!isCanonicalManuallyEdited) {
+          form.setFieldsValue({ canonical_url: `${config.siteUrl}/blog/${changedValues.slug}` });
+        }
       }
     }
     if ('title' in changedValues) {
@@ -225,6 +248,9 @@ const BlogForm: React.FC<BlogFormProps> = ({
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/(^-|-$)+/g, '');
         form.setFieldsValue({ slug: generatedSlug });
+        if (!isCanonicalManuallyEdited) {
+          form.setFieldsValue({ canonical_url: generatedSlug ? `${config.siteUrl}/blog/${generatedSlug}` : '' });
+        }
       }
     }
   };
@@ -232,6 +258,10 @@ const BlogForm: React.FC<BlogFormProps> = ({
   const initialValues = {
     title: blog?.title || '',
     slug: blog?.slug || (blog?.title ? blog.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') : ''),
+    canonical_url: blog?.canonical_url || (() => {
+      const slug = blog?.slug || (blog?.title ? blog.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') : '');
+      return slug ? `${config.siteUrl}/blog/${slug}` : '';
+    })(),
     meta_title: blog?.meta_title || '',
     meta_description: blog?.meta_description || '',
     descp: blog?.descp || '',
@@ -279,6 +309,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
       }
 
       formData.append("slug", values.slug || "");
+      formData.append("canonical_url", values.canonical_url || "");
       formData.append("meta_title", values.meta_title || "");
       formData.append("meta_description", values.meta_description || "");
       formData.append("status", values.status || "draft");
@@ -373,6 +404,26 @@ const BlogForm: React.FC<BlogFormProps> = ({
           ]}
         >
           <Input />
+        </Form.Item>
+
+        <Form.Item<IBlog>
+          label={
+            <span>
+              Canonical URL&nbsp;
+              <Tooltip title="Auto-generated from slug. Edit to override. Leave blank to save as empty.">
+                <InfoCircleOutlined style={{ color: 'rgba(0,0,0,0.45)' }} />
+              </Tooltip>
+            </span>
+          }
+          name="canonical_url"
+          rules={[
+            {
+              type: 'url',
+              message: 'Please enter a valid URL (e.g. https://example.com/blog/my-post)',
+            }
+          ]}
+        >
+          <Input placeholder={`${config.siteUrl}/blog/your-slug`} allowClear />
         </Form.Item>
 
         <Form.Item<IBlog>

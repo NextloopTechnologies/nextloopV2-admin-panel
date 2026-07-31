@@ -18,6 +18,7 @@ export interface IBlog {
     category_id?: number | null;
     categories?: { id: number; name: string } | null;
     tags?: string[] | null;
+    canonical_url?: string | null;
 }
 
 export interface ICategory {

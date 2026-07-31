@@ -18,6 +18,7 @@ export const author = pgTable("author", {
 	profile: text("profile"),
 	name: text("name"),
 	designation: text("designation"),
+	description: text("description"),
 });
 
 export const jobs = pgTable("jobs", {
@@ -87,6 +88,7 @@ export const blogs = pgTable("blogs", {
 	status: enumBlogStatus("status").default("draft").notNull(),
 	categoryId: bigint("category_id", { mode: "number" }).references(() => categories.id, { onDelete: "restrict" }),
 	tags: text("tags").array(),
+	canonicalUrl: text("canonical_url"),
 });
 
 export const categories = pgTable("categories", {

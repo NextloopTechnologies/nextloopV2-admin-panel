@@ -29,6 +29,7 @@ export async function POST(req: Request) {
       status: (formData.get('status') as "draft" | "published") || 'draft',
       category_id: formData.get('category_id') ? Number(formData.get('category_id')) : null,
       tags: formData.get('tags') ? JSON.parse(formData.get('tags') as string) : null,
+      canonical_url: (formData.get('canonical_url') as string) || null,
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";
@@ -71,6 +72,7 @@ export async function PUT(req: Request) {
       status: (formData.get('status') as "draft" | "published") || 'draft',
       category_id: formData.get('category_id') ? Number(formData.get('category_id')) : null,
       tags: formData.get('tags') ? JSON.parse(formData.get('tags') as string) : null,
+      canonical_url: (formData.get('canonical_url') as string) || null,
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";
@@ -113,7 +115,13 @@ export async function DELETE(req: Request) {
           .filter((img): img is { fileId: string; url: string } => !!img && typeof img.fileId?.toString() === "string")
           .map(img => img.fileId);
 
-        if (fileIds.length) await UploadFileService.deleteFiles(fileIds);
+        if (fileIds.length) {
+          try {
+            await UploadFileService.deleteFiles(fileIds);
+          } catch (ikError: any) {
+            console.warn("IMAGEKIT_DELETE_WARNING:", ikError?.message || ikError);
+          }
+        }
       }
     }
 

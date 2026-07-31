@@ -40,9 +40,9 @@ export const getTransformedUrl = (url: string) => {
 
 export const deleteFiles = async (files: string[]) => {
   try {
-    imagekit.bulkDeleteFiles(files);
-    return 
+    await imagekit.bulkDeleteFiles(files);
+    return;
   } catch (error) {
-    throw error
+    throw error;
   }
 }
