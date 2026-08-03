@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       meta_description: formData.get('meta_description') as string || null,
       status: (formData.get('status') as "draft" | "published") || 'draft',
       category_id: formData.get('category_id') ? Number(formData.get('category_id')) : null,
-      tags: formData.get('tags') ? JSON.parse(formData.get('tags') as string) : null,
+      tags: formData.get('tags') ? JSON.parse(formData.get('tags') as string) : [],
       canonical_url: (formData.get('canonical_url') as string) || null,
     }
 
@@ -71,7 +71,7 @@ export async function PUT(req: Request) {
       meta_description: formData.get('meta_description') as string || null,
       status: (formData.get('status') as "draft" | "published") || 'draft',
       category_id: formData.get('category_id') ? Number(formData.get('category_id')) : null,
-      tags: formData.get('tags') ? JSON.parse(formData.get('tags') as string) : null,
+      tags: formData.get('tags') ? JSON.parse(formData.get('tags') as string) : [],
       canonical_url: (formData.get('canonical_url') as string) || null,
     }
 

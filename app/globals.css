@@ -55,13 +55,16 @@
 }
 
 /* Ensure captions immediately following floated images clear floats to stay underneath */
-.ql-editor p:has(img[style*="float"]) + p,
-.ql-editor p:has(img[style*="float"]) + div,
-.ql-editor img[style*="float"] + p,
-.ql-editor img[style*="float"] + div,
-.ql-editor p:has(img[style*="float"]) + .ql-align-center,
-.ql-editor img[style*="float"] + .ql-align-center {
+.ql-editor p:has(img[style*="float"])+p,
+.ql-editor p:has(img[style*="float"])+div,
+.ql-editor img[style*="float"]+p,
+.ql-editor img[style*="float"]+div,
+.ql-editor p:has(img[style*="float"])+.ql-align-center,
+.ql-editor img[style*="float"]+.ql-align-center {
   clear: both !important;
 }
 
-
+/* Quill editor default height - approximately 3 rows */
+.ql-editor {
+  min-height: 100px;
+}

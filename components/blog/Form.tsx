@@ -285,7 +285,9 @@ const BlogForm: React.FC<BlogFormProps> = ({
       return false;
     },
     onChange: ({ fileList: newFileList }) => {
-      setFileList(newFileList)
+      setFileList(newFileList);
+      // Re-trigger image field validation when file is added/removed
+      setTimeout(() => form.validateFields(['image']), 0);
     }
   }
 
@@ -514,7 +516,19 @@ const BlogForm: React.FC<BlogFormProps> = ({
           />
         </Form.Item>
         <Form.Item<IBlog>
-          label={<span className='text-l'>Blog Image</span>}>
+          label={<span className='text-l'>Blog Image <span style={{ color: '#ff4d4f' }}>*</span></span>}
+          name="image"
+          rules={[
+            {
+              validator: () => {
+                if (fileList.length === 0) {
+                  return Promise.reject(new Error('Please upload a blog image!'));
+                }
+                return Promise.resolve();
+              },
+            }
+          ]}
+        >
           <Upload {...fileProps}>
             <Button icon={<UploadOutlined />}>Click to Upload</Button>
           </Upload>
@@ -524,6 +538,10 @@ const BlogForm: React.FC<BlogFormProps> = ({
           label="Meta Title"
           name="meta_title"
           rules={[
+            {
+              required: true,
+              message: 'Please input meta title!',
+            },
             {
               max: 60,
               message: 'Meta title cannot exceed 60 characters!',
@@ -537,6 +555,10 @@ const BlogForm: React.FC<BlogFormProps> = ({
           label="Meta Description"
           name="meta_description"
           rules={[
+            {
+              required: true,
+              message: 'Please input meta description!',
+            },
             {
               max: 160,
               message: 'Meta description cannot exceed 160 characters!',
