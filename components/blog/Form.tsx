@@ -19,7 +19,7 @@ import config from '@/config';
 import { Tooltip } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { deleteFiles, getTransformedUrl } from '@/app/api/services/uploadFile';
-import parse from "html-react-parser";
+import BlogPreviewModal from './BlogPreviewModal';
 
 const QuillNoSSRWrapper = dynamic(() => import('../quill/QuillEditor'), {
   ssr: false,
@@ -50,6 +50,10 @@ const BlogForm: React.FC<BlogFormProps> = ({
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
   const [authorsList, setAuthorsList] = useState<{ id: number, name: string | null }[]>([]);
   const [categoriesList, setCategoriesList] = useState<{ id: number, name: string | null }[]>([]);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState<boolean>(false);
+  const [videoUrl, setVideoUrl] = useState<string>('');
+  const [videoUrlError, setVideoUrlError] = useState<string>('');
+  const pendingVideoQuillRef = useRef<any | null>(null);
   const router = useRouter();
   const quillRef = useRef<any | null>(null);
 
@@ -207,7 +211,14 @@ const BlogForm: React.FC<BlogFormProps> = ({
         ['clean']
       ],
       handlers: {
-        image: imageHandler
+        image: imageHandler,
+        video: function () {
+          const quill = (this as any).quill;
+          pendingVideoQuillRef.current = quill;
+          setVideoUrl('');
+          setVideoUrlError('');
+          setIsVideoModalOpen(true);
+        }
       }
     },
     imageResize: {}
@@ -594,37 +605,80 @@ const BlogForm: React.FC<BlogFormProps> = ({
         </Form.Item>
       </Form>
 
-      <Modal
-        title="Blog Preview"
+      <BlogPreviewModal
         open={isPreviewOpen}
-        onCancel={() => setIsPreviewOpen(false)}
-        footer={[
-          <Button key="close" onClick={() => setIsPreviewOpen(false)}>
-            Close
-          </Button>
-        ]}
-        width={800}
+        onClose={() => setIsPreviewOpen(false)}
+        title={form.getFieldValue('title') || 'Untitled Blog'}
+        html={quillRef.current?.getEditor?.().root.innerHTML || form.getFieldValue('descp') || ''}
+        imageSrc={fileList[0]?.originFileObj ? URL.createObjectURL(fileList[0].originFileObj) : (fileList[0] as any)?.url}
+
+      />
+
+      {/* Video Embed Modal */}
+      <Modal
+        title="Embed Video"
+        open={isVideoModalOpen}
+        onCancel={() => { setIsVideoModalOpen(false); setVideoUrl(''); setVideoUrlError(''); }}
+        onOk={() => {
+          const url = videoUrl.trim();
+          if (!url) {
+            setVideoUrlError('Please enter a video URL.');
+            return;
+          }
+
+          const isYouTube = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/)|youtu\.be\/)/.test(url);
+          const isVimeo = /^(https?:\/\/)?(www\.)?vimeo\.com\//.test(url);
+
+          if (!isYouTube && !isVimeo) {
+            setVideoUrlError('Only YouTube or Vimeo video URLs are allowed.');
+            return;
+          }
+
+          // Convert YouTube watch URL to embed URL
+          let embedUrl = url;
+          if (isYouTube) {
+            const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            if (ytMatch) embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
+          }
+
+          // Convert Vimeo URL to embed URL
+          if (isVimeo) {
+            const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+            if (vimeoMatch) embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+          }
+
+          const quill = pendingVideoQuillRef.current;
+          if (quill) {
+            const range = quill.getSelection(true);
+            quill.insertEmbed(range.index, 'video', embedUrl);
+            quill.setSelection(range.index + 1);
+          }
+
+          setIsVideoModalOpen(false);
+          setVideoUrl('');
+          setVideoUrlError('');
+        }}
+        okText="Embed"
+        cancelText="Cancel"
+        width={480}
       >
-        <div style={{ padding: '20px 0' }}>
-          {fileList.length > 0 && (
-            <div style={{ marginBottom: 20, display: 'flex', justifyContent: 'center' }}>
-              <img
-                src={
-                  fileList[0].originFileObj
-                    ? URL.createObjectURL(fileList[0].originFileObj)
-                    : fileList[0].url
-                }
-                alt="Featured Banner"
-                style={{ maxWidth: '100%', maxHeight: 300, objectFit: 'cover', borderRadius: 8 }}
-              />
-            </div>
+        <div style={{ marginBottom: 8 }}>
+          <Input
+            placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..."
+            value={videoUrl}
+            onChange={(e) => { setVideoUrl(e.target.value); setVideoUrlError(''); }}
+            onPressEnter={() => {
+              const okBtn = document.querySelector('.ant-modal-footer .ant-btn-primary') as HTMLButtonElement;
+              okBtn?.click();
+            }}
+            size="large"
+            autoFocus
+          />
+          {videoUrlError && (
+            <div style={{ color: '#ff4d4f', marginTop: 4, fontSize: 13 }}>{videoUrlError}</div>
           )}
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: 15 }}>
-            {form.getFieldValue('title') || 'Untitled Blog'}
-          </h1>
-          <div style={{ borderBottom: '1px solid #f0f0f0', marginBottom: 20 }} />
-          <div className="ql-editor" style={{ fontSize: 16, lineHeight: 1.6 }}>
-            {parse(quillRef.current?.getEditor?.().root.innerHTML || form.getFieldValue('descp') || '')}
+          <div style={{ color: '#999', marginTop: 8, fontSize: 12 }}>
+            Supported: YouTube and Vimeo only
           </div>
         </div>
       </Modal>

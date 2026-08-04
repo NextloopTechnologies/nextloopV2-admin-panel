@@ -12,6 +12,7 @@ import parse from "html-react-parser"
 import { trimText } from '@/lib/utils';
 import { withAuth } from '../auth';
 import dayjs from 'dayjs';
+import BlogPreviewModal from './BlogPreviewModal';
 import { authorApi } from '@/components/author';
 import { categoryApi } from '@/components/category';
 
@@ -492,42 +493,16 @@ const List: React.FC = () => {
         }}
       />
 
-      <Modal
-        title="Blog Preview"
-        open={isPreviewOpen}
-        onCancel={() => { setIsPreviewOpen(false); setPreviewBlog(null); }}
-        footer={[
-          <Button key="close" onClick={() => { setIsPreviewOpen(false); setPreviewBlog(null); }}>
-            Close
-          </Button>
-        ]}
-        width={800}
-      >
-        {previewBlog && (
-          <div style={{ padding: '20px 0' }}>
-            {previewBlog.image && previewBlog.image.length > 0 && (
-              <div style={{ marginBottom: 20, display: 'flex', justifyContent: 'center' }}>
-                <img
-                  src={previewBlog.image[0].url}
-                  alt="Featured Banner"
-                  style={{ maxWidth: '100%', maxHeight: 300, objectFit: 'cover', borderRadius: 8 }}
-                />
-              </div>
-            )}
-            <div className="flex gap-4 text-xs text-gray-500 mb-3">
-              {previewBlog.author && <span>Author: <strong>{previewBlog.author.name}</strong></span>}
-              {previewBlog.created_at && <span>Date: <strong>{dayjs(previewBlog.created_at).format('YYYY-MM-DD')}</strong></span>}
-            </div>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: 15 }}>
-              {previewBlog.title || 'Untitled Blog'}
-            </h1>
-            <div style={{ borderBottom: '1px solid #f0f0f0', marginBottom: 20 }} />
-            <div className="ql-editor" style={{ fontSize: 16, lineHeight: 1.6 }}>
-              {parse(previewBlog.descp || '')}
-            </div>
-          </div>
-        )}
-      </Modal>
+      {previewBlog && (
+        <BlogPreviewModal
+          open={isPreviewOpen}
+          onClose={() => { setIsPreviewOpen(false); setPreviewBlog(null); }}
+          title={previewBlog.title || 'Untitled Blog'}
+          html={previewBlog.descp || ''}
+          imageSrc={previewBlog.image?.[0]?.url}
+
+        />
+      )}
     </div>
   )
 }
