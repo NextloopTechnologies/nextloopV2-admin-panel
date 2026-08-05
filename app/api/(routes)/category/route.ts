@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     const payload: Partial<ICategory> = {
       name: formData.get('name') as string,
       slug: formData.get('slug') as string,
-      description: formData.get('description') as string || null,
+      description: formData.get('description') as string || "",
     };
 
     const { status, ...data } = await CategoryService.create(payload);
@@ -40,7 +40,7 @@ export async function PUT(req: Request) {
     const payload: Partial<ICategory> = {
       name: formData.get('name') as string,
       slug: formData.get('slug') as string,
-      description: formData.get('description') as string || null,
+      description: formData.get('description') as string || "",
     };
 
     const { status, ...data } = await CategoryService.update(payload, id);

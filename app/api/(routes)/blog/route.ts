@@ -19,17 +19,27 @@ export async function GET(req: NextRequest) {
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
+    let tags: string[] = [];
+    try {
+      tags = formData.get("tags")
+        ? JSON.parse(formData.get("tags") as string)
+        : [];
+    } catch (err) {
+      console.warn("Invalid tags JSON:", err);
+      tags = [];
+    }
+
     const payload: IBlogMutate = {
       title: formData.get('title') as string,
       descp: formData.get('descp') as string,
       author_id: formData.get('author_id') ? Number(formData.get('author_id')) : null,
-      slug: formData.get('slug') as string || null,
-      meta_title: formData.get('meta_title') as string || null,
-      meta_description: formData.get('meta_description') as string || null,
+      slug: formData.get('slug') as string || "",
+      meta_title: formData.get('meta_title') as string || "",
+      meta_description: formData.get('meta_description') as string || "",
       status: (formData.get('status') as "draft" | "published") || 'draft',
       category_id: formData.get('category_id') ? Number(formData.get('category_id')) : null,
-      tags: formData.get('tags') ? JSON.parse(formData.get('tags') as string) : [],
-      canonical_url: (formData.get('canonical_url') as string) || null,
+      tags,
+      canonical_url: (formData.get('canonical_url') as string) || "",
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";
@@ -45,8 +55,6 @@ export async function POST(req: Request) {
       if (!Array.isArray(payload.image)) payload.image = [];
       payload.image = [...payload.image, ...descpImagesIds];
     }
-    // console.log("========== POST ==========");
-    // console.log("Payload:", payload);
 
     const { status, ...data } = await BlogService.create(payload);
     return Response.json({ data }, { status });
@@ -62,17 +70,29 @@ export async function PUT(req: Request) {
     const formData = await req.formData();
     const id = Number(formData.get("id"));
     const deletedImage = formData.get("deletedImage")?.toString() || "";
+
+
+    let tags: string[] = [];
+    try {
+      tags = formData.get("tags")
+        ? JSON.parse(formData.get("tags") as string)
+        : [];
+    } catch (err) {
+      console.warn("Invalid tags JSON:", err);
+      tags = [];
+    }
+
     const payload: IBlogMutate = {
       title: formData.get('title') as string,
       descp: formData.get('descp') as string,
       author_id: formData.get('author_id') ? Number(formData.get('author_id')) : null,
-      slug: formData.get('slug') as string || null,
-      meta_title: formData.get('meta_title') as string || null,
-      meta_description: formData.get('meta_description') as string || null,
+      slug: formData.get('slug') as string || "",
+      meta_title: formData.get('meta_title') as string || "",
+      meta_description: formData.get('meta_description') as string || "",
       status: (formData.get('status') as "draft" | "published") || 'draft',
       category_id: formData.get('category_id') ? Number(formData.get('category_id')) : null,
-      tags: formData.get('tags') ? JSON.parse(formData.get('tags') as string) : [],
-      canonical_url: (formData.get('canonical_url') as string) || null,
+      tags,
+      canonical_url: (formData.get('canonical_url') as string) || "",
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";
@@ -85,11 +105,10 @@ export async function PUT(req: Request) {
       await UploadFileService.deleteFiles([deletedImage])
       if (!imageInfo) payload.image = []
     };
-    // console.log("========== PUT ==========");
-    //console.log("ID:", id);
-    // console.log("Payload:", payload);
+
     const { status, ...data } = await BlogService.update(payload, id);
     return Response.json({ data }, { status });
+
   } catch (error) {
     console.error("BLOG_UPDATE_CONTROLLER", error)
     return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
@@ -120,6 +139,7 @@ export async function DELETE(req: Request) {
             await UploadFileService.deleteFiles(fileIds);
           } catch (ikError: any) {
             console.warn("IMAGEKIT_DELETE_WARNING:", ikError?.message || ikError);
+            throw ikError;
           }
         }
       }

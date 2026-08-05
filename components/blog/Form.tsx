@@ -35,7 +35,7 @@ interface BlogFormProps {
   blog?: IBlog | null,
 }
 
-const uploadedImageUrls: { "fileId": string; "transformedUrl": string }[] = [];
+
 
 const BlogForm: React.FC<BlogFormProps> = ({
   title,
@@ -56,6 +56,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
   const pendingVideoQuillRef = useRef<any | null>(null);
   const router = useRouter();
   const quillRef = useRef<any | null>(null);
+  const uploadedImageUrlsRef = useRef<{ fileId: string; transformedUrl: string }[]>([]);
 
   const handlePreview = () => {
     setIsPreviewOpen(true);
@@ -179,7 +180,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
             throw new Error("Failed to transform image URL");
           }
           // Store the uploaded image URL and fileId
-          uploadedImageUrls.push({ fileId, transformedUrl });
+          uploadedImageUrlsRef.current.push({ fileId, transformedUrl });
 
           quill.enable(true);
           quill.insertEmbed(range.index, "image", transformedUrl);
@@ -308,7 +309,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
       // delete backspaced images after adding it to quill
       const currentHtml = quillRef.current?.getEditor().root.innerHTML;
       const usedImages = new Set(extractImageUrlsFromHtml(currentHtml));
-      const toDelete = uploadedImageUrls.filter(({ transformedUrl }) => !usedImages.has(transformedUrl));
+      const toDelete = uploadedImageUrlsRef.current.filter(({ transformedUrl }) => !usedImages.has(transformedUrl));
 
       if (toDelete.length > 0) await deleteFiles(toDelete.map(({ fileId }) => fileId));
 
@@ -335,8 +336,8 @@ const BlogForm: React.FC<BlogFormProps> = ({
         formData.append("tags", JSON.stringify(values.tags));
       }
 
-      if (uploadedImageUrls.length) {
-        const uploadedImages = uploadedImageUrls.filter(({ transformedUrl }) => usedImages.has(transformedUrl));
+      if (uploadedImageUrlsRef.current.length) {
+        const uploadedImages = uploadedImageUrlsRef.current.filter(({ transformedUrl }) => usedImages.has(transformedUrl));
         if (uploadedImages.length) {
           uploadedImages.forEach(({ fileId, transformedUrl }) => {
             formData.append("descp_image_ids", JSON.stringify({ fileId, url: transformedUrl }));
@@ -352,16 +353,16 @@ const BlogForm: React.FC<BlogFormProps> = ({
           }
         });
       }
-      //console.log("blog before submit:", blog);
+
       if (blog) {
-        // console.log("UPDATE API CALLED");
+
         if (!fileList.length && blog.image?.length) formData.append("deletedImage", blog.image[0].fileId)
         formData.append("id", blog.id?.toString()!)
         const { success, msgText } = await blogApi.update(formData);
         if (!success) return message.error(msgText || "Failed to update!");
         message.success(msgText || "Blog updated successfully!");
       } else {
-        // console.log("CREATE API CALLED");
+
         const { success, msgText } = await blogApi.create(formData);
         if (!success) return message.error(msgText || "Failed to create!");
         message.success(msgText || "Blog created successfully!");
@@ -371,6 +372,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
       message.error("Something went wrong!");
     } finally {
       setIsLoading(false);
+      uploadedImageUrlsRef.current = [];
       router.push('/blog');
     }
   }
@@ -634,14 +636,14 @@ const BlogForm: React.FC<BlogFormProps> = ({
             return;
           }
 
-          // Convert YouTube watch URL to embed URL
+
           let embedUrl = url;
           if (isYouTube) {
             const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
             if (ytMatch) embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
           }
 
-          // Convert Vimeo URL to embed URL
+
           if (isVimeo) {
             const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
             if (vimeoMatch) embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}`;

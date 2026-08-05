@@ -34,7 +34,9 @@ export const list = async (page?: number, limit?: number, searchName?: string) =
         blogs_count: blogsCount
       };
     }) || [];
-
+    if (mappedData.length === 0) {
+      return { success: true, data: [], count: 0, msgText: "No records found!", status: 200 };
+    }
     return { success: true, data: mappedData, count: count || 0, status: 200 };
   } catch (error) {
     throw error;
