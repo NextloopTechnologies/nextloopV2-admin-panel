@@ -8,7 +8,7 @@ const EditBlog = async ({ params }: { params: { id: string } }) => {
 
   try {
     blog = await getBlog(Number(params?.id));
-    // console.log("Blog:", blog);
+
   } catch (err) {
     error = "An error occurred fetching blog data.";
   }
