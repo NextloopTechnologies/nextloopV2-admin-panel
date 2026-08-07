@@ -43,13 +43,13 @@ export const list = async (page?: number, limit?: number, searchName?: string) =
   }
 };
 
-export const create = async (values: Partial<ICategory>) => {
+export const create = async (values: Omit<ICategory, 'id' | 'created_at'>) => {
   try {
     const { error } = await supabase
       .from('categories')
       .insert({
-        name: values.name!,
-        slug: values.slug!,
+        name: values.name,
+        slug: values.slug,
         description: values.description
       });
 

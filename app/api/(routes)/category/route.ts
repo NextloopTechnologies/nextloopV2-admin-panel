@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
-    const payload: Partial<ICategory> = {
+    const payload: Omit<ICategory, 'id' | 'created_at'> = {
       name: formData.get('name') as string,
       slug: formData.get('slug') as string,
       description: formData.get('description') as string || "",
