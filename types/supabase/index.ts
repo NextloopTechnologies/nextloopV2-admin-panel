@@ -69,6 +69,7 @@ export type Database = {
           id: number
           name: string | null
           profile: string | null
+          description: string | null
         }
         Insert: {
           created_at?: string
@@ -76,6 +77,7 @@ export type Database = {
           id?: number
           name?: string | null
           profile?: string | null
+          description?: string | null
         }
         Update: {
           created_at?: string
@@ -83,6 +85,7 @@ export type Database = {
           id?: number
           name?: string | null
           profile?: string | null
+          description?: string | null
         }
         Relationships: []
       }
@@ -95,6 +98,14 @@ export type Database = {
           image: Json | null
           title: string | null
           updated_at: string | null
+          service: string | null
+          slug: string | null
+          meta_title: string | null
+          meta_description: string | null
+          status: "draft" | "published"
+          category_id: number | null
+          tags: string[] | null
+          canonical_url: string | null
         }
         Insert: {
           author_id?: number | null
@@ -104,6 +115,14 @@ export type Database = {
           image?: Json | null
           title?: string | null
           updated_at?: string | null
+          service?: string | null
+          slug?: string | null
+          meta_title?: string | null
+          meta_description?: string | null
+          status?: "draft" | "published"
+          category_id?: number | null
+          tags?: string[] | null
+          canonical_url?: string | null
         }
         Update: {
           author_id?: number | null
@@ -113,6 +132,14 @@ export type Database = {
           image?: Json | null
           title?: string | null
           updated_at?: string | null
+          service?: string | null
+          slug?: string | null
+          meta_title?: string | null
+          meta_description?: string | null
+          status?: "draft" | "published"
+          category_id?: number | null
+          tags?: string[] | null
+          canonical_url?: string | null
         }
         Relationships: [
           {
@@ -122,7 +149,41 @@ export type Database = {
             referencedRelation: "author"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "blogs_category_id_categories_id_fk"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          }
         ]
+      }
+      categories: {
+        Row: {
+          id: number
+          name: string
+          slug: string
+          description: string | null
+          created_at: string
+          updated_at: string | null
+        }
+        Insert: {
+          id?: number
+          name: string
+          slug: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: number
+          name?: string
+          slug?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       enquiry: {
         Row: {
@@ -395,7 +456,7 @@ export type Database = {
       }
     }
     Views: {
-       applied_jobs_with_title: {
+      applied_jobs_with_title: {
         Row: {
           cover_letter: string | null
           created_at: string | null
@@ -436,17 +497,17 @@ export type Database = {
       factor_type: "webauthn" | "totp"
       key_status: "expired" | "invalid" | "valid" | "default"
       key_type:
-        | "stream_xchacha20"
-        | "secretstream"
-        | "secretbox"
-        | "kdf"
-        | "generichash"
-        | "shorthash"
-        | "auth"
-        | "hmacsha256"
-        | "hmacsha512"
-        | "aead-det"
-        | "aead-ietf"
+      | "stream_xchacha20"
+      | "secretstream"
+      | "secretbox"
+      | "kdf"
+      | "generichash"
+      | "shorthash"
+      | "auth"
+      | "hmacsha256"
+      | "hmacsha512"
+      | "aead-det"
+      | "aead-ietf"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -458,92 +519,92 @@ type PublicSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
   PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
-    | { schema: keyof Database },
+  | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+  | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+  ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+    Database[PublicTableNameOrOptions["schema"]]["Views"])
+  : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+    Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-    ? R
-    : never
+  ? R
+  : never
   : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
+    PublicSchema["Views"])
+  ? (PublicSchema["Tables"] &
+    PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+      Row: infer R
+    }
+  ? R
+  : never
+  : never
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: keyof Database },
+  | keyof PublicSchema["Tables"]
+  | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
+    Insert: infer I
+  }
+  ? I
+  : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
+  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+    Insert: infer I
+  }
+  ? I
+  : never
+  : never
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: keyof Database },
+  | keyof PublicSchema["Tables"]
+  | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
+    Update: infer U
+  }
+  ? U
+  : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
+  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+    Update: infer U
+  }
+  ? U
+  : never
+  : never
 
 export type Enums<
   PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
-    | { schema: keyof Database },
+  | keyof PublicSchema["Enums"]
+  | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+  ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  : never = never,
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
-    : never
+  ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+  : never
 
 
 
 
 
-    
+
 export type IJob = TablesInsert<'jobs'>
 
-export type IAppliedJob = TablesUpdate<'applied_jobs'> & IJob 
+export type IAppliedJob = TablesUpdate<'applied_jobs'> & IJob
 
 export type IAppliedJobView = Tables<'applied_jobs_with_title'>
 

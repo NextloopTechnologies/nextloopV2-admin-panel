@@ -25,14 +25,18 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
 
   const initialValues: IAuthor = {
     name: author?.name || '',
-    designation: author?.designation || ''
+    designation: author?.designation || '',
+    profile: author?.profile || '',
+    description: author?.description || '',
   }
   
   const handleFinish: FormProps<IAuthor>['onFinish'] = async(values) => {
     setIsLoading(true);
-    const formData =  new FormData();
+    const formData = new FormData();
     formData.append("name", values.name as string);
     formData.append("designation", values.designation as string);
+    formData.append("profile", values.profile || "");
+    formData.append("description", values.description || "");
     
     if(author){
      formData.append("id", author.id?.toString()!)
@@ -88,7 +92,27 @@ const AuthorForm: React.FC<AuthorFormProps> = ({
             }
           ]}
         >
-          <Input.TextArea />
+          <Input.TextArea rows={2} />
+        </Form.Item>
+
+        <Form.Item<IAuthor>
+          label="Profile URL"
+          name="profile"
+          rules={[
+            {
+              type: 'url',
+              message: 'Please enter a valid URL',
+            }
+          ]}
+        >
+          <Input placeholder="https://example.com/profile" allowClear />
+        </Form.Item>
+
+        <Form.Item<IAuthor>
+          label="Description"
+          name="description"
+        >
+          <Input.TextArea rows={4} placeholder="Brief description about the author" allowClear />
         </Form.Item>
         <Form.Item
           wrapperCol={{

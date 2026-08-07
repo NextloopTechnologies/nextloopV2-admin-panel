@@ -6,15 +6,15 @@ import parse from "html-react-parser"
 import Image from 'next/image'
 
 type ViewProps = {
-    data: IBlog|null
+    data: IBlog | null
 }
 
 const View: React.FC<ViewProps> = ({
     data
 }) => {
     return (
-        <div className='py-10 mx-24'>  
-        <h1 className='mb-5 text-3xl font-bold '>View Blog</h1>
+        <div className='py-10 mx-24'>
+            <h1 className='mb-5 text-3xl font-bold '>View Blog</h1>
             <Descriptions
                 bordered
                 column={1}

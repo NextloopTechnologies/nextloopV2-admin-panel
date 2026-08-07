@@ -29,6 +29,14 @@ const Navbar: React.FC = () => {
         </Link>
       ),
     },
+    {
+      key: '3',
+      label: (
+        <Link href="/blog/category">
+          Categories
+        </Link>
+      ),
+    },
   ];
   const careerItems: MenuProps['items'] = [
     {

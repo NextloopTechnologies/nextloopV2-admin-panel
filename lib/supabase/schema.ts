@@ -1,5 +1,7 @@
 import { enumJobMode, enumJobType } from "@/migrations/schema";
-import { bigint, boolean, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { bigint, boolean, pgTable, text, timestamp, varchar, pgEnum } from "drizzle-orm/pg-core";
+
+export const enumBlogStatus = pgEnum("enum_blog_status", ["draft", "published"]);
 
 export const ideas = pgTable("ideas", {
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
@@ -16,6 +18,7 @@ export const author = pgTable("author", {
 	profile: text("profile"),
 	name: text("name"),
 	designation: text("designation"),
+	description: text("description"),
 });
 
 export const jobs = pgTable("jobs", {
@@ -58,7 +61,7 @@ export const appliedJobs = pgTable("applied_jobs", {
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
 	id: bigint("id", { mode: "number" }).primaryKey().notNull(),
 	jobId: bigint("job_id", { mode: "number" }).references(() => jobs.id, { onDelete: 'restrict' }),
-  resume: text("resume").notNull(),
+	resume: text("resume").notNull(),
 	fullname: text("fullname").notNull(),
 	email: text("email").notNull(),
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
@@ -78,6 +81,21 @@ export const blogs = pgTable("blogs", {
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
-	authorId: bigint("author_id", { mode: "number" }).references(() => author.id, { onDelete: "restrict" } ),
+	authorId: bigint("author_id", { mode: "number" }).references(() => author.id, { onDelete: "restrict" }),
+	slug: varchar("slug").unique(),
+	metaTitle: varchar("meta_title", { length: 60 }),
+	metaDescription: varchar("meta_description", { length: 160 }),
+	status: enumBlogStatus("status").default("draft").notNull(),
+	categoryId: bigint("category_id", { mode: "number" }).references(() => categories.id, { onDelete: "restrict" }),
+	tags: text("tags").array(),
+	canonicalUrl: text("canonical_url"),
 });
 
+export const categories = pgTable("categories", {
+	id: bigint("id", { mode: "number" }).primaryKey().notNull(),
+	name: varchar("name", { length: 100 }).notNull(),
+	slug: varchar("slug", { length: 100 }).unique().notNull(),
+	description: text("description"),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow(),
+});

@@ -4,6 +4,7 @@ import * as TestimonialService from './services/testimonial';
 import * as IdeaService from './services/idea';
 import * as BlogService from './services/blog';
 import * as AuthorService from './services/author';
+import * as CategoryService from './services/category';
 import * as JobService from './services/job';
 import * as AppliedJobService from './services/applied_job';
 import * as EnquiryService from './services/enquiry';
@@ -17,6 +18,7 @@ export {
   IdeaService,
   BlogService,
   AuthorService,
+  CategoryService,
   JobService,
   AppliedJobService,
   EnquiryService,
