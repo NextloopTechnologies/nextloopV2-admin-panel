@@ -90,6 +90,8 @@ export const blogs = pgTable("blogs", {
 	tags: text("tags").array(),
 	canonicalUrl: text("canonical_url"),
 	readTime: integer("read_time").notNull().default(2),
+	featuredBlogs: integer("featured_blogs").array(),
+
 });
 
 export const categories = pgTable("categories", {

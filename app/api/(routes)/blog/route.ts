@@ -20,6 +20,7 @@ export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     let tags: string[] = [];
+    let featuredBlogs: number[] = [];
     try {
       tags = formData.get("tags")
         ? JSON.parse(formData.get("tags") as string)
@@ -27,6 +28,15 @@ export async function POST(req: Request) {
     } catch (err) {
       console.warn("Invalid tags JSON:", err);
       tags = [];
+    }
+
+    try {
+      featuredBlogs = formData.get("featured_blogs")
+        ? JSON.parse(formData.get("featured_blogs") as string)
+        : [];
+    } catch (err) {
+      console.warn("Invalid featured_blogs JSON:", err);
+      featuredBlogs = [];
     }
 
     const payload: IBlogMutate = {
@@ -41,6 +51,7 @@ export async function POST(req: Request) {
       tags,
       canonical_url: (formData.get('canonical_url') as string) || "",
       read_time: formData.get('read_time') ? Number(formData.get('read_time')) : 2,
+      featured_blogs: featuredBlogs,
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";
@@ -74,6 +85,7 @@ export async function PUT(req: Request) {
 
 
     let tags: string[] = [];
+    let featuredBlogs: number[] = [];
     try {
       tags = formData.get("tags")
         ? JSON.parse(formData.get("tags") as string)
@@ -81,6 +93,15 @@ export async function PUT(req: Request) {
     } catch (err) {
       console.warn("Invalid tags JSON:", err);
       tags = [];
+    }
+
+    try {
+      featuredBlogs = formData.get("featured_blogs")
+        ? JSON.parse(formData.get("featured_blogs") as string)
+        : [];
+    } catch (err) {
+      console.warn("Invalid featured_blogs JSON:", err);
+      featuredBlogs = [];
     }
 
     const payload: IBlogMutate = {
@@ -95,6 +116,7 @@ export async function PUT(req: Request) {
       tags,
       canonical_url: (formData.get('canonical_url') as string) || "",
       read_time: formData.get('read_time') ? Number(formData.get('read_time')) : 2,
+      featured_blogs: featuredBlogs,
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";

@@ -50,6 +50,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
   const [authorsList, setAuthorsList] = useState<{ id: number, name: string | null, designation?: string | null, description?: string | null, profile?: string | null }[]>([]);
   const [categoriesList, setCategoriesList] = useState<{ id: number, name: string | null }[]>([]);
+  const [publishedBlogsList, setPublishedBlogsList] = useState<{ id: number, title: string | null }[]>([]);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState<boolean>(false);
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [videoUrlError, setVideoUrlError] = useState<string>('');
@@ -91,6 +92,22 @@ const BlogForm: React.FC<BlogFormProps> = ({
   }, []);
 
   useEffect(() => {
+    const fetchPublishedBlogs = async () => {
+      try {
+        const result = await blogApi.list(1, 500);
+        if (result?.data) {
+          const published = result.data.filter((b: any) => b.status === 'published');
+          setPublishedBlogsList(published);
+        }
+      } catch (err) {
+        console.error("Failed to fetch published blogs", err);
+      }
+    };
+    fetchPublishedBlogs();
+  }, []);
+
+
+  useEffect(() => {
     if (blog) {
       const generatedSlug = blog.slug || (blog.title || '')
         .toLowerCase()
@@ -112,6 +129,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
         category_id: blog.category_id || blog.categories?.id || undefined,
         tags: blog.tags || [],
         read_time: blog.read_time || 2,
+        featured_blogs: blog.featured_blogs || [],
       });
       setIsSlugManuallyEdited(!!blog.slug);
       setIsCanonicalManuallyEdited(!!blog.canonical_url);
@@ -340,6 +358,9 @@ const BlogForm: React.FC<BlogFormProps> = ({
       if (values.read_time) {
         formData.append("read_time", values.read_time.toString());
       }
+      if (values.featured_blogs) {
+        formData.append("featured_blogs", JSON.stringify(values.featured_blogs));
+      }
 
 
       if (uploadedImageUrlsRef.current.length) {
@@ -563,6 +584,23 @@ const BlogForm: React.FC<BlogFormProps> = ({
             <Button icon={<UploadOutlined />}>Click to Upload</Button>
           </Upload>
         </Form.Item>
+
+        <Form.Item<IBlog>
+          label="Featured Blogs"
+          name="featured_blogs"
+        >
+          <Select
+            mode="multiple"
+            placeholder="Select up to 3 featured blogs"
+            maxCount={3}
+            options={publishedBlogsList.map(b => ({ value: b.id, label: b.title || 'Untitled' }))}
+            allowClear
+            filterOption={(input, option) =>
+              (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
+            }
+          />
+        </Form.Item>
+
 
         <Form.Item<IBlog>
           label="Meta Title"

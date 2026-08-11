@@ -20,6 +20,8 @@ export interface IBlog {
     tags?: string[] | null;
     canonical_url?: string | null;
     read_time?: number;
+    featured_blogs?: number[] | null;
+
 }
 
 export interface ICategory {

@@ -7,7 +7,7 @@ export const list = async (page: number = 1, limit: number = 10) => {
 
     const { data, count, error } = await supabase
       .from("blogs")
-      .select('id, title, descp, image, created_at, status, category_id, categories(id, name), author(id, name, designation, description, profile), tags, canonical_url, read_time', { count: "exact" })
+      .select('id, title, descp, image, created_at, status, category_id, categories(id, name), author(id, name, designation, description, profile), tags, canonical_url, read_time, featured_blogs', { count: "exact" })
       .order('id', { ascending: false })
       .range(offset, offset + limit - 1)
 
