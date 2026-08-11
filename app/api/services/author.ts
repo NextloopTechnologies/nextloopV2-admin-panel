@@ -7,7 +7,7 @@ export const list = async(page:number = 1, limit:number = 10) => {
 
     const { data, count } = await supabase
     .from("author")
-    .select('id, name, designation ', { count: "exact" })
+    .select('id, name, designation, description, profile', { count: "exact" })
     .order('id', { ascending: false })
     .range(offset, offset + limit - 1)
 

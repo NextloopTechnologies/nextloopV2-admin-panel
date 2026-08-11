@@ -106,6 +106,7 @@ export type Database = {
           category_id: number | null
           tags: string[] | null
           canonical_url: string | null
+          read_time: number
         }
         Insert: {
           author_id?: number | null
@@ -123,6 +124,7 @@ export type Database = {
           category_id?: number | null
           tags?: string[] | null
           canonical_url?: string | null
+          read_time?: number
         }
         Update: {
           author_id?: number | null
@@ -140,6 +142,7 @@ export type Database = {
           category_id?: number | null
           tags?: string[] | null
           canonical_url?: string | null
+          read_time?: number
         }
         Relationships: [
           {

@@ -40,6 +40,7 @@ export async function POST(req: Request) {
       category_id: formData.get('category_id') ? Number(formData.get('category_id')) : null,
       tags,
       canonical_url: (formData.get('canonical_url') as string) || "",
+      read_time: formData.get('read_time') ? Number(formData.get('read_time')) : 2,
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";
@@ -93,6 +94,7 @@ export async function PUT(req: Request) {
       category_id: formData.get('category_id') ? Number(formData.get('category_id')) : null,
       tags,
       canonical_url: (formData.get('canonical_url') as string) || "",
+      read_time: formData.get('read_time') ? Number(formData.get('read_time')) : 2,
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";

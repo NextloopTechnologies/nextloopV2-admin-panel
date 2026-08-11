@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Button, Form, Input, Upload, message, Modal, Select } from 'antd';
+import { Button, Form, Input, InputNumber, Upload, message, Modal, Select } from 'antd';
 import { IBlog } from '@/types/blog';
 import { extractImageUrlsFromHtml, textFieldValidator } from '@/lib/utils';
 import { authorApi } from '@/components/author';
@@ -48,7 +48,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
   const [isCanonicalManuallyEdited, setIsCanonicalManuallyEdited] = useState<boolean>(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
-  const [authorsList, setAuthorsList] = useState<{ id: number, name: string | null }[]>([]);
+  const [authorsList, setAuthorsList] = useState<{ id: number, name: string | null, designation?: string | null, description?: string | null, profile?: string | null }[]>([]);
   const [categoriesList, setCategoriesList] = useState<{ id: number, name: string | null }[]>([]);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState<boolean>(false);
   const [videoUrl, setVideoUrl] = useState<string>('');
@@ -111,6 +111,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
         status: blog.status || 'draft',
         category_id: blog.category_id || blog.categories?.id || undefined,
         tags: blog.tags || [],
+        read_time: blog.read_time || 2,
       });
       setIsSlugManuallyEdited(!!blog.slug);
       setIsCanonicalManuallyEdited(!!blog.canonical_url);
@@ -281,6 +282,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
     status: blog?.status || 'draft',
     category_id: blog?.category_id || blog?.categories?.id || undefined,
     tags: blog?.tags || [],
+    read_time: blog?.read_time || 2,
   }
 
   const fileProps: UploadProps = {
@@ -335,6 +337,10 @@ const BlogForm: React.FC<BlogFormProps> = ({
       if (values.tags) {
         formData.append("tags", JSON.stringify(values.tags));
       }
+      if (values.read_time) {
+        formData.append("read_time", values.read_time.toString());
+      }
+
 
       if (uploadedImageUrlsRef.current.length) {
         const uploadedImages = uploadedImageUrlsRef.current.filter(({ transformedUrl }) => usedImages.has(transformedUrl));
@@ -528,6 +534,17 @@ const BlogForm: React.FC<BlogFormProps> = ({
             modules={modules}
           />
         </Form.Item>
+
+        <Form.Item<IBlog>
+          label="Read Time (minutes)"
+          name="read_time"
+          rules={[
+            { required: true, message: 'Please input the estimated read time!' }
+          ]}
+        >
+          <InputNumber min={1} max={10} style={{ width: '100%' }} placeholder="e.g. 2" />
+        </Form.Item>
+
         <Form.Item<IBlog>
           label={<span className='text-l'>Blog Image <span style={{ color: '#ff4d4f' }}>*</span></span>}
           name="image"
@@ -613,7 +630,11 @@ const BlogForm: React.FC<BlogFormProps> = ({
         title={form.getFieldValue('title') || 'Untitled Blog'}
         html={quillRef.current?.getEditor?.().root.innerHTML || form.getFieldValue('descp') || ''}
         imageSrc={fileList[0]?.originFileObj ? URL.createObjectURL(fileList[0].originFileObj) : (fileList[0] as any)?.url}
-
+        categoryName={categoriesList.find(c => c.id === form.getFieldValue('category_id'))?.name ?? null}
+        readTime={form.getFieldValue('read_time') ?? null}
+        status={form.getFieldValue('status') ?? 'draft'}
+        createdAt={blog?.created_at ?? null}
+        author={authorsList.find(a => a.id === form.getFieldValue('author_id')) ?? null}
       />
 
       {/* Video Embed Modal */}

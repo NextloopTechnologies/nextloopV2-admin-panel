@@ -348,7 +348,8 @@ const List: React.FC = () => {
     status: blog.status,
     categories: blog.categories,
     category_id: blog.category_id,
-    tags: blog.tags
+    tags: blog.tags,
+    read_time: blog.read_time,
   }));
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -500,7 +501,11 @@ const List: React.FC = () => {
           title={previewBlog.title || 'Untitled Blog'}
           html={previewBlog.descp || ''}
           imageSrc={previewBlog.image?.[0]?.url}
-
+          categoryName={previewBlog.categories?.name ?? null}
+          readTime={previewBlog.read_time != null ? `${previewBlog.read_time}` : null}
+          status={previewBlog.status}
+          createdAt={previewBlog.created_at ?? null}
+          author={previewBlog.author ?? null}
         />
       )}
     </div>
