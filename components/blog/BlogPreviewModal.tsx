@@ -39,7 +39,7 @@ const BlogPreviewModal: React.FC<BlogPreviewModalProps> = ({
   author,
 }) => {
 
-  // Extract headings from HTML for Table of Contents and inject IDs
+  // Extract headings 
   const { tocItems, parsedHtml } = useMemo(() => {
     const items: { tag: string; text: string; id: string }[] = [];
     let pHtml = html || '';
