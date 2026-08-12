@@ -21,7 +21,7 @@ export interface IBlog {
     canonical_url?: string | null;
     read_time?: number;
     featured_blogs?: number[] | null;
-
+    meta_keywords?: string[] | null;
 }
 
 export interface ICategory {

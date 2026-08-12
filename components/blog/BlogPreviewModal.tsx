@@ -88,7 +88,7 @@ const BlogPreviewModal: React.FC<BlogPreviewModalProps> = ({
         {/* Title block */}
         <div className="text-center px-10 pt-8 pb-5">
 
-          {/* Category badge — above title */}
+
           {categoryName && (
             <div className="mb-3">
               <span className="inline-block bg-orange-50 text-orange-500 border border-orange-200 rounded-full text-xs font-bold tracking-wide uppercase px-3.5 py-1">
@@ -101,7 +101,7 @@ const BlogPreviewModal: React.FC<BlogPreviewModalProps> = ({
             {title || 'Untitled Blog'}
           </h1>
 
-          {/* Meta line — below title */}
+          {/* Meta line */}
           {(formattedDate || readTime) && (
             <div className="mt-3 flex items-center justify-center gap-1.5 text-[13px] text-gray-500">
               {formattedDate && (
@@ -126,7 +126,7 @@ const BlogPreviewModal: React.FC<BlogPreviewModalProps> = ({
           )}
         </div>
 
-        {/* Featured Image */}
+
         {imageSrc && (
           <div className="w-full">
             <img
@@ -137,10 +137,10 @@ const BlogPreviewModal: React.FC<BlogPreviewModalProps> = ({
           </div>
         )}
 
-        {/* Two column: TOC + Description */}
+
         <div className="flex px-6 py-7 items-start">
 
-          {/* TOC Sidebar */}
+
           {tocItems.length > 0 && (
             <div className="w-[220px] shrink-0 mr-6">
               <div className="border border-gray-200 rounded-md overflow-hidden">
@@ -170,10 +170,10 @@ const BlogPreviewModal: React.FC<BlogPreviewModalProps> = ({
               {/* Author Section  */}
               {author?.name && (
                 <div className="mt-5 pt-4 border-t border-gray-200">
-                  {/* "The Author" — orange text heading */}
+
                   <p className="text-orange-500 font-bold text-[15px] mb-3 m-0">The Author</p>
 
-                  {/* Name + LinkedIn */}
+
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <div>
                       <p className="font-bold text-[13.5px] text-[#1a1a2e] m-0">{author.name}</p>
@@ -205,7 +205,7 @@ const BlogPreviewModal: React.FC<BlogPreviewModalProps> = ({
             </div>
           )}
 
-          {/* Description */}
+
           <div className="ql-editor flex-1 text-[15px] leading-relaxed text-gray-700 min-w-0">
             {parse(parsedHtml)}
           </div>

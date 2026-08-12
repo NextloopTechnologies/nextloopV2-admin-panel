@@ -91,7 +91,7 @@ export const blogs = pgTable("blogs", {
 	canonicalUrl: text("canonical_url"),
 	readTime: integer("read_time").notNull().default(2),
 	featuredBlogs: integer("featured_blogs").array(),
-
+	meta_keywords: text("meta_keywords").array(),
 });
 
 export const categories = pgTable("categories", {

@@ -21,6 +21,8 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     let tags: string[] = [];
     let featuredBlogs: number[] = [];
+    let metaKeywords: string[] = [];
+
     try {
       tags = formData.get("tags")
         ? JSON.parse(formData.get("tags") as string)
@@ -39,6 +41,16 @@ export async function POST(req: Request) {
       featuredBlogs = [];
     }
 
+
+    try {
+      metaKeywords = formData.get("meta_keywords")
+        ? JSON.parse(formData.get("meta_keywords") as string)
+        : [];
+    } catch (err) {
+      console.warn("Invalid meta_keywords JSON:", err);
+      metaKeywords = [];
+    }
+
     const payload: IBlogMutate = {
       title: formData.get('title') as string,
       descp: formData.get('descp') as string,
@@ -52,6 +64,7 @@ export async function POST(req: Request) {
       canonical_url: (formData.get('canonical_url') as string) || "",
       read_time: formData.get('read_time') ? Number(formData.get('read_time')) : 2,
       featured_blogs: featuredBlogs,
+      meta_keywords: metaKeywords,
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";
@@ -86,6 +99,8 @@ export async function PUT(req: Request) {
 
     let tags: string[] = [];
     let featuredBlogs: number[] = [];
+    let metaKeywords: string[] = [];
+
     try {
       tags = formData.get("tags")
         ? JSON.parse(formData.get("tags") as string)
@@ -104,6 +119,15 @@ export async function PUT(req: Request) {
       featuredBlogs = [];
     }
 
+    try {
+      metaKeywords = formData.get("meta_keywords")
+        ? JSON.parse(formData.get("meta_keywords") as string)
+        : [];
+    } catch (err) {
+      console.warn("Invalid meta_keywords JSON:", err);
+      metaKeywords = [];
+    }
+
     const payload: IBlogMutate = {
       title: formData.get('title') as string,
       descp: formData.get('descp') as string,
@@ -117,6 +141,7 @@ export async function PUT(req: Request) {
       canonical_url: (formData.get('canonical_url') as string) || "",
       read_time: formData.get('read_time') ? Number(formData.get('read_time')) : 2,
       featured_blogs: featuredBlogs,
+      meta_keywords: metaKeywords,
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";

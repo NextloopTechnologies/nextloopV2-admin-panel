@@ -45,6 +45,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState<boolean>(false);
+  const [isMetaKeywordsManuallyEdited, setIsMetaKeywordsManuallyEdited] = useState<boolean>(false);
   const [isCanonicalManuallyEdited, setIsCanonicalManuallyEdited] = useState<boolean>(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
@@ -128,6 +129,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
         status: blog.status || 'draft',
         category_id: blog.category_id || blog.categories?.id || undefined,
         tags: blog.tags || [],
+        meta_keywords: blog.meta_keywords || [],
         read_time: blog.read_time || 2,
         featured_blogs: blog.featured_blogs || [],
       });
@@ -284,6 +286,15 @@ const BlogForm: React.FC<BlogFormProps> = ({
         }
       }
     }
+    if ("tags" in changedValues && !isMetaKeywordsManuallyEdited) {
+      form.setFieldsValue({
+        meta_keywords: changedValues.tags || [],
+      });
+    }
+    if ("meta_keywords" in changedValues) {
+      setIsMetaKeywordsManuallyEdited(true);
+    }
+
   };
 
   const initialValues = {
@@ -300,6 +311,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
     status: blog?.status || 'draft',
     category_id: blog?.category_id || blog?.categories?.id || undefined,
     tags: blog?.tags || [],
+    meta_keywords: blog?.meta_keywords || [],
     read_time: blog?.read_time || 2,
   }
 
@@ -354,6 +366,9 @@ const BlogForm: React.FC<BlogFormProps> = ({
 
       if (values.tags) {
         formData.append("tags", JSON.stringify(values.tags));
+      }
+      if (values.meta_keywords) {
+        formData.append("meta_keywords", JSON.stringify(values.meta_keywords));
       }
       if (values.read_time) {
         formData.append("read_time", values.read_time.toString());
@@ -634,6 +649,18 @@ const BlogForm: React.FC<BlogFormProps> = ({
           ]}
         >
           <Input.TextArea maxLength={160} showCount placeholder="Enter Meta Description (max 160 characters)" rows={4} />
+        </Form.Item>
+        <Form.Item<IBlog>
+          label="Meta Keywords"
+          name="meta_keywords"
+
+        >
+          <Select
+            mode="tags"
+            style={{ width: '100%' }}
+            placeholder="Enter meta keywords (press Enter or comma to add)"
+            tokenSeparators={[',']}
+          />
         </Form.Item>
         <Form.Item
           wrapperCol={{
