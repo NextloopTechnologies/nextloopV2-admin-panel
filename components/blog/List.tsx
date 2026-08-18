@@ -3,7 +3,7 @@
 import { IBlog } from '@/types/blog';
 import { Button, Popconfirm, PopconfirmProps, Table, TableProps, message, Select, DatePicker, Input, Modal, Tooltip, Dropdown, MenuProps, Tag } from 'antd';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { EyeOutlined, GlobalOutlined, CopyOutlined, MoreOutlined } from '@ant-design/icons';
+import { EyeOutlined, GlobalOutlined, CopyOutlined, MoreOutlined, EditOutlined } from '@ant-design/icons';
 import Image from 'next/image';
 import Edit from "../../public/images/icons/edit.png";
 import Link from 'next/link';
@@ -299,6 +299,7 @@ const List: React.FC = () => {
               </span>
             ),
             onClick: () => {
+               
               window.open(`https://www.nextlooptechnologies.com/blog/${record.id}/`, "_blank");
             },
           });
@@ -315,15 +316,10 @@ const List: React.FC = () => {
                 }}
               />
             </Tooltip>
+          
             <Link href={`/blog/edit/${record.id}`}>
               <Tooltip title="Edit">
-                <Image
-                  src={Edit}
-                  alt='edit'
-                  height={20}
-                  width={20}
-                  className='cursor-pointer'
-                />
+                <EditOutlined style={{ fontSize: 22, color: '#1890ff', cursor: 'pointer' }} />
               </Tooltip>
             </Link>
             <Dropdown menu={{ items: menuItems }} trigger={['click']}>
