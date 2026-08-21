@@ -398,7 +398,12 @@ const BlogForm: React.FC<BlogFormProps> = ({
 
       if (blog) {
 
-        if (!fileList.length && blog.image?.length) formData.append("deletedImage", blog.image[0].fileId)
+
+        if (!fileList.length) {
+          const oldFileId = blog.image?.[0]?.fileId;
+          if (oldFileId) formData.append("deletedImage", oldFileId);
+        }
+
         formData.append("id", blog.id?.toString()!)
         const { success, msgText } = await blogApi.update(formData);
         if (!success) return message.error(msgText || "Failed to update!");

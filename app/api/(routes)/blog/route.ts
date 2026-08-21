@@ -150,10 +150,16 @@ export async function PUT(req: Request) {
       const { fileId, url } = await UploadFileService.uploadImage(imageInfo, imageInfo.name, folder);
       payload.image = [{ fileId, url }]
     }
-    if (deletedImage) {
-      await UploadFileService.deleteFiles([deletedImage])
-      if (!imageInfo) payload.image = []
-    };
+
+    if (deletedImage && deletedImage !== 'undefined' && deletedImage !== 'null') {
+      try {
+        await UploadFileService.deleteFiles([deletedImage]);
+      } catch (deleteErr) {
+        console.warn("IMAGEKIT_DELETE_WARNING (non-fatal):", deleteErr);
+      }
+      if (!imageInfo) payload.image = [];
+    }
+
 
     const { status, ...data } = await BlogService.update(payload, id);
     return Response.json({ data }, { status });
