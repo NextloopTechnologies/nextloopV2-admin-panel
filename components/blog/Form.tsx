@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Button, Form, Input, Upload, message, Modal, Select } from 'antd';
+import { Button, Form, Input, InputNumber, Upload, message, Modal, Select } from 'antd';
 import { IBlog } from '@/types/blog';
 import { extractImageUrlsFromHtml, textFieldValidator } from '@/lib/utils';
 import { authorApi } from '@/components/author';
@@ -45,11 +45,13 @@ const BlogForm: React.FC<BlogFormProps> = ({
   const [form] = Form.useForm();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState<boolean>(false);
+  const [isMetaKeywordsManuallyEdited, setIsMetaKeywordsManuallyEdited] = useState<boolean>(false);
   const [isCanonicalManuallyEdited, setIsCanonicalManuallyEdited] = useState<boolean>(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
-  const [authorsList, setAuthorsList] = useState<{ id: number, name: string | null }[]>([]);
+  const [authorsList, setAuthorsList] = useState<{ id: number, name: string | null, designation?: string | null, description?: string | null, profile?: string | null }[]>([]);
   const [categoriesList, setCategoriesList] = useState<{ id: number, name: string | null }[]>([]);
+  const [publishedBlogsList, setPublishedBlogsList] = useState<{ id: number, title: string | null }[]>([]);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState<boolean>(false);
   const [videoUrl, setVideoUrl] = useState<string>('');
   const [videoUrlError, setVideoUrlError] = useState<string>('');
@@ -91,6 +93,22 @@ const BlogForm: React.FC<BlogFormProps> = ({
   }, []);
 
   useEffect(() => {
+    const fetchPublishedBlogs = async () => {
+      try {
+        const result = await blogApi.list(1, 500);
+        if (result?.data) {
+          const published = result.data.filter((b: any) => b.status === 'published');
+          setPublishedBlogsList(published);
+        }
+      } catch (err) {
+        console.error("Failed to fetch published blogs", err);
+      }
+    };
+    fetchPublishedBlogs();
+  }, []);
+
+
+  useEffect(() => {
     if (blog) {
       const generatedSlug = blog.slug || (blog.title || '')
         .toLowerCase()
@@ -111,6 +129,9 @@ const BlogForm: React.FC<BlogFormProps> = ({
         status: blog.status || 'draft',
         category_id: blog.category_id || blog.categories?.id || undefined,
         tags: blog.tags || [],
+        meta_keywords: blog.meta_keywords || [],
+        read_time: blog.read_time || 2,
+        featured_blogs: blog.featured_blogs || [],
       });
       setIsSlugManuallyEdited(!!blog.slug);
       setIsCanonicalManuallyEdited(!!blog.canonical_url);
@@ -265,6 +286,15 @@ const BlogForm: React.FC<BlogFormProps> = ({
         }
       }
     }
+    if ("tags" in changedValues && !isMetaKeywordsManuallyEdited) {
+      form.setFieldsValue({
+        meta_keywords: changedValues.tags || [],
+      });
+    }
+    if ("meta_keywords" in changedValues) {
+      setIsMetaKeywordsManuallyEdited(true);
+    }
+
   };
 
   const initialValues = {
@@ -281,6 +311,8 @@ const BlogForm: React.FC<BlogFormProps> = ({
     status: blog?.status || 'draft',
     category_id: blog?.category_id || blog?.categories?.id || undefined,
     tags: blog?.tags || [],
+    meta_keywords: blog?.meta_keywords || [],
+    read_time: blog?.read_time || 2,
   }
 
   const fileProps: UploadProps = {
@@ -335,6 +367,16 @@ const BlogForm: React.FC<BlogFormProps> = ({
       if (values.tags) {
         formData.append("tags", JSON.stringify(values.tags));
       }
+      if (values.meta_keywords) {
+        formData.append("meta_keywords", JSON.stringify(values.meta_keywords));
+      }
+      if (values.read_time) {
+        formData.append("read_time", values.read_time.toString());
+      }
+      if (values.featured_blogs) {
+        formData.append("featured_blogs", JSON.stringify(values.featured_blogs));
+      }
+
 
       if (uploadedImageUrlsRef.current.length) {
         const uploadedImages = uploadedImageUrlsRef.current.filter(({ transformedUrl }) => usedImages.has(transformedUrl));
@@ -356,7 +398,12 @@ const BlogForm: React.FC<BlogFormProps> = ({
 
       if (blog) {
 
-        if (!fileList.length && blog.image?.length) formData.append("deletedImage", blog.image[0].fileId)
+
+        if (!fileList.length) {
+          const oldFileId = blog.image?.[0]?.fileId;
+          if (oldFileId) formData.append("deletedImage", oldFileId);
+        }
+
         formData.append("id", blog.id?.toString()!)
         const { success, msgText } = await blogApi.update(formData);
         if (!success) return message.error(msgText || "Failed to update!");
@@ -528,6 +575,17 @@ const BlogForm: React.FC<BlogFormProps> = ({
             modules={modules}
           />
         </Form.Item>
+
+        <Form.Item<IBlog>
+          label="Read Time (minutes)"
+          name="read_time"
+          rules={[
+            { required: true, message: 'Please input the estimated read time!' }
+          ]}
+        >
+          <InputNumber min={1} max={10} style={{ width: '100%' }} placeholder="e.g. 2" />
+        </Form.Item>
+
         <Form.Item<IBlog>
           label={<span className='text-l'>Blog Image <span style={{ color: '#ff4d4f' }}>*</span></span>}
           name="image"
@@ -546,6 +604,23 @@ const BlogForm: React.FC<BlogFormProps> = ({
             <Button icon={<UploadOutlined />}>Click to Upload</Button>
           </Upload>
         </Form.Item>
+
+        <Form.Item<IBlog>
+          label="Featured Blogs"
+          name="featured_blogs"
+        >
+          <Select
+            mode="multiple"
+            placeholder="Select up to 3 featured blogs"
+            maxCount={3}
+            options={publishedBlogsList.map(b => ({ value: b.id, label: b.title || 'Untitled' }))}
+            allowClear
+            filterOption={(input, option) =>
+              (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
+            }
+          />
+        </Form.Item>
+
 
         <Form.Item<IBlog>
           label="Meta Title"
@@ -580,6 +655,18 @@ const BlogForm: React.FC<BlogFormProps> = ({
         >
           <Input.TextArea maxLength={160} showCount placeholder="Enter Meta Description (max 160 characters)" rows={4} />
         </Form.Item>
+        <Form.Item<IBlog>
+          label="Meta Keywords"
+          name="meta_keywords"
+
+        >
+          <Select
+            mode="tags"
+            style={{ width: '100%' }}
+            placeholder="Enter meta keywords (press Enter or comma to add)"
+            tokenSeparators={[',']}
+          />
+        </Form.Item>
         <Form.Item
           wrapperCol={{
             offset: 8,
@@ -613,7 +700,11 @@ const BlogForm: React.FC<BlogFormProps> = ({
         title={form.getFieldValue('title') || 'Untitled Blog'}
         html={quillRef.current?.getEditor?.().root.innerHTML || form.getFieldValue('descp') || ''}
         imageSrc={fileList[0]?.originFileObj ? URL.createObjectURL(fileList[0].originFileObj) : (fileList[0] as any)?.url}
-
+        categoryName={categoriesList.find(c => c.id === form.getFieldValue('category_id'))?.name ?? null}
+        readTime={form.getFieldValue('read_time') ?? null}
+        status={form.getFieldValue('status') ?? 'draft'}
+        createdAt={blog?.created_at ?? null}
+        author={authorsList.find(a => a.id === form.getFieldValue('author_id')) ?? null}
       />
 
       {/* Video Embed Modal */}

@@ -1,5 +1,5 @@
 import { enumJobMode, enumJobType } from "@/migrations/schema";
-import { bigint, boolean, pgTable, text, timestamp, varchar, pgEnum } from "drizzle-orm/pg-core";
+import { bigint, boolean, pgTable, text, timestamp, varchar, pgEnum, integer } from "drizzle-orm/pg-core";
 
 export const enumBlogStatus = pgEnum("enum_blog_status", ["draft", "published"]);
 
@@ -89,6 +89,9 @@ export const blogs = pgTable("blogs", {
 	categoryId: bigint("category_id", { mode: "number" }).references(() => categories.id, { onDelete: "restrict" }),
 	tags: text("tags").array(),
 	canonicalUrl: text("canonical_url"),
+	readTime: integer("read_time").notNull().default(2),
+	featuredBlogs: integer("featured_blogs").array(),
+	meta_keywords: text("meta_keywords").array(),
 });
 
 export const categories = pgTable("categories", {

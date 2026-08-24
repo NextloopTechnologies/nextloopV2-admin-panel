@@ -106,6 +106,9 @@ export type Database = {
           category_id: number | null
           tags: string[] | null
           canonical_url: string | null
+          read_time: number
+          featured_blogs: number[] | null
+          meta_keywords?: string[] | null
         }
         Insert: {
           author_id?: number | null
@@ -123,6 +126,9 @@ export type Database = {
           category_id?: number | null
           tags?: string[] | null
           canonical_url?: string | null
+          read_time?: number
+          featured_blogs?: number[] | null
+          meta_keywords?: string[] | null
         }
         Update: {
           author_id?: number | null
@@ -140,6 +146,9 @@ export type Database = {
           category_id?: number | null
           tags?: string[] | null
           canonical_url?: string | null
+          read_time?: number
+          featured_blogs?: number[] | null
+          meta_keywords?: string[] | null
         }
         Relationships: [
           {
