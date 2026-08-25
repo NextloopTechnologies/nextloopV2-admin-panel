@@ -6,10 +6,11 @@ import Link from 'next/link';
 import { appliedJobApi } from '.';
 import { withAuth } from '../auth';
 import { IAppliedJobView, IJob } from '@/types/supabase';
-import { UploadFileService } from '@/app/api';
+import { deleteFiles } from './appliedJobApi';
 import { formattedDate } from '@/lib/utils';
 import { jobApi } from '../job';
 import { IAppliedJobFilters } from '@/types/applied_job';
+import { responseMessage, thrownErrorMessage } from '../crud/apiResponse';
 
 const List: React.FC = () => {
 
@@ -28,16 +29,17 @@ const List: React.FC = () => {
       try {
         setIsLoading(true);
         console.log("pageNo", pageNo);
-        const { success, data, count } = await appliedJobApi.list(pageNo, pageSize, filters);
-        if (success) {
-          setCount(count);
-          setAppliedJobData(data);
+        const result = await appliedJobApi.list(pageNo, pageSize, filters);
+        if (result?.success) {
+          setCount(result.count || 0);
+          setAppliedJobData(Array.isArray(result.data) ? result.data : []);
+          setIsError(null);
         } else {
-          setIsError("An error occurred while fetching data.");
+          setIsError(responseMessage(result, "Unable to load applications."));
         }
       } catch (error) {
         console.error("APPLIED_JOB_LIST_CONTROLLER", error);
-        message.error("An error occurred while fetching data.");
+        setIsError(thrownErrorMessage(error, "Unable to load applications."));
       } finally {
         setIsLoading(false);
       }
@@ -49,14 +51,19 @@ const List: React.FC = () => {
 
   useEffect(() => {
     async function fetchJobs() {
-      setIsLoading(true);
-      const { success, data } = await jobApi.list(pageNo, 1000);
-      if (success) {
-        setJobData(data);
+      try {
+        setIsLoading(true);
+        const result = await jobApi.list(pageNo, 1000);
+        if (result?.success) {
+          setJobData(Array.isArray(result.data) ? result.data : []);
+        } else setIsError(responseMessage(result, "Unable to load job filters."));
+      } catch (error) {
+        setIsError(thrownErrorMessage(error, "Unable to load job filters."));
+      } finally {
+        setIsLoading(false)
       }
-      else setIsError("An error occured while fetching job filter data.")
-      setIsLoading(false)
     }
+    
     fetchJobs()
   },[])
 
@@ -151,7 +158,7 @@ const List: React.FC = () => {
         if(!success) return message.error("Failed to Delete!");
 
         const deleteBucketImages = appliedJobData.filter(applied_job => selectedRowKeys.includes(applied_job.id as React.Key)).map(item => item.resume_id!)            
-        if(deleteBucketImages.length) UploadFileService.deleteFiles(deleteBucketImages)
+        if(deleteBucketImages.length) await deleteFiles(deleteBucketImages)
         
         const updatedAppliedJobData = appliedJobData.filter(applied_job => !selectedRowKeys.includes(applied_job.id as React.Key))
         setAppliedJobData(updatedAppliedJobData)
@@ -185,6 +192,7 @@ const List: React.FC = () => {
         columns={columns}
         dataSource={dataSource}
         loading={isLoading}
+        locale={{ emptyText: 'No records found.' }}
         pagination={{
           pageSize,
           total: count,

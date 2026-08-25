@@ -13,8 +13,7 @@ export const list = async (pageNo?: number, pageSize?: number, searchQuery?: str
     }
 
     const response = await fetch(url, { cache: "no-store" });
-    const { data } = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.error('CATEGORY_LIST_API_ERROR:', error);
     return { success: false, data: [], count: 0 };
@@ -27,8 +26,7 @@ export const create = async (payload: FormData) => {
       method: 'POST',
       body: payload,
     });
-    const { data } = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.error('CATEGORY_CREATE_API_ERROR:', error);
     return { success: false, msgText: "Failed to create category." };
@@ -40,8 +38,7 @@ export const read = async (id: number) => {
     const response = await fetch(`${config.apiBaseUrl}/api/category/${id}`, {
       cache: "no-store"
     });
-    const { data } = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.error('CATEGORY_READ_API_ERROR:', error);
     return { success: false, msgText: "Failed to read category." };
@@ -54,8 +51,7 @@ export const update = async (payload: FormData) => {
       method: 'PUT',
       body: payload,
     });
-    const { data } = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.error('CATEGORY_UPDATE_API_ERROR:', error);
     return { success: false, msgText: "Failed to update category." };
@@ -68,8 +64,7 @@ export const remove = async (ids: number[]) => {
       method: "DELETE",
       body: JSON.stringify(ids)
     });
-    const { data } = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.error('CATEGORY_DELETE_API_ERROR:', error);
     return { success: false, msgText: "Failed to delete category." };
@@ -82,8 +77,7 @@ export const reassignAndRemove = async (id: number, reassignId: number) => {
       method: "DELETE",
       body: JSON.stringify({ id, reassignId })
     });
-    const { data } = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.error('CATEGORY_REASSIGN_AND_DELETE_API_ERROR:', error);
     return { success: false, msgText: "Failed to reassign and delete category." };

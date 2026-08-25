@@ -15,6 +15,7 @@ import dayjs from 'dayjs';
 import BlogPreviewModal from './BlogPreviewModal';
 import { authorApi } from '@/components/author';
 import { categoryApi } from '@/components/category';
+import { responseMessage, thrownErrorMessage } from '../crud/apiResponse';
 
 const List: React.FC = () => {
 
@@ -46,14 +47,15 @@ const List: React.FC = () => {
       const result = await blogApi.list(1, 1000);
       const { success, data, count } = result;
       if (success) {
-        setCount(count);
-        setBlogData(data);
+        setCount(count || 0);
+        setBlogData(Array.isArray(data) ? data : []);
+        setIsError(null);
       } else {
-        setIsError("An error occurred while fetching data.");
+        setIsError(responseMessage(result, "Unable to load blogs."));
       }
     } catch (error) {
       console.error("BLOG_LIST_CONTROLLER", error);
-      setIsError("Something went wrong while fetching data!");
+      setIsError(thrownErrorMessage(error, "Unable to load blogs."));
     } finally {
       setIsLoading(false);
     }
@@ -485,6 +487,7 @@ const List: React.FC = () => {
         columns={columns}
         dataSource={dataSource}
         loading={isLoading}
+        locale={{ emptyText: 'No records found.' }}
         pagination={{
           pageSize: 10
         }}

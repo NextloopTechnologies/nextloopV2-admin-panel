@@ -8,6 +8,7 @@ import { categoryApi } from '.';
 import { ICategory } from '@/types/blog';
 import { withAuth } from '../auth';
 import dayjs from 'dayjs';
+import { responseMessage, thrownErrorMessage } from '../crud/apiResponse';
 
 const List: React.FC = () => {
   const [categoryData, setCategoryData] = useState<ICategory[]>([]);
@@ -32,14 +33,15 @@ const List: React.FC = () => {
       const result = await categoryApi.list();
       const { success, data, count: totalCount } = result;
       if (success) {
-        setCount(totalCount);
+        setCount(totalCount || 0);
         setCategoryData(data || []);
+        setIsError(null);
       } else {
-        setIsError("An error occurred while fetching categories.");
+        setIsError(responseMessage(result, "Unable to load categories."));
       }
     } catch (error) {
       console.error("CATEGORY_LIST_FETCH_ERROR", error);
-      setIsError("Something went wrong while fetching categories!");
+      setIsError(thrownErrorMessage(error, "Unable to load categories."));
     } finally {
       setIsLoading(false);
     }

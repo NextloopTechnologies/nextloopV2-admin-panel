@@ -1,62 +1,75 @@
 import { supabase } from "@/lib/supabase/query";
 import { IAppliedJobFilters } from "@/types/applied_job";
 import { deleteFiles } from "./uploadFile";
+import { invalidInput, serviceError, serviceFailure, serviceSuccess } from "@/app/api/utils/response";
 
 export const list = async(page:number = 1, limit:number = 10, filters: IAppliedJobFilters) => {
   try {
+    if (!Number.isInteger(page) || !Number.isInteger(limit) || page < 1 || limit < 1 || limit > 1000) return invalidInput("Page must be at least 1 and row must be between 1 and 1000.");
    
     const offset = (page-1) * limit;
 
-    let query = supabase
-    .from("applied_jobs_with_title")
-    .select('*', { count: "exact" })
+    let query = (supabase as any)
+    .from("applied_jobs")
+    .select('id, resume, fullname, email, phone, linkedin_url, github_url, cover_letter, created_at, job_id, jobs(title)', { count: "exact" })
     .order('id', { ascending: false })
 
     if(Array.isArray(filters?.title)) {
       query = query.in('job_title', filters.title)
     }    
-    if(Array.isArray(filters?.experience)) {
-      query = query.in('experience', filters.experience)
-    }
-
     query = query.range(offset, offset + limit - 1)
-    const { data, count, error } = await query
+    const { data: rows, count, error } = await query
+
+    const data = (rows || []).map((row: any) => ({
+      ...row,
+      title: Array.isArray(row.jobs) ? row.jobs[0]?.title : row.jobs?.title,
+      job_title: Array.isArray(row.jobs) ? row.jobs[0]?.title : row.jobs?.title,
+      experience: null,
+      resume_id: null,
+      resume_url: row.resume,
+    }))
     
-    if(data) return { success: true , data , count, status: 200 }
-    return { success: false, msgText: "No records found!",  status: 404 }
+    if (error) return serviceError(error, "Unable to load applications.");
+    if (!data?.length) return serviceSuccess(200, "No records found.", [], { count: 0 });
+    return serviceSuccess(200, "Applications loaded successfully.", data, { count: count ?? 0 });
   } catch(error) {
-    throw error
+    return serviceError(error, "Unable to load applications.");
   }
 }
 
 export const read = async (id: number) => {
   try {
-    const { data } = await supabase
+    if (!Number.isInteger(id) || id < 1) return invalidInput("A valid application id is required.");
+    const { data, error } = await (supabase as any)
     .from('applied_jobs')
-    .select('id, fullname, email, phone, linkedin_url, github_url, cover_letter, job_id, resume_url, experience, resume_id, jobs(title) ')
+    .select('id, fullname, email, phone, linkedin_url, github_url, cover_letter, job_id, resume, jobs(title) ')
     .filter('id', 'eq', id)
     .single();
 
-    const modifiedData = { title: data?.jobs?.title, ...data }
+    const modifiedData = { title: data?.jobs?.title, resume_url: data?.resume, ...data }
     
-    if(!data) return { success: false, msgText: "No record found!", status: 404 }
-    return { success: true , applied_job: modifiedData, status: 200 }
+    if (error && error.code !== "PGRST116") return serviceError(error, "Unable to load application.");
+    if(!data) return serviceFailure("Application not found.", 404, "NOT_FOUND");
+    return serviceSuccess(200, "Application loaded successfully.", undefined, { applied_job: modifiedData });
   } catch (error) {
-    throw error
+    return serviceError(error, "Unable to load application.");
   }
 } 
 
 export const remove = async(ids: number[]) => {
   try {
-    const { error } = await supabase
+    if (!Array.isArray(ids) || !ids.length || ids.some(id => !Number.isInteger(id) || id < 1)) return invalidInput("At least one valid application id is required.");
+    const { data, error } = await (supabase as any)
     .from("applied_jobs")
     .delete()
     .in('id', ids)
+    .select('id')
 
-    if(error) return { success: false , msgText: "No record found!", status: 404 }
-    return { success: true , msgText: "Deleted!", status: 200 }
+    if (error) return serviceError(error, "Unable to delete applications.");
+    if (!data?.length) return serviceFailure("Application not found.", 404, "NOT_FOUND");
+    return serviceSuccess(200, "Application(s) deleted successfully.", data);
   } catch(error) {
-    throw error
+    return serviceError(error, "Unable to delete applications.");
   }
 }
 
@@ -65,18 +78,18 @@ export const removeBacklogCandidates = async() => {
     const date = new Date();
     date.setDate(date.getDate() - 60) 
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
     .from("applied_jobs")
     .delete()
     .lt('created_at', date.toISOString()) 
-    .select('fullname, resume_id')
+    .select('fullname, resume')
   
-    if(error) return { success: false , msgText: "No record found!", status: 404 }
+    if (error) return serviceError(error, "Unable to delete backlog applications.");
    
     // get resume ids to delete from imagekit
-    const deleteIds = data
-      .map(item => item.resume_id)
-      .filter((id): id is string => typeof id === 'string' && id !== '');
+    const deleteIds = (data || [])
+      .map((item: { resume?: unknown }) => item.resume)
+      .filter((id: unknown): id is string => typeof id === 'string' && id !== '');
 
     //process 99 request for imagekit
     if(deleteIds.length>0){
@@ -87,8 +100,8 @@ export const removeBacklogCandidates = async() => {
       }
     }
    
-    return { success: true , msgText: `${deleteIds.length} Deleted!`, status: 200 }
+    return serviceSuccess(200, `${deleteIds.length} application(s) deleted successfully.`, undefined, { deletedCount: deleteIds.length });
   } catch(error) {
-    throw error
+    return serviceError(error, "Unable to delete backlog applications.");
   }
 } 

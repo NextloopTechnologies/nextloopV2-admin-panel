@@ -1,17 +1,17 @@
 import { Enums, IJob } from "@/types/supabase";
 import { JobService } from "../..";
 import { NextRequest } from "next/server";
+import { apiResponse, errorResponse } from "@/app/api/utils/response";
 
 export async function GET(req: NextRequest) {
   try {
     const pageNo = Number(req.nextUrl.searchParams.get('page')) 
     const pageSize = Number(req.nextUrl.searchParams.get('row')) 
     const { status, ...data }  = await JobService.list(pageNo, pageSize);
-    if(status!==200) return Response.json({ data }, { status })
-    return Response.json({ data }, { status })  
+    return apiResponse(data, { status });
   } catch (error) {
     console.error("JOB_LIST_CONTROLLER", error)
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+    return errorResponse(error);
   }
 }
 
@@ -27,14 +27,14 @@ export async function POST(req: Request) {
       location: formData.get("location") as string,
       job_mode: formData.get("job_mode") as Enums<'enum_job_mode'>,
       job_type: formData.get("job_type") as Enums<'enum_job_type'>,
+      visibility: formData.get("visibility") === "true",
     }
     
     const { status, ...data} = await JobService.create(payload);
-    if(status!==201) return Response.json({ data }, { status });
-    return Response.json({ data }, { status });
+    return apiResponse(data, { status });
   } catch (error) {
     console.error("JOB_CREATE_CONTROLLER", error)
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+    return errorResponse(error);
   }  
 }
 
@@ -54,11 +54,10 @@ export async function PUT(req: Request) {
     }
     
     const { status, ...data} = await JobService.update(payload, id);
-    if(status!==200) return Response.json({ data }, { status });
-    return Response.json({ data }, { status });
+    return apiResponse(data, { status });
   } catch (error) {
     console.error("JOB_UPDATE_CONTROLLER", error)
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+    return errorResponse(error);
   }  
 }
 
@@ -66,11 +65,10 @@ export async function DELETE(req: Request) {
   try {
     const deleteIds =  await req.json()
     const { status, ...data } = await JobService.remove(deleteIds)
-    if(status!==200) return Response.json({ data }, { status });
-    return Response.json({ data }, { status });
+    return apiResponse(data, { status });
   } catch (error) {
     console.error("JOB_DELETE_CONTROLLER", error)
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+    return errorResponse(error);
   }
 }
 

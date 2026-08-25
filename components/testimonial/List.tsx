@@ -10,6 +10,7 @@ import { testimonialApi } from '.';
 import { trimText } from '@/lib/utils';
 import { ITestimonial } from '@/types/supabase';
 import { withAuth } from '../auth';
+import { responseMessage, thrownErrorMessage } from '../crud/apiResponse';
 
 const List: React.FC = () => {
 
@@ -24,13 +25,18 @@ const List: React.FC = () => {
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
-    const { success, data, count }  = await testimonialApi.list(pageNo, pageSize);
-    if (success) {
-      setCount(count);
-      setTestimonailData(data);
-    } 
-    else setIsError("An error occured while fetching data.")
-    setIsLoading(false)
+    try {
+      const result = await testimonialApi.list(pageNo, pageSize);
+      if (result?.success) {
+        setCount(result.count || 0);
+        setTestimonailData(Array.isArray(result.data) ? result.data : []);
+        setIsError(null);
+      } else setIsError(responseMessage(result, "Unable to load testimonials."));
+    } catch (error) {
+      setIsError(thrownErrorMessage(error, "Unable to load testimonials."));
+    } finally {
+      setIsLoading(false);
+    }
   }, [pageNo]);
   
   useEffect(() => {
@@ -158,6 +164,7 @@ const List: React.FC = () => {
         columns={columns}
         dataSource={dataSource}
         loading={isLoading}
+        locale={{ emptyText: 'No records found.' }}
         pagination={{
           pageSize,
           total: count,

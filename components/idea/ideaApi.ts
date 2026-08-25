@@ -3,8 +3,7 @@ import config from "@/config";
 export const list = async(pageNo: number, pageSize: number) => {
   try {
     const response = await fetch(`${config.apiBaseUrl}/api/idea?page=${pageNo}&row=${pageSize}`)
-    const { data } = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.log('IDEA_LIST_API:', error);
   }
@@ -15,8 +14,7 @@ export const read = async(id: number) => {
     const response = await fetch(`${config.apiBaseUrl}/api/idea/${id}`, { 
       cache: "no-store"
     })
-    const { data } = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.log('IDEA_READ_API:', error);
   }
@@ -28,8 +26,7 @@ export const remove = async(ids: number[]) => {
       method: "DELETE",
       body: JSON.stringify(ids)
     })
-    const { data } = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.log('IDEA_DELETE_API:', error);
   }

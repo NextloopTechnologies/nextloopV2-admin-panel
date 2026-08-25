@@ -18,7 +18,7 @@ import dynamic from 'next/dynamic';
 import config from '@/config';
 import { Tooltip } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { deleteFiles, getTransformedUrl } from '@/app/api/services/uploadFile';
+import { deleteFiles, getTransformedUrl } from '../crud/uploadApi';
 import BlogPreviewModal from './BlogPreviewModal';
 
 const QuillNoSSRWrapper = dynamic(() => import('../quill/QuillEditor'), {

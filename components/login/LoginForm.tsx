@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { ILogin } from '@/types/login';
 import { AuthContext } from '../auth/AuthContext';
 import { AuthContextProps } from '@/types/auth';
-import { validateCredentials } from '@/app/api/services/user';
+import { login as apiLogin } from '@/components/user/userApi';
 
 const headingTitle: string = "Log in to Nextloop Admin";
 
@@ -21,12 +21,13 @@ const LoginForm: React.FC = () => {
 
   const handleSubmit = async (values: ILogin) => {
     setIsLoading(true);    
-    if(await validateCredentials(values)) {
+    const result = await apiLogin(values);
+    if(result.success) {
       login();
       return router.push('/dashboard') 
     }
     setIsLoading(false);
-    message.error("Invalid Credentials!")
+    message.error(result.message || result.msgText || "Invalid Credentials!")
   };
 
   return (

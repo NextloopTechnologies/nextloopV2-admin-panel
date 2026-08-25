@@ -29,7 +29,7 @@ const Enquiry = async({ params }: { params: { id: string } }) => {
 export default Enquiry;
 
 async function getEnquiry(id: number) {
-  const { enquiry, success } = await enquiryApi.read(id);
-  if(!success) throw "Error" 
+  const { enquiry, success } = await enquiryApi.read(id) as { enquiry?: IEnquiry; success?: boolean };
+  if (!success || !enquiry) throw "Error";
   return enquiry
 }
