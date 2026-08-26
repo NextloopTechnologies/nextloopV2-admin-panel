@@ -8,10 +8,11 @@ import Image from 'next/image';
 import Edit from "../../public/images/icons/edit.png";
 import Link from 'next/link';
 import { portfolioApi } from '.';
-import { UploadFileService } from '@/app/api';
+import { deleteFiles } from './portfolioApi';
 import parse from "html-react-parser"
 import { trimText } from '@/lib/utils';
 import { withAuth } from '../auth';
+import { responseMessage, thrownErrorMessage } from '../crud/apiResponse';
 
 const List: React.FC = () => {
 
@@ -26,15 +27,18 @@ const List: React.FC = () => {
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
-    const { success, data, count }  = await portfolioApi.list(pageNo, pageSize);
-    console.log({count, data});
-    
-    if (success) {
-      setCount(count);
-      setPortfolioData(data as IPortfolio[]);
-    } 
-    else setIsError("An error occured while fetching data.")
-    setIsLoading(false)
+    try {
+      const result = await portfolioApi.list(pageNo, pageSize);
+      if (result?.success) {
+        setCount(result.count || 0);
+        setPortfolioData(Array.isArray(result.data) ? result.data : []);
+        setIsError(null);
+      } else setIsError(responseMessage(result, "Unable to load portfolio items."));
+    } catch (error) {
+      setIsError(thrownErrorMessage(error, "Unable to load portfolio items."));
+    } finally {
+      setIsLoading(false);
+    }
   }, [pageNo]);
   
   useEffect(() => {
@@ -139,7 +143,7 @@ const List: React.FC = () => {
         if(!success) return message.error("Failed to Delete!");
 
         const deleteBucketImages = portfolioData.filter(portfolio => selectedRowKeys.includes(portfolio.id as React.Key)).flatMap(item => item?.image?.map(item => item.fileId) || [])
-        if(deleteBucketImages.length) UploadFileService.deleteFiles(deleteBucketImages)
+        if(deleteBucketImages.length) await deleteFiles(deleteBucketImages)
         
         const updatedPortfolioData = portfolioData.filter(portfolio => !selectedRowKeys.includes(portfolio.id as React.Key))
         setPortfolioData(updatedPortfolioData)
@@ -180,6 +184,7 @@ const List: React.FC = () => {
         columns={columns}
         dataSource={dataSource}
         loading={isLoading}
+        locale={{ emptyText: 'No records found.' }}
         pagination={{
           pageSize,
           total: count,

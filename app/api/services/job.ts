@@ -1,75 +1,87 @@
 import { supabase } from "@/lib/supabase/query";
 import { IJob } from "@/types/supabase";
+import { invalidInput, serviceError, serviceFailure, serviceSuccess } from "@/app/api/utils/response";
 
 export const list = async(page:number = 1, limit:number = 10) => {
   try {
+    if (!Number.isInteger(page) || !Number.isInteger(limit) || page < 1 || limit < 1 || limit > 1000) return invalidInput("Page must be at least 1 and row must be between 1 and 1000.");
     const offset = (page-1) * limit;
 
-    const { data, count } = await supabase
+    const { data, count, error } = await supabase
     .from("jobs")
-    .select('id, title, descp, location, visibility ', { count: "exact" })
+    .select('id, title, descp, location, job_mode, job_type, package, responsibilities, qualifications, skills, created_at, updated_at', { count: "exact" })
     .order('id', { ascending: false })
     .range(offset, offset + limit - 1)
     
-    if(data) return { success: true , data, count, status: 200 }
-    return { success: false, msgText: "No records found!",  status: 404 }
+    if (error) return serviceError(error, "Unable to load jobs.");
+    if (!data?.length) return serviceSuccess(200, "No records found.", [], { count: 0 });
+    return serviceSuccess(200, "Jobs loaded successfully.", data, { count: count ?? 0 });
   } catch(error) {
-    throw error
+    return serviceError(error, "Unable to load jobs.");
   }
 }
 
 export const create = async (values: IJob) => {
   try {
+    if (!values || !values.title?.trim() || !values.descp?.trim()) return invalidInput("Job title and description are required.");
     const { error } = await supabase
     .from('jobs')
     .insert(values)
 
-    if(!error) return { success: true, msgText: "Created!", status: 201 }    
-    return { success: false, msgText: "Failed to create!", status: 500 }
+    if (error) return serviceError(error, "Unable to create job.");
+    return serviceSuccess(201, "Job created successfully.");
   } catch (error) {
-    throw error
+    return serviceError(error, "Unable to create job.");
   }
 }
 
 export const read = async (id: number) => {
   try {
-    const { data } = await supabase
+    if (!Number.isInteger(id) || id < 1) return invalidInput("A valid job id is required.");
+    const { data, error } = await supabase
     .from('jobs')
     .select()
     .filter('id', 'eq', id)
     .single();
   
-    if(!data) return { success: false, msgText: "No record found!", status: 404 }
-    return { success: true , job: data, status: 200 }
+    if (error && error.code !== "PGRST116") return serviceError(error, "Unable to load job.");
+    if(!data) return serviceFailure("Job not found.", 404, "NOT_FOUND");
+    return serviceSuccess(200, "Job loaded successfully.", undefined, { job: data });
   } catch (error) {
-    throw error
+    return serviceError(error, "Unable to load job.");
   }
 } 
 
 export const update = async (values: IJob, id: number) => {
   try {
-    const { error } = await supabase
+    if (!Number.isInteger(id) || id < 1 || !values || !values.title?.trim() || !values.descp?.trim()) return invalidInput("A valid job id, title, and description are required.");
+    const { data, error } = await supabase
     .from('jobs')
     .update(values)
     .eq('id', id)
+    .select('id')
     
-    if(!error) return { success: true, msgText: "Updated!", status: 200 }
-    return { success: false, msgText: "Failed to update!", status: 500 }
+    if (error) return serviceError(error, "Unable to update job.");
+    if (!data?.length) return serviceFailure("Job not found.", 404, "NOT_FOUND");
+    return serviceSuccess(200, "Job updated successfully.");
   } catch (error) {
-    throw error
+    return serviceError(error, "Unable to update job.");
   }
 }
 
 export const remove = async(ids: number[]) => {
   try {
-    const { error } = await supabase
+    if (!Array.isArray(ids) || !ids.length || ids.some(id => !Number.isInteger(id) || id < 1)) return invalidInput("At least one valid job id is required.");
+    const { data, error } = await supabase
     .from("jobs")
     .delete()
     .in('id', ids)
+    .select('id')
 
-    if(error) return { success: false , msgText: "No record found!", status: 404 }
-    return { success: true , msgText: "Deleted!", status: 200 }
+    if (error) return serviceError(error, "Unable to delete jobs.");
+    if (!data?.length) return serviceFailure("Job not found.", 404, "NOT_FOUND");
+    return serviceSuccess(200, "Job(s) deleted successfully.", data);
   } catch(error) {
-    throw error
+    return serviceError(error, "Unable to delete jobs.");
   }
 }

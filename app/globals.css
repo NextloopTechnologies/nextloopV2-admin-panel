@@ -8,6 +8,14 @@
   max-width: 1180px;
 }
 
+@media (min-width: 768px) {
+  .content-container {
+    width: 90vw;
+    max-width: none;
+    margin: 20px auto 0;
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -67,4 +75,4 @@
 /* Quill editor default height - approximately 3 rows */
 .ql-editor {
   min-height: 100px;
-}
+}

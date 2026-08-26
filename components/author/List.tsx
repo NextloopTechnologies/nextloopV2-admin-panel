@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { authorApi } from '.';
 import { IAuthor } from '@/types/supabase';
 import { withAuth } from '../auth';
+import { responseMessage, thrownErrorMessage } from '../crud/apiResponse';
 
 const List: React.FC = () => {
 
@@ -22,14 +23,19 @@ const List: React.FC = () => {
   const pageSize: number = 10;
 
   const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    const { success, data, count }  = await authorApi.list(pageNo, pageSize);
-    if (success) {
-      setCount(count);
-      setAuthorData(data);
-    } 
-    else setIsError("An error occured while fetching data.")
-    setIsLoading(false)
+    try {
+      setIsLoading(true);
+      const result = await authorApi.list(pageNo, pageSize);
+      if (result?.success) {
+        setCount(result.count || 0);
+        setAuthorData(Array.isArray(result.data) ? result.data : []);
+        setIsError(null);
+      } else setIsError(responseMessage(result, "Unable to load authors."));
+    } catch (error) {
+      setIsError(thrownErrorMessage(error, "Unable to load authors."));
+    } finally {
+      setIsLoading(false);
+    }
   }, [pageNo]);
   
   useEffect(() => {
@@ -150,6 +156,7 @@ const List: React.FC = () => {
         columns={columns}
         dataSource={dataSource}
         loading={isLoading}
+        locale={{ emptyText: 'No records found.' }}
         pagination={{
           pageSize,
           total: count,

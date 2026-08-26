@@ -1,8 +1,10 @@
 import { supabase } from "@/lib/supabase/query";
 import { IBlogMutate } from "@/types/supabase";
+import { invalidInput, serviceError, serviceFailure, serviceSuccess } from "@/app/api/utils/response";
 
 export const list = async (page: number = 1, limit: number = 10) => {
   try {
+    if (!Number.isInteger(page) || !Number.isInteger(limit) || page < 1 || limit < 1 || limit > 1000) return invalidInput("Page must be at least 1 and row must be between 1 and 1000.");
     const offset = (page - 1) * limit;
 
     const { data, count, error } = await supabase
@@ -11,78 +13,82 @@ export const list = async (page: number = 1, limit: number = 10) => {
       .order('id', { ascending: false })
       .range(offset, offset + limit - 1)
 
-    if (error) {
-      console.error("SUPABASE_LIST_ERROR:", error);
-    }
-
-    if (data) return { success: true, data, count, status: 200 }
-    return { success: false, msgText: "No records found!", status: 404 }
+    if (error) return serviceError(error, "Unable to load blogs.");
+    if (!data?.length) return serviceSuccess(200, "No records found.", [], { count: 0 });
+    return serviceSuccess(200, "Blogs loaded successfully.", data, { count: count ?? 0 });
   } catch (error) {
-    throw error
+    return serviceError(error, "Unable to load blogs.");
   }
 }
 
 export const create = async (values: IBlogMutate) => {
   try {
+    if (!values || !values.title?.trim() || !values.descp?.trim()) return invalidInput("Blog title and description are required.");
     const { error } = await supabase
       .from('blogs')
       .insert(values)
 
-    if (!error) return { success: true, msgText: "Created!", status: 201 }
-    console.error("SUPABASE_CREATE_ERROR:", error);
-    return { success: false, msgText: "Failed to create!", status: 500 }
+    if (error) return serviceError(error, "Unable to create blog.");
+    return serviceSuccess(201, "Blog created successfully.");
   } catch (error) {
-    throw error
+    return serviceError(error, "Unable to create blog.");
   }
 }
 
 export const read = async (id: number) => {
   try {
-    const { data } = await supabase
+    if (!Number.isInteger(id) || id < 1) return invalidInput("A valid blog id is required.");
+    const { data, error } = await supabase
       .from('blogs')
       .select()
       .filter('id', 'eq', id)
       .single();
 
-    if (!data) return { success: false, msgText: "No record found!", status: 404 }
-    return { success: true, blog: data, status: 200 }
+    if (error && error.code !== "PGRST116") return serviceError(error, "Unable to load blog.");
+    if (!data) return serviceFailure("Blog not found.", 404, "NOT_FOUND");
+    return serviceSuccess(200, "Blog loaded successfully.", undefined, { blog: data });
   } catch (error) {
-    throw error
+    return serviceError(error, "Unable to load blog.");
   }
 }
 
 export const update = async (values: IBlogMutate, id: number) => {
   try {
-    const { error } = await supabase
+    if (!Number.isInteger(id) || id < 1 || !values || !values.title?.trim() || !values.descp?.trim()) return invalidInput("A valid blog id, title, and description are required.");
+    const { data, error } = await supabase
       .from('blogs')
       .update(values)
       .eq('id', id)
+      .select('id')
 
-    if (!error) return { success: true, msgText: "Updated!", status: 200 }
-    console.error("SUPABASE_UPDATE_ERROR:", error);
-    return { success: false, msgText: "Failed to update!", status: 500 }
+    if (error) return serviceError(error, "Unable to update blog.");
+    if (!data?.length) return serviceFailure("Blog not found.", 404, "NOT_FOUND");
+    return serviceSuccess(200, "Blog updated successfully.");
   } catch (error) {
-    throw error
+    return serviceError(error, "Unable to update blog.");
   }
 }
 
 export const remove = async (ids: number[]) => {
   try {
+    if (!Array.isArray(ids) || !ids.length || ids.some(id => !Number.isInteger(id) || id < 1)) return invalidInput("At least one valid blog id is required.");
     const { data, error } = await supabase
       .from("blogs")
       .delete()
       .in('id', ids)
       .select();
 
-    if (error) return { success: false, msgText: "Failed to delete!", status: 404 }
-    return { success: true, deletedData: data, msgText: "Deleted!", status: 200 }
+    if (error) return serviceError(error, "Unable to delete blogs.");
+    if (!data?.length) return serviceFailure("Blog not found.", 404, "NOT_FOUND");
+    return serviceSuccess(200, "Blog(s) deleted successfully.", undefined, { deletedData: data });
   } catch (error) {
-    throw error
+    return serviceError(error, "Unable to delete blogs.");
   }
 }
 
 export const search = async (query: string, limit: number = 10) => {
   try {
+    if (!query?.trim() || !Number.isInteger(limit) || limit < 1 || limit > 1000) return invalidInput("Search query is required and limit must be between 1 and 1000.");
     const { data, error } = await supabase
       .from("blogs")
       .select('id, title')
@@ -90,9 +96,9 @@ export const search = async (query: string, limit: number = 10) => {
       .order('title', { ascending: true })
       .limit(limit);
 
-    if (error) throw error;
-    return { success: true, data: data || [], status: 200 };
+    if (error) return serviceError(error, "Unable to search blogs.");
+    return serviceSuccess(200, data?.length ? "Blogs found." : "No blogs found.", data || []);
   } catch (error) {
-    throw error;
+    return serviceError(error, "Unable to search blogs.");
   }
 }

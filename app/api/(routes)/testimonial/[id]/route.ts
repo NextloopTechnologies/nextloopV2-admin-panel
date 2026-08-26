@@ -1,12 +1,13 @@
 import { TestimonialService } from "../../..";
+import { apiResponse, errorResponse } from "@/app/api/utils/response";
 
 export async function GET(req: Request) {
   try {
     const id = Number(req.url.split('/testimonial/')[1]);
-    const { status, ...data }  = await TestimonialService.read(id);
-    return Response.json({ data }, { status })  
+    const result = await TestimonialService.read(id);
+    return apiResponse(result);
   } catch (error) {
     console.error("TESTIMONIAL_READ_CONTROLLER", error)
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+    return errorResponse(error);
   }
 }

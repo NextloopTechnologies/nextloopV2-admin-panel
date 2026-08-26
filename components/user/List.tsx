@@ -6,7 +6,8 @@ import { SearchBox } from '../crud';
 import Link from 'next/link';
 import { IUser } from '@/types/supabase';
 import { withAuth } from '../auth';
-import { list, remove } from '@/app/api/services/user';
+import { list, remove } from './userApi';
+import { responseMessage, thrownErrorMessage } from '../crud/apiResponse';
 
 const List: React.FC = () => {
 
@@ -22,13 +23,15 @@ const List: React.FC = () => {
   const fetchData =  useCallback(async () => { 
     try {
       setIsLoading(true);
-      const { data, count }  = await list(pageNo, pageSize);
-      if (data?.length || data != null ) {
+      const result = await list(pageNo, pageSize);
+      const { data, count } = result;
+      if (result.success) {
         setCount(count || 0);
-        setUserData(data);
-      } 
+        setUserData(Array.isArray(data) ? data : []);
+        setIsError(null);
+      } else setIsError(responseMessage(result, "Unable to load users."));
     } catch (error) {
-      setIsError("An error occured while fetching data.")
+      setIsError(thrownErrorMessage(error, "Unable to load users."));
     } finally {
       setIsLoading(false)
     }
@@ -89,8 +92,8 @@ const List: React.FC = () => {
   const deleteAll: PopconfirmProps['onConfirm'] = async () => {
     if (selectedRowKeys) {
       try {
-        const status = await remove(selectedRowKeys as number[]);
-        if(status !== 204) return message.error("Failed to Delete!");
+        const result = await remove(selectedRowKeys as number[]);
+        if(!result.success) return message.error(result.msgText || "Failed to Delete!");
 
         const updatedUserData = userData.filter(user => !selectedRowKeys.includes(user.id as React.Key))
         setUserData(updatedUserData)
@@ -131,6 +134,7 @@ const List: React.FC = () => {
         columns={columns}
         dataSource={dataSource}
         loading={isLoading}
+        locale={{ emptyText: 'No records found.' }}
         pagination={{
           pageSize,
           total: count,

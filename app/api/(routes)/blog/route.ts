@@ -3,16 +3,19 @@ import { BlogService, UploadFileService } from "../..";
 import { NextRequest } from "next/server";
 import { IBlog } from "@/types/blog";
 import { deleteFiles } from "../../services/uploadFile";
+import { apiResponse, errorResponse } from "@/app/api/utils/response";
 
 export async function GET(req: NextRequest) {
   try {
-    const pageNo = Number(req.nextUrl.searchParams.get('page')) || 1;
-    const pageSize = Number(req.nextUrl.searchParams.get('row')) || 10;
+    const pageParam = req.nextUrl.searchParams.get('page');
+    const rowParam = req.nextUrl.searchParams.get('row');
+    const pageNo = pageParam === null ? 1 : Number(pageParam);
+    const pageSize = rowParam === null ? 10 : Number(rowParam);
     const { status, ...data } = await BlogService.list(pageNo, pageSize);
-    return Response.json({ data }, { status })
+    return apiResponse(data, { status });
   } catch (error) {
     console.error("BLOG_LIST_CONTROLLER", error)
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+    return errorResponse(error);
   }
 }
 
@@ -82,11 +85,11 @@ export async function POST(req: Request) {
     }
 
     const { status, ...data } = await BlogService.create(payload);
-    return Response.json({ data }, { status });
+    return apiResponse(data, { status });
 
   } catch (error) {
     console.error("BLOG_CREATE_CONTROLLER", error)
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+    return errorResponse(error);
   }
 }
 
@@ -162,11 +165,11 @@ export async function PUT(req: Request) {
 
 
     const { status, ...data } = await BlogService.update(payload, id);
-    return Response.json({ data }, { status });
+    return apiResponse(data, { status });
 
   } catch (error) {
     console.error("BLOG_UPDATE_CONTROLLER", error)
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+    return errorResponse(error);
   }
 }
 
@@ -200,10 +203,10 @@ export async function DELETE(req: Request) {
       }
     }
 
-    return Response.json({ data: { success, msgText } }, { status });
+    return apiResponse({ success, msgText }, { status });
   } catch (error) {
     console.error("BLOG_DELETE_CONTROLLER", error)
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+    return errorResponse(error);
   }
 }
 
