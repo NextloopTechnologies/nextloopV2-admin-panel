@@ -2,30 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    /* rgb(var(--background-start-rgb)); */
-}
-
 .content-container {
   margin: 20px 0 auto;
   padding: 0 26px;
@@ -37,3 +13,58 @@ body {
     text-wrap: balance;
   }
 }
+
+.ql-editor img {
+  display: block;
+  margin: 20px auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.ql-editor img[style*="float: left"] {
+  display: inline !important;
+  margin: 8px 16px 8px 0 !important;
+}
+
+.ql-editor img[style*="float: right"] {
+  display: inline !important;
+  margin: 8px 0 8px 16px !important;
+}
+
+.ql-editor img[style*="display: inline"] {
+  display: inline !important;
+  margin: 0 !important;
+}
+
+
+
+.ql-editor .ql-video {
+  display: block;
+  margin: 20px auto;
+  max-width: 100%;
+}
+
+.ql-image-caption {
+  text-align: center !important;
+  font-size: 14px !important;
+  color: #666666 !important;
+  margin-top: 6px !important;
+  font-style: italic !important;
+  display: block !important;
+  margin-bottom: 20px !important;
+}
+
+/* Ensure captions immediately following floated images clear floats to stay underneath */
+.ql-editor p:has(img[style*="float"])+p,
+.ql-editor p:has(img[style*="float"])+div,
+.ql-editor img[style*="float"]+p,
+.ql-editor img[style*="float"]+div,
+.ql-editor p:has(img[style*="float"])+.ql-align-center,
+.ql-editor img[style*="float"]+.ql-align-center {
+  clear: both !important;
+}
+
+/* Quill editor default height - approximately 3 rows */
+.ql-editor {
+  min-height: 100px;
+}

@@ -11,7 +11,7 @@ export const AuthContext = createContext<AuthContextProps>({
 
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
-  const [authUser, setAuthUser] = useState<boolean>(false);
+  const [authUser, setAuthUser] = useState<boolean|null>(null);
 
   useEffect(() => {
     const initialAuthUser = !!localStorage.getItem('isAuth');
@@ -27,6 +27,12 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem("isAuth")
     setAuthUser(false);
   };
+
+  if (authUser === null) {
+    return (
+     <div className='flex items-center justify-center h-screen'>Loading...</div>
+    )
+  }
 
   return (
     <AuthContext.Provider value={{ authUser, login, logout }}>

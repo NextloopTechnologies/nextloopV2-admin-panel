@@ -11,12 +11,13 @@ const getBufferImage = async(fileInfo: File) => {
   }
 }
 
-export const uploadImage = async(fileInfo: File, fileName: string) => {
+export const uploadImage = async(fileInfo: File, fileName: string, folder?: string) => {
   try {
     const bufferImage: Buffer = await getBufferImage(fileInfo);
     const result = await imagekit.upload({
       file: bufferImage, 
       fileName: fileName, 
+      folder: folder || "AdminNextloop",
     });
     return result;
   } catch (error) {
@@ -24,11 +25,24 @@ export const uploadImage = async(fileInfo: File, fileName: string) => {
   }
 }
 
+export const getTransformedUrl = (url: string) => {
+    return imagekit.url({
+      src: url,
+      transformation: [
+        {
+          height: "400",
+          crop: "maintain_ratio",
+        },
+      ],
+    });
+}
+
+
 export const deleteFiles = async (files: string[]) => {
   try {
-    imagekit.bulkDeleteFiles(files);
-    return 
+    await imagekit.bulkDeleteFiles(files);
+    return;
   } catch (error) {
-    throw error
+    throw error;
   }
 }

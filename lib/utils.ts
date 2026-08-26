@@ -21,3 +21,23 @@ export function trimText(text: string, limit: number): string {
   const trimmed = words.slice(0, limit).join(" ");
   return trimmed + (words.length > limit ? "..." : "");
 }
+
+export function formattedDate(dateInput: string) {
+  return new Date(dateInput).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+  });
+}
+
+export function formattedUrl(url: string) {
+  return url.startsWith("http") ? url : `https://${url}`;
+}
+
+export function extractImageUrlsFromHtml(html: string): string[] {
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  return Array.from(div.querySelectorAll("img"))
+    .map((img) => img.getAttribute("src")!)
+    .filter(Boolean);
+}
