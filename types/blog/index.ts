@@ -22,6 +22,8 @@ export interface IBlog {
     read_time?: number;
     featured_blogs?: number[] | null;
     meta_keywords?: string[] | null;
+    image_alt?: string;
+    image_caption?: string;
 }
 
 export interface ICategory {
