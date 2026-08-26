@@ -8,6 +8,7 @@ import { popupFormApi } from '.';
 import { withAuth } from '../auth';
 import { IPopupForm } from '@/types/supabase';
 import { formattedDate, trimText } from '@/lib/utils';
+import { responseMessage, thrownErrorMessage } from '../crud/apiResponse';
 
 const List: React.FC = () => {
 
@@ -23,13 +24,14 @@ const List: React.FC = () => {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const { success, data, count } = await popupFormApi.list(pageNo, pageSize);
-      if (success) {
-        setCount(count);
-        setPopupFormData(data);
-      }
+      const result = await popupFormApi.list(pageNo, pageSize);
+      if (result?.success) {
+        setCount(result.count || 0);
+        setPopupFormData(Array.isArray(result.data) ? result.data : []);
+        setIsError(null);
+      } else setIsError(responseMessage(result, "Unable to load popup forms."));
     } catch (error) {
-      setIsError("An error occurred while fetching data.")
+      setIsError(thrownErrorMessage(error, "Unable to load popup forms."))
     } finally {
       setIsLoading(false)
     }
@@ -155,6 +157,7 @@ const List: React.FC = () => {
         columns={columns}
         dataSource={dataSource}
         loading={isLoading}
+        locale={{ emptyText: 'No records found.' }}
         pagination={{
           pageSize,
           total: count,

@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { IUser, IUserMutate } from '@/types/supabase';
 import { withAuth } from '../auth';
-import { create, hashPassword, userExists } from '@/app/api/services/user';
+import { create } from './userApi';
 
 interface UserFormProps {
   title: string;
@@ -31,19 +31,17 @@ const UserForm: React.FC<UserFormProps> = ({
   
   const handleFinish: FormProps<IUserMutate>['onFinish'] = async(values) => {
     setIsLoading(true);
-    const isUserExists = await userExists(values.email)
-    if(isUserExists != null) {
-      message.error("Email already taken!")
-      setIsLoading(false)
-      return
-    }
     const payload = {
       ...values,
-      password: await hashPassword(values.password)
+      password: values.password
     }
-    const data  = await create(payload);    
-    if(data != null ) message.success("Created Successfully!");
-    else message.error("Failed to create!");
+    const result = await create(payload);
+    if(result.success) message.success(result.msgText || "Created Successfully!");
+    else {
+      message.error(result.msgText || "Failed to create!");
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(false);
     router.push('/user');
   }

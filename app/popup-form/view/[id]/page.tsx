@@ -29,6 +29,6 @@ export default PopupFormDetail;
 
 async function getPopupForm(id: string) {
   const data = await popupFormApi.read(id);
-  if (!data) throw "Error";
-  return data;
+  if (!data?.success || !data.popupForm) throw "Error";
+  return data.popupForm as IPopupForm;
 }

@@ -8,6 +8,7 @@ import { enquiryApi } from '.';
 import { withAuth } from '../auth';
 import { IEnquiry } from '@/types/supabase';
 import { formattedDate, trimText } from '@/lib/utils';
+import { responseMessage, thrownErrorMessage } from '../crud/apiResponse';
 
 const List: React.FC = () => {
 
@@ -23,13 +24,14 @@ const List: React.FC = () => {
   const fetchData = useCallback(async () => {    
     setIsLoading(true);
     try {
-      const { success, data, count }  = await enquiryApi.list(pageNo, pageSize);
-      if (success) {
-        setCount(count);
-        setEnquiryData(data);
-      } 
+      const result = await enquiryApi.list(pageNo, pageSize);
+      if (result?.success) {
+        setCount(result.count || 0);
+        setEnquiryData(Array.isArray(result.data) ? result.data : []);
+        setIsError(null);
+      } else setIsError(responseMessage(result, "Unable to load enquiries."));
     } catch (error) {
-      setIsError("An error occured while fetching data.")
+      setIsError(thrownErrorMessage(error, "Unable to load enquiries."))
     } finally {
       setIsLoading(false)
     }   
@@ -156,6 +158,7 @@ const List: React.FC = () => {
         columns={columns}
         dataSource={dataSource}
         loading={isLoading}
+        locale={{ emptyText: 'No records found.' }}
         pagination={{
           pageSize,
           total: count,

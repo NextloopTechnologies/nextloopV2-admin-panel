@@ -1,12 +1,13 @@
 import { PortfolioService } from "@/app/api";
+import { apiResponse, errorResponse } from "@/app/api/utils/response";
 
 export async function GET(req: Request) {
   try {
     const id = Number(req.url.split('/portfolio/')[1]);
-    const { status, ...data }  = await PortfolioService.read(id);
-    return Response.json({ data }, { status })  
+    const result = await PortfolioService.read(id);
+    return apiResponse(result);
   } catch (error) {
     console.error("PORTFOLIO_READ_CONTROLLER", error)
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+    return errorResponse(error);
   }
 }

@@ -8,6 +8,7 @@ import { ideaApi } from '.';
 import { trimText } from '@/lib/utils';
 import { withAuth } from '../auth';
 import { IIdea } from '@/types/supabase';
+import { responseMessage, thrownErrorMessage } from '../crud/apiResponse';
 
 const List: React.FC = () => {
 
@@ -22,13 +23,18 @@ const List: React.FC = () => {
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
-    const { success, data, count }  = await ideaApi.list(pageNo, pageSize);
-    if (success) {
-      setCount(count);
-      setIdeaData(data);
-    } 
-    else setIsError("An error occured while fetching data.")
-    setIsLoading(false)
+    try {
+      const result = await ideaApi.list(pageNo, pageSize);
+      if (result?.success) {
+        setCount(result.count || 0);
+        setIdeaData(Array.isArray(result.data) ? result.data : []);
+        setIsError(null);
+      } else setIsError(responseMessage(result, "Unable to load ideas."));
+    } catch (error) {
+      setIsError(thrownErrorMessage(error, "Unable to load ideas."));
+    } finally {
+      setIsLoading(false);
+    }
   }, [pageNo]);
   
   useEffect(() => {
@@ -128,6 +134,7 @@ const List: React.FC = () => {
         columns={columns}
         dataSource={dataSource}
         loading={isLoading}
+        locale={{ emptyText: 'No records found.' }}
         pagination={{
           pageSize,
           total: count,

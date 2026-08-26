@@ -1,17 +1,17 @@
 import { ITestimonial } from "@/types/supabase";
 import { TestimonialService } from "../..";
 import { NextRequest } from "next/server";
+import { apiResponse, errorResponse } from "@/app/api/utils/response";
 
 export async function GET(req: NextRequest) {
   try {
     const pageNo = Number(req.nextUrl.searchParams.get('page')) 
     const pageSize = Number(req.nextUrl.searchParams.get('row')) 
     const { status, ...data }  = await TestimonialService.list(pageNo, pageSize);
-    if(status!==200) return Response.json({ data }, { status })
-    return Response.json({ data }, { status })  
+    return apiResponse(data, { status });
   } catch (error) {
     console.error("TESTIMONIAL_LIST_CONTROLLER", error)
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+    return errorResponse(error);
   }
 }
 
@@ -25,11 +25,10 @@ export async function POST(req: Request) {
     }
 
     const { status, ...data} = await TestimonialService.create(payload);
-    if(status!==201) return Response.json({ data }, { status });
-    return Response.json({ data }, { status });
+    return apiResponse(data, { status });
   } catch (error) {
     console.error("TESTIMONIAL_CREATE_CONTROLLER", error)
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+    return errorResponse(error);
   }  
 }
 
@@ -44,11 +43,10 @@ export async function PUT(req: Request) {
     }
     
     const { status, ...data} = await TestimonialService.update(payload, id);
-    if(status!==200) return Response.json({ data }, { status });
-    return Response.json({ data }, { status });
+    return apiResponse(data, { status });
   } catch (error) {
     console.error("TESTIMONIAL_UPDATE_CONTROLLER", error)
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+    return errorResponse(error);
   }  
 }
 
@@ -56,11 +54,10 @@ export async function DELETE(req: Request) {
   try {
     const deleteIds =  await req.json()
     const { status, ...data } = await TestimonialService.remove(deleteIds)
-    if(status!==200) return Response.json({ data }, { status });
-    return Response.json({ data }, { status });
+    return apiResponse(data, { status });
   } catch (error) {
     console.error("TESTIMONIAL_DELETE_CONTROLLER", error)
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 })
+    return errorResponse(error);
   }
 }
 

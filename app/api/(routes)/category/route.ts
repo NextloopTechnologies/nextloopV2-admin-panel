@@ -1,6 +1,7 @@
 import { ICategory } from "@/types/blog";
 import { CategoryService } from "../..";
 import { NextRequest } from "next/server";
+import { apiResponse, errorResponse } from "@/app/api/utils/response";
 
 export async function GET(req: NextRequest) {
   try {
@@ -9,10 +10,10 @@ export async function GET(req: NextRequest) {
     const searchName = req.nextUrl.searchParams.get('q') || undefined;
 
     const { status, ...data } = await CategoryService.list(pageNo, pageSize, searchName);
-    return Response.json({ data }, { status });
+    return apiResponse(data, { status });
   } catch (error) {
     console.error("CATEGORY_LIST_CONTROLLER", error);
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -26,10 +27,10 @@ export async function POST(req: Request) {
     };
 
     const { status, ...data } = await CategoryService.create(payload);
-    return Response.json({ data }, { status });
+    return apiResponse(data, { status });
   } catch (error) {
     console.error("CATEGORY_CREATE_CONTROLLER", error);
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -44,10 +45,10 @@ export async function PUT(req: Request) {
     };
 
     const { status, ...data } = await CategoryService.update(payload, id);
-    return Response.json({ data }, { status });
+    return apiResponse(data, { status });
   } catch (error) {
     console.error("CATEGORY_UPDATE_CONTROLLER", error);
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 });
+    return errorResponse(error);
   }
 }
 
@@ -57,14 +58,14 @@ export async function DELETE(req: Request) {
     if (payload && typeof payload === 'object' && 'reassignId' in payload) {
       const { id, reassignId } = payload;
       const { status, ...data } = await CategoryService.reassignAndRemove(Number(id), Number(reassignId));
-      return Response.json({ data }, { status });
+      return apiResponse(data, { status });
     } else {
       const deleteIds = payload as number[];
       const { status, ...data } = await CategoryService.remove(deleteIds);
-      return Response.json({ data }, { status });
+      return apiResponse(data, { status });
     }
   } catch (error) {
     console.error("CATEGORY_DELETE_CONTROLLER", error);
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 });
+    return errorResponse(error);
   }
 }

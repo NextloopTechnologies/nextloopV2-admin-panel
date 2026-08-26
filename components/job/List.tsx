@@ -10,7 +10,7 @@ import { jobApi } from '.';
 import { trimText } from '@/lib/utils';
 import { IJob } from '@/types/supabase';
 import { withAuth } from '../auth';
-import { JobService } from '@/app/api';
+import { responseMessage, thrownErrorMessage } from '../crud/apiResponse';
 
 const List: React.FC = () => {
 
@@ -25,13 +25,18 @@ const List: React.FC = () => {
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
-    const { success, data, count } = await jobApi.list(pageNo, pageSize);
-    if (success) {
-      setCount(count);
-      setJobData(data);
+    try {
+      const result = await jobApi.list(pageNo, pageSize);
+      if (result?.success) {
+        setCount(result.count || 0);
+        setJobData(Array.isArray(result.data) ? result.data : []);
+        setIsError(null);
+      } else setIsError(responseMessage(result, "Unable to load jobs."));
+    } catch (error) {
+      setIsError(thrownErrorMessage(error, "Unable to load jobs."));
+    } finally {
+      setIsLoading(false);
     }
-    else setIsError("An error occured while fetching data.")
-    setIsLoading(false)
   }, [pageNo]);
 
   useEffect(() => {
@@ -89,7 +94,15 @@ const List: React.FC = () => {
           onChange={async (checked: boolean) => {
             setIsLoading(true)
             try {
-              const { success, msgText } = await JobService.update({ visibility: checked }, record.id as number)
+              const formData = new FormData();
+              formData.append("id", String(record.id));
+              formData.append("title", record.title || "");
+              formData.append("descp", record.descp || "");
+              formData.append("location", record.location || "");
+              formData.append("job_mode", record.job_mode || "");
+              formData.append("job_type", record.job_type || "");
+              formData.append("visibility", String(checked));
+              const { success, msgText } = await jobApi.update(formData)
               if (!success) return message.error(msgText)
               const updatedJobData = jobData.map((job) => {
                 if (job.id === record.id) {
@@ -192,6 +205,7 @@ const List: React.FC = () => {
         columns={columns}
         dataSource={dataSource}
         loading={isLoading}
+        locale={{ emptyText: 'No records found.' }}
         pagination={{
           pageSize,
           total: count,

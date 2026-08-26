@@ -1,18 +1,19 @@
 import { CategoryService } from "@/app/api";
+import { apiResponse, errorResponse } from "@/app/api/utils/response";
 
 export async function GET(req: Request) {
   try {
     const id = Number(req.url.split('/category/')[1]);
     if (!Number.isInteger(id) || id <= 0) {
-      return Response.json(
+      return apiResponse(
         { msgText: "Invalid category id." },
         { status: 400 }
       );
     }
-    const { status, ...data } = await CategoryService.read(id);
-    return Response.json({ data }, { status });
+    const result = await CategoryService.read(id);
+    return apiResponse(result);
   } catch (error) {
     console.error("CATEGORY_READ_CONTROLLER", error);
-    return Response.json({ msgText: "Something went wrong!" }, { status: 500 });
+    return errorResponse(error);
   }
 }
