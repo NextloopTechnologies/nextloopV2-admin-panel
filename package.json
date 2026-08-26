@@ -7,12 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "db:up": "drizzle-kit up:pg",
     "db:push": "drizzle-kit push:pg",
     "db:pull": "drizzle-kit introspect:pg ",
     "db:generate": "drizzle-kit generate:pg",
     "db:drop": "drizzle-kit drop",
     "db:check": "drizzle-kit check:pg",
-    "db:up": "drizzle-kit up:pg",
     "db:migrate": "tsx ./lib/supabase/db.ts"
   },
   "dependencies": {
