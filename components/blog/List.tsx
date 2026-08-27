@@ -311,6 +311,7 @@ const List: React.FC = () => {
               <EyeOutlined
                 style={{ fontSize: '20px', color: '#1890ff', cursor: 'pointer' }}
                 onClick={() => {
+                  console.log('PREVIEW RECORD:', record);
                   setPreviewBlog(record);
                   setIsPreviewOpen(true);
                 }}
@@ -346,6 +347,8 @@ const List: React.FC = () => {
     category_id: blog.category_id,
     tags: blog.tags,
     read_time: blog.read_time,
+    image_alt: blog.image_alt,
+    image_caption: blog.image_caption,
   }));
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
@@ -502,6 +505,8 @@ const List: React.FC = () => {
           status={previewBlog.status}
           createdAt={previewBlog.created_at ?? null}
           author={previewBlog.author ?? null}
+          imageAlt={previewBlog.image_alt ?? ''}
+          imageCaption={previewBlog.image_caption ?? ''}
         />
       )}
     </div>

@@ -24,6 +24,8 @@ interface BlogPreviewModalProps {
   status?: 'draft' | 'published';
   createdAt?: string | null;
   author?: AuthorInfo | null;
+  imageAlt?: string; 
+  imageCaption?: string;
 }
 
 const BlogPreviewModal: React.FC<BlogPreviewModalProps> = ({
@@ -37,6 +39,8 @@ const BlogPreviewModal: React.FC<BlogPreviewModalProps> = ({
   status,
   createdAt,
   author,
+  imageAlt,
+  imageCaption
 }) => {
 
   // Extract headings 
@@ -127,7 +131,7 @@ const BlogPreviewModal: React.FC<BlogPreviewModalProps> = ({
         </div>
 
 
-        {imageSrc && (
+        {/* {imageSrc && (
           <div className="w-full">
             <img
               src={imageSrc}
@@ -135,7 +139,21 @@ const BlogPreviewModal: React.FC<BlogPreviewModalProps> = ({
               className="w-full max-h-[340px] object-cover block"
             />
           </div>
+        )} */}
+        {imageSrc && (
+      <div className="w-full">
+        <img
+          src={imageSrc}
+          alt={imageAlt || title || 'Blog cover image'}
+          className="w-full max-h-[340px] object-cover block"
+        />
+        {imageCaption && (
+          <figcaption className="text-center text-sm text-gray-500 py-3 px-4 border-t border-gray-100 italic">
+            {imageCaption}
+          </figcaption>
         )}
+      </div>
+    )}
 
 
         <div className="flex px-6 py-7 items-start">

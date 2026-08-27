@@ -9,6 +9,22 @@ export async function GET(req: NextRequest) {
     const pageNo = Number(req.nextUrl.searchParams.get('page')) || 1;
     const pageSize = Number(req.nextUrl.searchParams.get('row')) || 10;
     const { status, ...data } = await BlogService.list(pageNo, pageSize);
+      // Parse image strings to arrays
+    if (data.data && Array.isArray(data.data)) {
+      data.data = data.data.map((blog: any) => {
+        // Parse image if it's a string
+        if (typeof blog.image === 'string') {
+          try {
+            blog.image = JSON.parse(blog.image);
+            console.log(' Parsed image for blog:', blog.id, blog.image);
+          } catch (e) {
+            console.warn('Failed to parse image for blog:', blog.id, e);
+            blog.image = null;
+          }
+        }
+        return blog;
+      });
+    }
     return Response.json({ data }, { status })
   } catch (error) {
     console.error("BLOG_LIST_CONTROLLER", error)
@@ -22,6 +38,8 @@ export async function POST(req: Request) {
     let tags: string[] = [];
     let featuredBlogs: number[] = [];
     let metaKeywords: string[] = [];
+    const image_alt = formData.get('image_alt') as string || '';
+    const image_caption = formData.get('image_caption') as string || '';
 
     try {
       tags = formData.get("tags")
@@ -65,6 +83,8 @@ export async function POST(req: Request) {
       read_time: formData.get('read_time') ? Number(formData.get('read_time')) : 2,
       featured_blogs: featuredBlogs,
       meta_keywords: metaKeywords,
+      image_alt: formData.get('image_alt'),
+      image_caption: formData.get('image_caption'),
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";
@@ -95,6 +115,8 @@ export async function PUT(req: Request) {
     const formData = await req.formData();
     const id = Number(formData.get("id"));
     const deletedImage = formData.get("deletedImage")?.toString() || "";
+    const image_alt = formData.get('image_alt') as string || '';
+    const image_caption = formData.get('image_caption') as string || '';
 
 
     let tags: string[] = [];
@@ -142,6 +164,8 @@ export async function PUT(req: Request) {
       read_time: formData.get('read_time') ? Number(formData.get('read_time')) : 2,
       featured_blogs: featuredBlogs,
       meta_keywords: metaKeywords,
+      image_alt: formData.get('image_alt'),
+      image_caption: formData.get('image_caption'),
     }
 
     const folder = formData.get('folder')?.toString() || "AdminNextloop/Blogs";
