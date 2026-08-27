@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Button, Form, Input, InputNumber, Upload, message, Modal, Select } from 'antd';
+import { Button, Form, Input, InputNumber, Upload, message, Modal, Select , Row, Col} from 'antd';
 import { IBlog } from '@/types/blog';
 import { extractImageUrlsFromHtml, textFieldValidator } from '@/lib/utils';
 import { authorApi } from '@/components/author';
@@ -611,7 +611,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
           <InputNumber min={1} max={10} style={{ width: '100%' }} placeholder="e.g. 2" />
         </Form.Item>
 
-        <Form.Item<IBlog>
+        {/* <Form.Item<IBlog>
           label={<span className='text-l'>Cover Image <span style={{ color: '#ff4d4f' }}>*</span></span>}
           name="image"
           rules={[
@@ -648,7 +648,102 @@ const BlogForm: React.FC<BlogFormProps> = ({
       ]}
     >
       <Input.TextArea placeholder="Add a caption for the image" maxLength={200} rows={2} showCount />
+    </Form.Item> */}
+
+    <Row gutter={[16, 16]} align="top">
+      {/* Cover Image */}
+      <Col xs={24} md={8}>
+        <Form.Item<IBlog>
+          label={
+            <span className="text-l">
+              Cover Image <span style={{ color: '#ff4d4f' }}>*</span>
+            </span>
+          }
+          name="image"
+          rules={[
+            {
+              validator: () => {
+                if (fileList.length === 0) {
+                  return Promise.reject(
+                    new Error('Please upload a cover image!')
+                  );
+                }
+                return Promise.resolve();
+              },
+            },
+          ]}
+        >
+          {/* <Upload {...fileProps}>
+            <Button icon={<UploadOutlined />}>
+              Click to Upload
+            </Button>
+          </Upload> */}
+      <Upload {...fileProps} style={{ width: '100%' }}>
+      <Button
+        icon={<UploadOutlined />}
+        style={{
+          width: '100%',
+          height: '40px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+        }}
+      >
+        Click to Upload
+      </Button>
+    </Upload>
     </Form.Item>
+      </Col>
+
+      {/* Alt Text */}
+      <Col xs={24} md={8}>
+        <Form.Item<IBlog>
+          label="Alt Text"
+          name="image_alt"
+          rules={[
+            {
+              max: 125,
+              message: 'Alt text cannot exceed 125 characters!',
+            },
+          ]}
+        >
+          <Input
+            placeholder="Describe the image for accessibility and SEO"
+            maxLength={125}
+            showCount
+            style={{ width: '100%' }}
+          />
+        </Form.Item>
+      </Col>
+
+      {/* Caption */}
+      <Col xs={24} md={8}>
+        <Form.Item<IBlog>
+          label="Caption"
+          name="image_caption"
+          rules={[
+            {
+              max: 200,
+              message: 'Caption cannot exceed 200 characters!',
+            },
+          ]}
+        >
+          <Input
+            placeholder="Add a caption for the image"
+            maxLength={200}
+            showCount
+            style={{ width: '100%' }}
+          />
+          {/* <Input.TextArea
+            placeholder="Add a caption for the image"
+            maxLength={200}
+            rows={2}
+            showCount
+            style={{ width: '100%' }}
+          /> */}
+        </Form.Item>
+      </Col>
+    </Row>
 
         <Form.Item<IBlog>
           label="Featured Blogs"
