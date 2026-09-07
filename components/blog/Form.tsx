@@ -20,6 +20,8 @@ import { Tooltip } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { deleteFiles, getTransformedUrl } from '@/app/api/services/uploadFile';
 import BlogPreviewModal from './BlogPreviewModal';
+import FaqSection from '@/components/blog/FaqSection';
+
 
 const QuillNoSSRWrapper = dynamic(() => import('../quill/QuillEditor'), {
   ssr: false,
@@ -59,6 +61,8 @@ const BlogForm: React.FC<BlogFormProps> = ({
   const router = useRouter();
   const quillRef = useRef<any | null>(null);
   const uploadedImageUrlsRef = useRef<{ fileId: string; transformedUrl: string }[]>([]);
+  const [savedBlogId, setSavedBlogId] = useState<number | undefined>(blog?.id);
+  const [faqCount, setFaqCount] = useState(0);
 
   const handlePreview = () => {
     setIsPreviewOpen(true);
@@ -215,6 +219,9 @@ const BlogForm: React.FC<BlogFormProps> = ({
           quill.enable(true);
         } finally {
           setIsLoading(false);
+          uploadedImageUrlsRef.current = [];
+
+         // router.push('/blog');
         }
       });
       quill.root.appendChild(fileInput);
@@ -412,9 +419,27 @@ const BlogForm: React.FC<BlogFormProps> = ({
         message.success(msgText || "Blog updated successfully!");
       } else {
 
-        const { success, msgText } = await blogApi.create(formData);
-        if (!success) return message.error(msgText || "Failed to create!");
-        message.success(msgText || "Blog created successfully!");
+    const result = await blogApi.create(formData);
+
+    const { success, msgText } = result;
+
+    if (!success) {
+        return message.error(
+            msgText || "Failed to create!"
+        );
+    }
+
+    message.success(
+        msgText || "Blog created successfully!"
+    );
+
+    if (result.data?.id) {
+        setSavedBlogId(result.data.id);
+
+        message.info(
+            'You can now add FAQs to this blog'
+        );
+    }
       }
     } catch (error) {
       console.error("Error in handleFinish", error);
@@ -669,6 +694,11 @@ const BlogForm: React.FC<BlogFormProps> = ({
             tokenSeparators={[',']}
           />
         </Form.Item>
+        {/* FAQ Section */}
+        <FaqSection
+            blogId={blog?.id || savedBlogId}
+            onFaqsChange={(count) => setFaqCount(count)}
+        />
         <Form.Item
           wrapperCol={{
             offset: 8,

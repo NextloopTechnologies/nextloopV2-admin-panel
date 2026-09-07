@@ -1,6 +1,16 @@
 import { IFileUpload } from "../file";
 import { IAuthor } from "../supabase";
 
+export interface IFaq {
+    id?: number;
+    blog_id: number;
+    question: string;
+    answer: string;
+    display_order?: number;
+    created_at?: string;
+    updated_at?: string;
+}
+
 export interface IBlog {
     id?: number;
     title: string | null;
@@ -22,6 +32,8 @@ export interface IBlog {
     read_time?: number;
     featured_blogs?: number[] | null;
     meta_keywords?: string[] | null;
+    faqs?: IFaq[];
+
 }
 
 export interface ICategory {
