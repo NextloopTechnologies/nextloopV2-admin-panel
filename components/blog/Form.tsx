@@ -139,7 +139,7 @@ const BlogForm: React.FC<BlogFormProps> = ({
       });
       setIsSlugManuallyEdited(!!blog.slug);
       setIsCanonicalManuallyEdited(!!blog.canonical_url);
-       if (blog.image && Array.isArray(blog.image) && blog.image.length > 0) {
+     if (blog.image && Array.isArray(blog.image) && blog.image.length > 0) {
       const files = blog.image.map((file: any) => {
         return {
           ...file,
