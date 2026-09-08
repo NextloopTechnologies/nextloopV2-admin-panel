@@ -1,8 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, {  useEffect } from 'react';
 import ReactQuill, { Quill, ReactQuillProps } from 'react-quill';
 import { message } from 'antd';
+import config from '@/config';
+import { getTransformedUrl } from '@/app/api/services/uploadFile';
+
 
 interface QuillEditorProps extends ReactQuillProps {
   forwardedRef: React.Ref<any>;
@@ -770,14 +773,147 @@ Quill.register('modules/imageResize', ImageResize);
 
 import { InternalLinkSuggestion } from './InternalLinkSuggestion';
 
+// const QuillEditor: React.FC<QuillEditorProps> = ({ forwardedRef, ...props }) => {
+//   const localRef = React.useRef<ReactQuill | null>(null);
+
+//   return (
+//     <>
+//       <ReactQuill
+//         ref={(el) => {
+//           localRef.current = el;
+//           if (forwardedRef) {
+//             if (typeof forwardedRef === 'function') {
+//               forwardedRef(el);
+//             } else {
+//               (forwardedRef as any).current = el;
+//             }
+//           }
+//         }}
+//         {...props}
+//       />
+//       <InternalLinkSuggestion editorRef={localRef} />
+//     </>
+//   );
+// };
 const QuillEditor: React.FC<QuillEditorProps> = ({ forwardedRef, ...props }) => {
   const localRef = React.useRef<ReactQuill | null>(null);
+
+  useEffect(() => {
+    const quill = localRef.current?.getEditor();
+
+    if (!quill) return;
+
+    const handleDragOver = (event: DragEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
+    const handleDrop = async (event: DragEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const files = event.dataTransfer?.files;
+
+      if (!files || files.length === 0) return;
+
+      const imageFile = Array.from(files).find((file) =>
+        file.type.startsWith('image/')
+      );
+
+      if (!imageFile) {
+        message.warning('Please drop an image file.');
+        return;
+      }
+
+      // Get drop position inside Quill
+      const range = quill.getSelection(true);
+
+      if (!range) {
+        message.warning('Please place the cursor where you want to insert the image.');
+        return;
+      }
+
+      try {
+        const formData = new FormData();
+
+        formData.append('file', imageFile);
+        formData.append('folder', '/AdminNextloop/Blogs');
+
+        message.loading({
+          content: 'Uploading image...',
+          key: 'quill-image-upload',
+        });
+
+        // const res = await fetch(
+        //   `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/api/upload`,
+        const res = await fetch(
+       `${config.apiBaseUrl}/api/upload`,
+          {
+            method: 'POST',
+            body: formData,
+          }
+        );
+
+        const result = await res.json();
+
+        if (!result.success) {
+          throw new Error(result.msgText || 'Upload failed');
+        }
+
+        const { fileId, url } = result.data;
+
+        if (!fileId || !url) {
+          throw new Error('Invalid upload response');
+        }
+
+        const transformedUrl = await getTransformedUrl(url);
+
+        if (!transformedUrl) {
+          throw new Error('Failed to transform image URL');
+        }
+
+        // Insert image exactly where user dropped it
+        quill.insertEmbed(
+          range.index,
+          'image',
+          transformedUrl,
+          'user'
+        );
+
+        quill.setSelection(range.index + 1, 0, 'user');
+
+        message.success({
+          content: 'Image uploaded successfully',
+          key: 'quill-image-upload',
+        });
+
+      } catch (error) {
+        console.error('Failed to upload dropped image:', error);
+
+        message.error({
+          content: 'Image upload failed',
+          key: 'quill-image-upload',
+        });
+      }
+    };
+
+    const editor = quill.root;
+
+    editor.addEventListener('dragover', handleDragOver);
+    editor.addEventListener('drop', handleDrop);
+
+    return () => {
+      editor.removeEventListener('dragover', handleDragOver);
+      editor.removeEventListener('drop', handleDrop);
+    };
+  }, []);
 
   return (
     <>
       <ReactQuill
         ref={(el) => {
           localRef.current = el;
+
           if (forwardedRef) {
             if (typeof forwardedRef === 'function') {
               forwardedRef(el);
@@ -788,6 +924,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ forwardedRef, ...props }) => 
         }}
         {...props}
       />
+
       <InternalLinkSuggestion editorRef={localRef} />
     </>
   );
