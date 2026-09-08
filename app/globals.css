@@ -67,4 +67,28 @@
 /* Quill editor default height - approximately 3 rows */
 .ql-editor {
   min-height: 100px;
-}
+}
+
+/* Blog Description Quill Scroll */
+.blog-description-quill .ql-container {
+  height: 400px !important;
+  overflow-y: auto !important;
+}
+
+.blog-description-quill .ql-editor {
+  min-height: 350px !important;
+  overflow-y: auto !important;
+}
+
+/* Scrollbar styling */
+.blog-description-quill .ql-editor::-webkit-scrollbar {
+  width: 8px;
+}
+.blog-description-quill .ql-editor::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+.blog-description-quill .ql-editor::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
